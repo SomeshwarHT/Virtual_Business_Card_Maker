@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Create Your Card</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='form.css') }}">
+
+  <style>
+
+    /* ── RESET & BASE ── */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      /* Brand */
+      --accent:          #fc7800;
+      --accent-hover:    #e56b00;
+      --accent-deep:     #c85a00;
+      --accent-soft:     #fff3e6;
+      --accent-border:   #ffc280;
+
+      /* Dark brand surfaces */
+      --brand-dark:      #0f0f0f;
+      --brand-mid:       #1e1e1e;
+      --brand-surface:   #2a2a2a;
+
+      /* Light surfaces */
+      --surface:         #ffffff;
+      --surface2:        #f8f7f5;
+      --bg:              #f0ede9;
+
+      /* Text */
+      --text-1:          #0f0f0f;
+      --text-2:          #4b5563;
+      --text-3:          #9ca3af;
+      --text-placeholder:#b8b4ae;
+
+      /* Borders */
+      --border:          #e5e1da;
+      --border-focus:    #fc7800;
+
+      /* States */
+      --error:           #e53935;
+      --error-soft:      #ffeaea;
+      --success:         #22c55e;
+
+      /* Layout */
+      --radius:          14px;
+      --radius-sm:       8px;
+      --radius-input:    10px;
+      --max-w:           520px;
+
+      /* Shadows */
+      --shadow-card:     0 2px 16px rgba(0,0,0,.07), 0 1px 4px rgba(0,0,0,.04);
+      --shadow-btn:      0 4px 18px rgba(252,120,0,.32);
+      --shadow-bar:      0 -4px 24px rgba(0,0,0,.09);
+
+      /* Transitions */
+      --transition:      .18s ease;
+    }
+
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text-1);
+      min-height: 100vh;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      background: var(--brand-dark);
+      border-bottom: 1px solid #2a2a2a;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+    }
+
+    .header-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .logo-icon { width: 28px; height: 28px; flex-shrink: 0; }
+
+    .logo-text {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -.3px;
+    }
+
+    .header-step {
+      font-size: .72rem;
+      font-weight: 700;
+      color: var(--brand-dark);
+      background: var(--accent);
+      padding: 4px 11px;
+      border-radius: 99px;
+      letter-spacing: .4px;
+    }
+
+    /* ── MAIN WRAPPER ── */
+    .main-wrap {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 24px 16px 0;
+    }
+
+    .form-container { width: 100%; }
+
+    /* ── HERO ── */
+    .form-hero { padding: 4px 4px 24px; }
+
+    .form-title {
+      font-size: 1.65rem;
+      font-weight: 700;
+      color: var(--text-1);
+      letter-spacing: -.4px;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .form-title::after {
+      content: '';
+      display: block;
+      width: 40px;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 99px;
+      margin-top: 8px;
+    }
+
+    .form-subtitle {
+      font-size: .9rem;
+      color: var(--text-2);
+      line-height: 1.6;
+      margin-top: 4px;
+    }
+
+    /* ── FORM SECTION ── */
+    .form-section {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-card);
+      padding: 20px 20px 24px;
+      margin-bottom: 16px;
+      animation: fadeUp .35s ease both;
+    }
+
+    .form-section:nth-child(1) { animation-delay: .04s; }
+    .form-section:nth-child(2) { animation-delay: .08s; }
+    .form-section:nth-child(3) { animation-delay: .12s; }
+    .form-section:nth-child(4) { animation-delay: .16s; }
+    .form-section:nth-child(5) { animation-delay: .20s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── SECTION HEADER ── */
+    .section-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      background: var(--brand-dark);
+      color: var(--accent);
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-1);
+      letter-spacing: -.2px;
+      margin-bottom: 2px;
+    }
+
+    .section-desc {
+      font-size: .78rem;
+      color: var(--text-3);
+      font-weight: 400;
+    }
+
+    /* ── FIELDS GRID ── */
+    .fields-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .field-full { grid-column: 1 / -1; }
+
+    /* ── FIELD WRAP ── */
+    .field-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    /* ── LABELS ── */
+    .field-label {
+      font-size: .82rem;
+      font-weight: 600;
+      color: var(--text-2);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      letter-spacing: .1px;
+    }
+
+    .required-dot { color: var(--accent); font-size: .9rem; line-height: 1; }
+    .field-hint   { font-size: .73rem; font-weight: 400; color: var(--text-3); margin-left: auto; }
+
+    /* ── INPUTS ── */
+    .field-input {
+      width: 100%;
+      height: 44px;
+      padding: 0 13px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-input);
+      background: var(--surface2);
+      font-family: 'Outfit', sans-serif;
+      font-size: .9rem;
+      font-weight: 400;
+      color: var(--text-1);
+      outline: none;
+      transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .field-input::placeholder { color: var(--text-placeholder); font-weight: 400; }
+    .field-input:hover         { border-color: var(--accent-border); background: var(--surface); }
+    .field-input:focus         { border-color: var(--border-focus); background: var(--surface); box-shadow: 0 0 0 3px rgba(252,120,0,.12); }
+    .field-input.has-icon      { padding-left: 40px; }
+
+    /* Input icon wrapper */
+    .input-icon-wrap { position: relative; display: flex; align-items: center; }
+
+    .input-icon {
+      position: absolute;
+      left: 12px;
+      width: 16px;
+      height: 16px;
+      fill: var(--text-3);
+      pointer-events: none;
+      flex-shrink: 0;
+      transition: fill var(--transition);
+    }
+
+    .input-icon-wrap:focus-within .input-icon { fill: var(--accent); }
+
+    /* Textarea */
+    .field-textarea { height: auto; padding: 11px 13px; resize: vertical; min-height: 84px; line-height: 1.5; }
+
+    /* Char counter */
+    .char-count { font-size: .72rem; color: var(--text-3); text-align: right; margin-top: -2px; transition: color var(--transition); }
+    .char-count.warn { color: var(--error); }
+
+    /* ── VALIDATION STATES ── */
+    .field-input.is-error  { border-color: var(--error); background: var(--error-soft); }
+    .field-input.is-error:focus { box-shadow: 0 0 0 3px rgba(229,57,53,.12); }
+    .field-input.is-valid  { border-color: var(--success); }
+    .field-error { font-size: .75rem; color: var(--error); font-weight: 500; min-height: 16px; display: block; }
+
+    /* ── HINT BLOCK ── */
+    .field-hint-block { font-size: .75rem; color: var(--text-3); margin-top: 2px; line-height: 1.5; }
+    .field-hint-block code {
+      font-family: 'Outfit', monospace;
+      font-size: .73rem;
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-border);
+      border-radius: 4px;
+      padding: 1px 5px;
+      color: var(--accent-deep);
+    }
+
+    /* ── CUSTOM LINK GROUP ── */
+    .custom-link-group {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .custom-link-tag {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      color: var(--accent-deep);
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-border);
+      padding: 3px 8px;
+      border-radius: 4px;
+      align-self: flex-start;
+    }
+
+    .field-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .field-pair-item { display: flex; flex-direction: column; gap: 5px; }
+
+    /* ── SOCIAL LABEL ICONS ── */
+    .social-label-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .social-label-icon svg { width: 11px; height: 11px; fill: #fff; }
+    .social-wa { background: #25d366; }
+    .social-ig { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+    .social-li { background: #0077b5; }
+    .social-tw { background: #1da1f2; }
+    .social-fb { background: #1877f2; }
+    .social-yt { background: #ff0000; }
+
+    /* ── SPACER ── */
+    .submit-spacer { height: 96px; }
+
+    /* ── FIXED SUBMIT BAR ── */
+    .submit-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--brand-dark);
+      border-top: 2px solid var(--accent);
+      box-shadow: var(--shadow-bar);
+      z-index: 300;
+      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    }
+
+    .submit-bar-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .submit-preview { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+
+    .preview-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #fc7800, #c85a00);
+      color: #fff;
+      font-size: .82rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      letter-spacing: 1px;
+      user-select: none;
+      transition: background var(--transition);
+      border: 2px solid rgba(255,255,255,.12);
+    }
+
+    .preview-meta { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+
+    .preview-name {
+      font-size: .86rem;
+      font-weight: 600;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 130px;
+    }
+
+    .preview-sub {
+      font-size: .72rem;
+      color: rgba(255,255,255,.45);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 130px;
+    }
+
+    /* Submit button */
+    .submit-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 22px;
+      height: 46px;
+      border-radius: var(--radius-sm);
+      background: var(--accent);
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-size: .9rem;
+      font-weight: 700;
+      letter-spacing: .2px;
+      border: none;
+      cursor: pointer;
+      box-shadow: var(--shadow-btn);
+      transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+      white-space: nowrap;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .submit-btn svg { width: 17px; height: 17px; fill: #fff; flex-shrink: 0; }
+    .submit-btn:hover    { background: var(--accent-hover); box-shadow: 0 6px 22px rgba(252,120,0,.42); }
+    .submit-btn:active   { transform: scale(.96); box-shadow: 0 2px 8px rgba(252,120,0,.28); }
+    .submit-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .submit-btn.loading  { pointer-events: none; opacity: .75; }
+
+    /* ── SHAKE ANIMATION ── */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%       { transform: translateX(-5px); }
+      40%       { transform: translateX(5px); }
+      60%       { transform: translateX(-4px); }
+      80%       { transform: translateX(4px); }
+    }
+
+    .shake { animation: shake .35s ease; }
+
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* ── DESKTOP (≥560px) ── */
+    @media (min-width: 560px) {
+      .main-wrap { padding: 32px 24px 0; }
+      .form-title { font-size: 1.9rem; }
+      .form-section { padding: 24px 24px 28px; margin-bottom: 18px; }
+      .submit-bar { padding: 12px 24px calc(12px + env(safe-area-inset-bottom)); }
+      .preview-name, .preview-sub { max-width: 200px; }
+    }
+
+    /* ── MOBILE: single column ── */
+    @media (max-width: 399px) {
+      .fields-grid { grid-template-columns: 1fr; }
+      .field-pair  { grid-template-columns: 1fr; }
+      .submit-btn  { padding: 0 16px; font-size: .84rem; }
+    }
+
+  </style>
+
+</head>
+<body>
+
+  <!-- PAGE HEADER -->
+  <header class="page-header">
+    <div class="header-inner">
+      <div class="header-logo">
+        <svg class="logo-icon" viewBox="0 0 32 32" aria-hidden="true">
+          <rect x="0" y="0" width="32" height="32" rx="6" fill="#fc7800"/>
+          <rect x="4" y="6" width="24" height="20" rx="3" fill="#0f0f0f" opacity=".85"/>
+          <circle cx="11" cy="14" r="4" fill="#fc7800" opacity=".95"/>
+          <rect x="17" y="11" width="9" height="2" rx="1" fill="#fff" opacity=".8"/>
+          <rect x="17" y="15" width="6" height="2" rx="1" fill="#fff" opacity=".55"/>
+          <rect x="5" y="21" width="22" height="2" rx="1" fill="#fc7800" opacity=".4"/>
+        </svg>
+        <span class="logo-text">CardCraft</span>
+      </div>
+      <span class="header-step">Step 1 of 1</span>
+    </div>
+  </header>
+
+  <!-- MAIN WRAPPER -->
+  <main class="main-wrap">
+    <div class="form-container">
+
+      <!-- HERO -->
+      <div class="form-hero">
+        <h1 class="form-title">Build your digital card</h1>
+        <p class="form-subtitle">Fill in the details below. Only your name is required — everything else is optional.</p>
+      </div>
+
+      <!-- FORM -->
+      <form id="card-form" method="POST" action="{{ url_for('save_card') }}">
+
+        <!-- ── SECTION 1: BASIC INFO ── -->
+        <section class="form-section" aria-labelledby="sec-basic">
+          <div class="section-header">
+            <div class="section-badge">01</div>
+            <div>
+              <h2 class="section-title" id="sec-basic">Basic Information</h2>
+              <p class="section-desc">How you want to be introduced</p>
+            </div>
+          </div>
+
+          <div class="fields-grid">
+            <div class="field-wrap field-full">
+              <label class="field-label" for="name">
+                Full Name
+                <span class="required-dot" aria-label="required">*</span>
+              </label>
+              <input
+                class="field-input"
+                type="text"
+                id="name"
+                name="name"
+                placeholder="e.g. Alex Morgan"
+                autocomplete="name"
+                required
+                aria-required="true"
+              />
+              <span class="field-error" id="name-error" role="alert" aria-live="polite"></span>
+            </div>
+
+            <div class="field-wrap">
+              <label class="field-label" for="title">Designation / Title</label>
+              <input
+                class="field-input"
+                type="text"
+                id="title"
+                name="title"
+                placeholder="e.g. Product Designer"
+                autocomplete="organization-title"
+              />
+            </div>
+
+            <div class="field-wrap">
+              <label class="field-label" for="company">Company / Organisation</label>
+              <input
+                class="field-input"
+                type="text"
+                id="company"
+                name="company"
+                placeholder="e.g. Pixel & Co."
+                autocomplete="organization"
+              />
+            </div>
+
+            <div class="field-wrap field-full">
+              <label class="field-label" for="bio">
+                Bio
+                <span class="field-hint">Short description shown on card</span>
+              </label>
+              <textarea
+                class="field-input field-textarea"
+                id="bio"
+                name="bio"
+                placeholder="e.g. Designer crafting digital experiences that delight users and drive results."
+                rows="3"
+                maxlength="200"
+              ></textarea>
+              <span class="char-count" id="bioCount">0 / 200</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── SECTION 2: CONTACT ── -->
+        <section class="form-section" aria-labelledby="sec-contact">
+          <div class="section-header">
+            <div class="section-badge">02</div>
+            <div>
+              <h2 class="section-title" id="sec-contact">Contact Details</h2>
+              <p class="section-desc">How people can reach you</p>
+            </div>
+          </div>
+
+          <div class="fields-grid">
+            <div class="field-wrap">
+              <label class="field-label" for="phone">Phone Number</label>
+              <div class="input-icon-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.4 21 3 13.6 3 4.5c0-.6.4-1 1-1H8c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
+                <input
+                  class="field-input has-icon"
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  placeholder="+91 98765 43210"
+                  autocomplete="tel"
+                />
+              </div>
+            </div>
+
+            <div class="field-wrap">
+              <label class="field-label" for="email">Email Address</label>
+              <div class="input-icon-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                <input
+                  class="field-input has-icon"
+                  type="email"
+                  id="email"
+                  name="email"
+                  placeholder="you@example.com"
+                  autocomplete="email"
+                />
+              </div>
+            </div>
+
+            <div class="field-wrap field-full">
+              <label class="field-label" for="address">Address</label>
+              <div class="input-icon-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                <input
+                  class="field-input has-icon"
+                  type="text"
+                  id="address"
+                  name="address"
+                  placeholder="e.g. Chennai, Tamil Nadu, India"
+                  autocomplete="street-address"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── SECTION 3: WEBSITE & LINKS ── -->
+        <section class="form-section" aria-labelledby="sec-links">
+          <div class="section-header">
+            <div class="section-badge">03</div>
+            <div>
+              <h2 class="section-title" id="sec-links">Website &amp; Links</h2>
+              <p class="section-desc">Your web presence and resources</p>
+            </div>
+          </div>
+
+          <div class="fields-grid">
+            <div class="field-wrap field-full">
+              <label class="field-label" for="website">Website URL</label>
+              <div class="input-icon-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                <input
+                  class="field-input has-icon"
+                  type="url"
+                  id="website"
+                  name="website"
+                  placeholder="https://yourwebsite.com"
+                />
+              </div>
+            </div>
+
+            <div class="field-wrap field-full">
+              <div class="custom-link-group">
+                <div class="custom-link-tag">Custom Link</div>
+                <div class="field-pair">
+                  <div class="field-pair-item">
+                    <label class="field-label" for="customLabel">Link Label</label>
+                    <input
+                      class="field-input"
+                      type="text"
+                      id="customLabel"
+                      name="customLabel"
+                      placeholder="e.g. Download Brochure"
+                    />
+                  </div>
+                  <div class="field-pair-item">
+                    <label class="field-label" for="customURL">Link URL</label>
+                    <input
+                      class="field-input"
+                      type="url"
+                      id="customURL"
+                      name="customURL"
+                      placeholder="https://example.com/file.pdf"
+                    />
+                  </div>
+                </div>
+                <p class="field-hint-block">Both label and URL are needed to add a custom link to your card.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── SECTION 4: SOCIAL ── -->
+        <section class="form-section" aria-labelledby="sec-social">
+          <div class="section-header">
+            <div class="section-badge">04</div>
+            <div>
+              <h2 class="section-title" id="sec-social">Social Profiles</h2>
+              <p class="section-desc">Add links to your social accounts</p>
+            </div>
+          </div>
+
+          <div class="fields-grid">
+
+            <div class="field-wrap">
+              <label class="field-label" for="whatsapp">
+                <span class="social-label-icon social-wa" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                </span>
+                WhatsApp
+              </label>
+              <input class="field-input" type="tel" id="whatsapp" name="whatsapp" placeholder="+91 98765 43210" autocomplete="tel" />
+            </div>
+
+            <div class="field-wrap">
+              <label class="field-label" for="instagram">
+                <span class="social-label-icon social-ig" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                </span>
+                Instagram
+              </label>
+              <input class="field-input" type="url" id="instagram" name="instagram" placeholder="https://instagram.com/yourhandle" />
+            </div>
+
+            <div class="field-wrap">
+              <label class="field-label" for="linkedin">
+                <span class="social-label-icon social-li" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                </span>
+                LinkedIn
+              </label>
+              <input class="field-input" type="url" id="linkedin" name="linkedin" placeholder="https://linkedin.com/in/yourprofile" />
+            </div>
+
+            <div class="field-wrap">
+              <label class="field-label" for="twitter">
+                <span class="social-label-icon social-tw" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                </span>
+                Twitter / X
+              </label>
+              <input class="field-input" type="url" id="twitter" name="twitter" placeholder="https://twitter.com/yourhandle" />
+            </div>
+
+            <div class="field-wrap">
+              <label class="field-label" for="facebook">
+                <span class="social-label-icon social-fb" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                </span>
+                Facebook
+              </label>
+              <input class="field-input" type="url" id="facebook" name="facebook" placeholder="https://facebook.com/yourpage" />
+            </div>
+
+            <div class="field-wrap">
+              <label class="field-label" for="youtube">
+                <span class="social-label-icon social-yt" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
+                </span>
+                YouTube
+              </label>
+              <input class="field-input" type="url" id="youtube" name="youtube" placeholder="https://youtube.com/@yourchannel" />
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ── SECTION 5: UPI ── -->
+        <section class="form-section" aria-labelledby="sec-upi">
+          <div class="section-header">
+            <div class="section-badge">05</div>
+            <div>
+              <h2 class="section-title" id="sec-upi">UPI Payment</h2>
+              <p class="section-desc">Let people pay you directly from your card</p>
+            </div>
+          </div>
+
+          <div class="fields-grid">
+            <div class="field-wrap field-full">
+              <label class="field-label" for="upi">UPI ID</label>
+              <div class="input-icon-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+                <input
+                  class="field-input has-icon"
+                  type="text"
+                  id="upi"
+                  name="upi"
+                  placeholder="yourname@upi"
+                  autocomplete="off"
+                  spellcheck="false"
+                />
+              </div>
+              <p class="field-hint-block">e.g. <code>alexmorgan@okicici</code> or <code>9876543210@paytm</code></p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SPACER so content isn't hidden under fixed button on mobile -->
+        <div class="submit-spacer" aria-hidden="true"></div>
+
+        <!-- HE5 FOOTER -->
+        <div style="text-align:center;padding:4px 0 8px;">
+          <p style="font-size:.7rem;color:#9ca3af;letter-spacing:.3px;">Powered by</p>
+          <div style="display:inline-flex;align-items:center;gap:6px;margin-top:4px;">
+            <svg width="18" height="18" viewBox="0 0 32 32" aria-hidden="true">
+              <rect width="32" height="32" rx="6" fill="#fc7800"/>
+              <text x="4" y="24" font-family="sans-serif" font-weight="900" font-size="19" fill="#fff">H5</text>
+            </svg>
+            <span style="font-size:.82rem;font-weight:700;color:#4b5563;letter-spacing:-.2px;">He5 Solutions</span>
+          </div>
+        </div>
+
+      </form><!-- /form -->
+    </div><!-- /form-container -->
+  </main>
+
+  <!-- FIXED SUBMIT BAR -->
+  <div class="submit-bar" role="region" aria-label="Form submission">
+    <div class="submit-bar-inner">
+      <div class="submit-preview" id="submitPreview">
+        <div class="preview-avatar" id="previewAvatar" aria-hidden="true">?</div>
+        <div class="preview-meta">
+          <span class="preview-name" id="previewName">Your name</span>
+          <span class="preview-sub" id="previewSub">Fill in your details above</span>
+        </div>
+      </div>
+      <button type="submit" form="card-form" class="submit-btn" aria-label="Generate and view your business card"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>Generate Card</button>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CardCraft — Digital Business Cards</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent:       #fc7800;
+      --accent-deep:  #c85a00;
+      --accent-soft:  #fff3e6;
+      --brand:        #0f0f0f;
+      --brand-mid:    #1a1a1a;
+      --brand-2:      #252525;
+      --surface:      #ffffff;
+      --bg:           #f0ede9;
+      --text-1:       #0f0f0f;
+      --text-2:       #4b5563;
+      --text-3:       #9ca3af;
+      --border:       #e5e1da;
+      --radius:       18px;
+      --radius-sm:    10px;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text-1);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── LAYOUT ── */
+    .page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* ── LEFT PANEL ── */
+    .left-panel {
+      background: var(--brand);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px 48px;
+      overflow: hidden;
+    }
+
+    /* Decorative background layers */
+    .left-panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 10% 80%, rgba(252,120,0,.18) 0%, transparent 65%),
+        radial-gradient(ellipse 60% 40% at 90% 10%, rgba(252,120,0,.10) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    /* Subtle grid lines */
+    .left-panel::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(255,255,255,.03) 59px, rgba(255,255,255,.03) 60px),
+        repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(255,255,255,.03) 59px, rgba(255,255,255,.03) 60px);
+      pointer-events: none;
+    }
+
+    .left-top { position: relative; z-index: 1; }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -.3px;
+    }
+
+    .left-body {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 48px 0;
+    }
+
+    .left-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(252,120,0,.15);
+      border: 1px solid rgba(252,120,0,.3);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      width: fit-content;
+    }
+
+    .left-tag::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s ease infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: .5; transform: scale(.8); }
+    }
+
+    .left-headline {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      font-weight: 400;
+      color: #fff;
+      line-height: 1.15;
+      letter-spacing: -.5px;
+      margin-bottom: 20px;
+    }
+
+    .left-headline em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .left-sub {
+      font-size: .95rem;
+      color: rgba(255,255,255,.5);
+      line-height: 1.65;
+      max-width: 360px;
+      font-weight: 400;
+    }
+
+    /* Feature pills */
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 40px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .feature-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: rgba(252,120,0,.15);
+      border: 1px solid rgba(252,120,0,.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .feature-dot svg {
+      width: 14px;
+      height: 14px;
+      fill: var(--accent);
+    }
+
+    .feature-text {
+      font-size: .85rem;
+      color: rgba(255,255,255,.55);
+      font-weight: 400;
+    }
+
+    /* Preview card floating */
+    .card-preview {
+      position: absolute;
+      right: -20px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 180px;
+      background: rgba(255,255,255,.06);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 16px;
+      padding: 20px 16px;
+      z-index: 2;
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(-50%) translateY(0); }
+      50%       { transform: translateY(-50%) translateY(-8px); }
+    }
+
+    .card-preview-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .95rem;
+      font-weight: 700;
+      color: #fff;
+      margin: 0 auto 12px;
+    }
+
+    .card-preview-name {
+      text-align: center;
+      font-size: .72rem;
+      font-weight: 600;
+      color: rgba(255,255,255,.85);
+      margin-bottom: 2px;
+    }
+
+    .card-preview-role {
+      text-align: center;
+      font-size: .64rem;
+      color: var(--accent);
+      font-weight: 500;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .card-preview-divider {
+      height: 1px;
+      background: rgba(255,255,255,.08);
+      margin-bottom: 12px;
+    }
+
+    .card-preview-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .card-preview-row:last-child { margin-bottom: 0; }
+
+    .card-preview-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: .6;
+      flex-shrink: 0;
+    }
+
+    .card-preview-line {
+      height: 5px;
+      border-radius: 3px;
+      background: rgba(255,255,255,.12);
+      flex: 1;
+    }
+
+    .left-bottom {
+      position: relative;
+      z-index: 1;
+    }
+
+    .left-bottom p {
+      font-size: .72rem;
+      color: rgba(255,255,255,.25);
+    }
+
+    .left-bottom a {
+      color: rgba(255,255,255,.4);
+      text-decoration: none;
+    }
+
+    .left-bottom a:hover { color: rgba(255,255,255,.7); }
+
+    /* ── RIGHT PANEL ── */
+    .right-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 48px 40px;
+      background: var(--bg);
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .login-welcome {
+      font-size: .8rem;
+      font-weight: 600;
+      color: var(--text-3);
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .login-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2rem;
+      font-weight: 400;
+      color: var(--text-1);
+      line-height: 1.2;
+      letter-spacing: -.3px;
+      margin-bottom: 8px;
+    }
+
+    .login-sub {
+      font-size: .9rem;
+      color: var(--text-2);
+      line-height: 1.55;
+      margin-bottom: 40px;
+    }
+
+    /* Google button */
+    .google-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      padding: 15px 24px;
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      color: var(--text-1);
+      font-family: 'Outfit', sans-serif;
+      font-size: .95rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: border-color .18s, box-shadow .18s, transform .12s;
+      letter-spacing: -.1px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .google-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(252,120,0,.06) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity .2s;
+    }
+
+    .google-btn:hover {
+      border-color: var(--accent);
+      box-shadow: 0 4px 20px rgba(252,120,0,.15), 0 0 0 3px rgba(252,120,0,.08);
+      transform: translateY(-1px);
+    }
+
+    .google-btn:hover::before { opacity: 1; }
+    .google-btn:active { transform: translateY(0); }
+
+    .google-btn svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 28px 0;
+      color: var(--text-3);
+      font-size: .78rem;
+    }
+
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Info pills */
+    .info-pills {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .info-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+    }
+
+    .pill-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: var(--accent-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .pill-icon svg {
+      width: 15px;
+      height: 15px;
+      fill: var(--accent);
+    }
+
+    .pill-text {
+      font-size: .82rem;
+      color: var(--text-2);
+      line-height: 1.35;
+    }
+
+    .pill-text strong {
+      display: block;
+      font-weight: 600;
+      color: var(--text-1);
+      font-size: .83rem;
+    }
+
+    /* Privacy note */
+    .privacy-note {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .privacy-note svg {
+      width: 14px;
+      height: 14px;
+      fill: var(--text-3);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .privacy-note p {
+      font-size: .75rem;
+      color: var(--text-3);
+      line-height: 1.5;
+    }
+
+    /* He5 footer */
+    .he5-footer {
+      margin-top: 32px;
+      text-align: center;
+    }
+
+    .he5-footer p {
+      font-size: .7rem;
+      color: var(--text-3);
+      letter-spacing: .3px;
+      margin-bottom: 5px;
+    }
+
+    .he5-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .he5-brand span {
+      font-size: .78rem;
+      font-weight: 700;
+      color: var(--text-2);
+      letter-spacing: -.1px;
+    }
+
+    /* Logged-in state */
+    .logged-in-box {
+      text-align: center;
+    }
+
+    .user-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #fff;
+      margin: 0 auto 16px;
+      box-shadow: 0 4px 20px rgba(252,120,0,.3);
+    }
+
+    .logged-in-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.5rem;
+      color: var(--text-1);
+      margin-bottom: 4px;
+    }
+
+    .logged-in-sub {
+      font-size: .88rem;
+      color: var(--text-2);
+      margin-bottom: 32px;
+    }
+
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 15px 24px;
+      background: var(--accent);
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-size: .95rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: background .18s, transform .12s, box-shadow .18s;
+      box-shadow: 0 4px 20px rgba(252,120,0,.3);
+      letter-spacing: -.1px;
+      margin-bottom: 12px;
+    }
+
+    .cta-btn:hover {
+      background: var(--accent-deep);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 28px rgba(252,120,0,.38);
+    }
+
+    .cta-btn:active { transform: translateY(0); }
+
+    .cta-btn svg { width: 17px; height: 17px; fill: #fff; }
+
+    .logout-link {
+      display: inline-block;
+      font-size: .83rem;
+      color: var(--text-3);
+      text-decoration: none;
+      transition: color .15s;
+    }
+
+    .logout-link:hover { color: var(--text-1); }
+
+    /* Animations */
+    .fade-up {
+      animation: fadeUp .45s ease both;
+    }
+    .fade-up:nth-child(1) { animation-delay: .05s; }
+    .fade-up:nth-child(2) { animation-delay: .12s; }
+    .fade-up:nth-child(3) { animation-delay: .18s; }
+    .fade-up:nth-child(4) { animation-delay: .24s; }
+    .fade-up:nth-child(5) { animation-delay: .30s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .left-body > * {
+      animation: fadeUp .55s ease both;
+    }
+    .left-body > *:nth-child(1) { animation-delay: .1s; }
+    .left-body > *:nth-child(2) { animation-delay: .2s; }
+    .left-body > *:nth-child(3) { animation-delay: .28s; }
+    .left-body > *:nth-child(4) { animation-delay: .36s; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .page {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+      }
+
+      .left-panel {
+        padding: 28px 24px 32px;
+        min-height: auto;
+      }
+
+      .left-body { padding: 28px 0 0; }
+
+      .left-headline { font-size: 1.75rem; }
+
+      .card-preview { display: none; }
+
+      .feature-list { display: none; }
+
+      .right-panel { padding: 36px 24px 48px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ── LEFT BRAND PANEL ── -->
+  <div class="left-panel">
+
+    <div class="left-top">
+      <a href="/" class="logo">
+        <svg class="logo-icon" viewBox="0 0 32 32" aria-hidden="true">
+          <rect x="0" y="0" width="32" height="32" rx="6" fill="#fc7800"/>
+          <rect x="4" y="6" width="24" height="20" rx="3" fill="#0f0f0f" opacity=".85"/>
+          <circle cx="11" cy="14" r="4" fill="#fc7800" opacity=".95"/>
+          <rect x="17" y="11" width="9" height="2" rx="1" fill="#fff" opacity=".8"/>
+          <rect x="17" y="15" width="6" height="2" rx="1" fill="#fff" opacity=".55"/>
+          <rect x="5" y="21" width="22" height="2" rx="1" fill="#fc7800" opacity=".4"/>
+        </svg>
+        <span class="logo-text">CardCraft</span>
+      </a>
+    </div>
+
+    <div class="left-body">
+      <div class="left-tag">Digital Business Cards</div>
+
+      <h1 class="left-headline">
+        Your identity,<br>
+        <em>always</em> in their<br>
+        pocket.
+      </h1>
+
+      <p class="left-sub">
+        Create a stunning digital business card in minutes. Share it anywhere — no app needed.
+      </p>
+
+      <div class="feature-list">
+        <div class="feature-item">
+          <div class="feature-dot">
+            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          </div>
+          <span class="feature-text">Instant shareable link — no printing required</span>
+        </div>
+        <div class="feature-item">
+          <div class="feature-dot">
+            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          </div>
+          <span class="feature-text">Phone, email, UPI & social — all in one place</span>
+        </div>
+        <div class="feature-item">
+          <div class="feature-dot">
+            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          </div>
+          <span class="feature-text">One-tap contact save to any phone</span>
+        </div>
+        <div class="feature-item">
+          <div class="feature-dot">
+            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          </div>
+          <span class="feature-text">Free forever — built for professionals</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating preview card -->
+    <div class="card-preview" aria-hidden="true">
+      <div class="card-preview-avatar">AM</div>
+      <div class="card-preview-name">Alex Morgan</div>
+      <div class="card-preview-role">Product Designer</div>
+      <div class="card-preview-divider"></div>
+      <div class="card-preview-row">
+        <div class="card-preview-dot"></div>
+        <div class="card-preview-line" style="width:60%"></div>
+      </div>
+      <div class="card-preview-row">
+        <div class="card-preview-dot"></div>
+        <div class="card-preview-line" style="width:80%"></div>
+      </div>
+      <div class="card-preview-row">
+        <div class="card-preview-dot"></div>
+        <div class="card-preview-line" style="width:50%"></div>
+      </div>
+    </div>
+
+    <div class="left-bottom">
+      <p>© 2025 CardCraft &nbsp;·&nbsp; <a href="#">Privacy</a> &nbsp;·&nbsp; <a href="#">Terms</a></p>
+    </div>
+
+  </div>
+
+  <!-- ── RIGHT LOGIN PANEL ── -->
+  <div class="right-panel">
+
+    <div class="login-box">
+
+      {% if current_user.is_authenticated %}
+
+      <!-- ── LOGGED IN STATE ── -->
+      <div class="logged-in-box">
+        <div class="user-avatar">
+          {{ current_user.name[0] | upper }}
+        </div>
+        <h2 class="logged-in-name">Welcome back,<br>{{ current_user.name.split()[0] }}</h2>
+        <p class="logged-in-sub">You're signed in and ready to create.</p>
+        <a href="{{ url_for('dashboard') }}" class="cta-btn">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1zm0 8h6c.55 0 1-.45 1-1v-4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1zm10 0h6c.55 0 1-.45 1-1v-8c0-.55-.45-1-1-1h-6c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1zM13 4v4c0 .55.45 1 1 1h6c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1h-6c-.55 0-1 .45-1 1z"/></svg>
+          Go to Dashboard
+        </a>
+        <a href="{{ url_for('logout') }}" class="logout-link">Sign out</a>
+      </div>
+
+      {% else %}
+
+      <!-- ── SIGN IN STATE ── -->
+      <p class="login-welcome fade-up">Get started</p>
+      <h2 class="login-title fade-up">Sign in to<br>CardCraft</h2>
+      <p class="login-sub fade-up">Create your free digital business card and share it with the world.</p>
+
+      <a href="{{ url_for('login') }}" class="google-btn fade-up" role="button">
+        <!-- Google "G" logo -->
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </a>
+
+      <div class="divider fade-up">Why CardCraft?</div>
+
+      <div class="info-pills">
+        <div class="info-pill fade-up">
+          <div class="pill-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+          </div>
+          <div class="pill-text">
+            <strong>Ready in 2 minutes</strong>
+            Fill out the form, get a shareable link instantly.
+          </div>
+        </div>
+        <div class="info-pill fade-up">
+          <div class="pill-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+          </div>
+          <div class="pill-text">
+            <strong>Secure & private</strong>
+            Signed in with Google. We never store passwords.
+          </div>
+        </div>
+        <div class="info-pill fade-up">
+          <div class="pill-icon">
+            <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
+          </div>
+          <div class="pill-text">
+            <strong>Always up to date</strong>
+            Edit your card anytime — your link never changes.
+          </div>
+        </div>
+      </div>
+
+      <div class="privacy-note fade-up">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        <p>By continuing, you agree to our <a href="#" style="color:var(--text-2);text-decoration:underline;text-underline-offset:2px">Terms of Service</a> and <a href="#" style="color:var(--text-2);text-decoration:underline;text-underline-offset:2px">Privacy Policy</a>. We only request your name, email, and profile photo from Google.</p>
+      </div>
+
+      {% endif %}
+
+      <div class="he5-footer">
+        <p>Powered by</p>
+        <div class="he5-brand">
+          <span>He5 Solutions</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Virtual Business Card</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand:       #0f0f0f;
+      --brand-2:     #1e1e1e;
+      --accent:      #fc7800;
+      --accent-hover:#e56b00;
+      --accent-soft: #fff3e6;
+      --surface:     #ffffff;
+      --surface2:    #f7f7f8;
+      --border:      #ebebeb;
+      --text-1:      #0f0f0f;
+      --text-2:      #4b5563;
+      --text-3:      #9ca3af;
+      --radius:      18px;
+      --radius-sm:   10px;
+      --shadow:      0 8px 40px rgba(0,0,0,.10);
+      --shadow-sm:   0 2px 12px rgba(0,0,0,.07);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: #f0ede9;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 0;
+    }
+
+    /* ── CARD SHELL ── */
+    .card {
+      width: 100%;
+      max-width: 420px;
+      min-height: 100vh;
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      background: var(--brand);
+      padding-bottom: 72px;
+      overflow: visible;
+    }
+
+    .hero-banner {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      display: block;
+      background: linear-gradient(135deg, #0f0f0f 0%, #2a1200 60%, #fc780033 100%);
+    }
+
+    .hero-banner-placeholder {
+      width: 100%;
+      height: 140px;
+      background: linear-gradient(135deg, #0f0f0f 0%, #1e1000 55%, #fc7800 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-banner-placeholder::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 80% at 80% 20%, rgba(252,120,0,.45) 0%, transparent 70%),
+        repeating-linear-gradient(45deg, transparent, transparent 18px, rgba(255,255,255,.02) 18px, rgba(255,255,255,.02) 19px);
+    }
+
+    .hero-logo-wrap {
+      position: absolute;
+      bottom: -48px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+    }
+
+    .hero-logo {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      border: 4px solid var(--surface);
+      background: var(--surface2);
+      object-fit: cover;
+      box-shadow: 0 4px 20px rgba(0,0,0,.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .hero-logo-initials {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      border: 4px solid var(--surface);
+      background: linear-gradient(135deg, #fc7800, #c85a00);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 2px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.18);
+      user-select: none;
+    }
+
+    /* ── IDENTITY ── */
+    .identity {
+      text-align: center;
+      padding: 60px 24px 20px;
+    }
+
+    .identity-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.75rem;
+      font-weight: 400;
+      color: var(--text-1);
+      letter-spacing: -.3px;
+      line-height: 1.2;
+    }
+
+    .identity-title {
+      font-size: .92rem;
+      color: var(--accent);
+      font-weight: 500;
+      margin-top: 4px;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+
+    .identity-company {
+      font-size: 1rem;
+      color: var(--text-2);
+      margin-top: 2px;
+      font-weight: 400;
+    }
+
+    .identity-bio {
+      font-size: .88rem;
+      color: var(--text-2);
+      margin-top: 12px;
+      line-height: 1.6;
+      max-width: 300px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ── ACTION BUTTONS ── */
+    .actions {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      padding: 6px 24px 20px;
+    }
+
+    .action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .action-btn .icon-circle {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 14px rgba(252,120,0,.35);
+      transition: transform .15s, box-shadow .15s;
+    }
+
+    .action-btn:active .icon-circle {
+      transform: scale(.92);
+      box-shadow: 0 2px 8px rgba(252,120,0,.25);
+    }
+
+    .action-btn .icon-circle svg {
+      width: 22px;
+      height: 22px;
+      fill: #fff;
+    }
+
+    .action-btn span {
+      font-size: .72rem;
+      font-weight: 600;
+      color: var(--text-2);
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+
+    /* ── SECTION ── */
+    .section {
+      padding: 0 16px 12px;
+    }
+
+    .section-label {
+      font-size: .68rem;
+      font-weight: 700;
+      color: var(--text-3);
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      padding: 16px 8px 8px;
+    }
+
+    /* ── INFO ROWS ── */
+    .info-list {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .info-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      text-decoration: none;
+      transition: background .12s;
+      cursor: default;
+    }
+
+    .info-row:last-child { border-bottom: none; }
+    .info-row.clickable { cursor: pointer; }
+    .info-row.clickable:active { background: var(--accent-soft); }
+
+    .info-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: var(--accent-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .info-icon svg {
+      width: 18px;
+      height: 18px;
+      fill: var(--accent);
+    }
+
+    .info-text { flex: 1; overflow: hidden; }
+
+    .info-value {
+      font-size: .93rem;
+      font-weight: 500;
+      color: var(--text-1);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .info-label {
+      font-size: .75rem;
+      color: var(--text-3);
+      margin-top: 1px;
+    }
+
+    .info-chevron { color: var(--text-3); flex-shrink: 0; }
+    .info-chevron svg { width: 16px; height: 16px; fill: var(--text-3); }
+
+    /* ── HOURS TABLE ── */
+    .hours-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .hours-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: .87rem;
+    }
+
+    .hours-row:last-child { border-bottom: none; }
+    .hours-row .day { color: var(--text-2); font-weight: 400; }
+    .hours-row .time { color: var(--text-1); font-weight: 500; }
+    .hours-row.today .day { color: var(--accent); font-weight: 600; }
+    .hours-row.today .time { color: var(--accent); font-weight: 600; }
+    .hours-row.closed .time { color: var(--text-3); }
+
+    /* ── SOCIAL LINKS ── */
+    .social-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .social-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 14px 8px;
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      text-decoration: none;
+      cursor: pointer;
+      transition: background .12s, border-color .12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .social-btn:active { background: var(--accent-soft); border-color: var(--accent); }
+
+    .social-btn img, .social-btn .social-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+
+    .social-btn .social-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+    }
+
+    .social-btn .social-icon svg { width: 24px; height: 24px; }
+
+    .social-btn span {
+      font-size: .68rem;
+      font-weight: 600;
+      color: var(--text-2);
+      letter-spacing: .3px;
+      text-align: center;
+    }
+
+    /* ── PHOTO GALLERY ── */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .gallery-img {
+      aspect-ratio: 1;
+      object-fit: cover;
+      width: 100%;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+
+    .gallery-img:active { opacity: .8; }
+
+    .gallery-placeholder {
+      aspect-ratio: 1;
+      background: var(--surface2);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gallery-placeholder svg { width: 28px; height: 28px; fill: var(--text-3); }
+
+    /* ── VIDEO EMBED ── */
+    .video-wrap {
+      border-radius: var(--radius);
+      overflow: hidden;
+      aspect-ratio: 16/9;
+      background: var(--brand);
+      border: 1px solid var(--border);
+    }
+
+    .video-wrap iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    .video-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: var(--text-3);
+      background: var(--surface2);
+    }
+
+    .video-placeholder svg { width: 40px; height: 40px; fill: var(--text-3); }
+    .video-placeholder span { font-size: .82rem; }
+
+    /* ── CUSTOM LINKS ── */
+    .link-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: background .12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .link-btn:last-child { margin-bottom: 0; }
+    .link-btn:active { background: var(--accent-soft); }
+
+    /* ── UPI PAYMENT ── */
+    .upi-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .upi-id-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .upi-id-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: var(--accent-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .upi-id-icon svg { width: 18px; height: 18px; fill: var(--accent); }
+
+    .upi-id-text { flex: 1; overflow: hidden; }
+
+    .upi-id-value {
+      font-size: .93rem;
+      font-weight: 600;
+      color: var(--text-1);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-family: 'Outfit', monospace;
+      letter-spacing: .3px;
+    }
+
+    .upi-id-sublabel {
+      font-size: .75rem;
+      color: var(--text-3);
+      margin-top: 1px;
+    }
+
+    .upi-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+
+    .upi-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 13px 10px;
+      font-family: 'Outfit', sans-serif;
+      font-size: .85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: background .12s, opacity .12s;
+      letter-spacing: .2px;
+    }
+
+    .upi-btn:active { opacity: .82; }
+
+    .upi-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+    .upi-btn.pay {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .upi-btn.pay svg { fill: #fff; }
+
+    .upi-btn.copy {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-left: 1px solid var(--border);
+    }
+
+    .upi-btn.copy svg { fill: var(--accent); }
+
+    .link-btn-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--accent-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .link-btn-icon svg { width: 18px; height: 18px; fill: var(--accent); }
+
+    .link-btn-text {
+      flex: 1;
+      font-size: .9rem;
+      font-weight: 500;
+      color: var(--text-1);
+    }
+
+    .link-btn-arrow svg { width: 16px; height: 16px; fill: var(--text-3); }
+
+    /* ── BOTTOM ACTION BAR ── */
+    .bottom-bar {
+      position: sticky;
+      bottom: 0;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+      padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+      z-index: 100;
+    }
+
+    .bar-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 13px;
+      border-radius: var(--radius-sm);
+      font-family: 'Outfit', sans-serif;
+      font-size: .88rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform .12s, box-shadow .12s;
+    }
+
+    .bar-btn:active { transform: scale(.96); }
+
+    .bar-btn.primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(252,120,0,.3);
+    }
+
+    .bar-btn.secondary {
+      background: var(--surface2);
+      color: var(--text-1);
+      border: 1px solid var(--border);
+    }
+
+    .bar-btn svg { width: 17px; height: 17px; }
+    .bar-btn.primary svg { fill: #fff; }
+    .bar-btn.secondary svg { fill: var(--text-1); }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #111;
+      color: #fff;
+      font-size: .82rem;
+      font-weight: 500;
+      padding: 10px 20px;
+      border-radius: 999px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s, transform .25s;
+      white-space: nowrap;
+      z-index: 9999;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── LIGHTBOX ── */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.92);
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lightbox.open { display: flex; }
+
+    .lightbox img {
+      max-width: 92vw;
+      max-height: 80vh;
+      border-radius: 12px;
+      object-fit: contain;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255,255,255,.15);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #fff;
+      font-size: 1.2rem;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card > * { animation: fadeUp .4s ease both; }
+    .hero         { animation-delay: 0s; }
+    .identity     { animation-delay: .08s; }
+    .actions      { animation-delay: .14s; }
+    .section      { animation-delay: .18s; }
+
+    /* ── HIDDEN HELPER ── */
+    [data-hide] { display: none !important; }
+  </style>
+</head>
+<body>
+
+<div class="card" id="card">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-banner-placeholder" id="heroBanner"></div>
+    <div class="hero-logo-wrap">
+      <div class="hero-logo-initials" id="avatarEl">{{ card.name[:2]|upper if card.name else "?" }}</div>
+    </div>
+  </div>
+
+  <!-- IDENTITY -->
+  <div class="identity">
+    <h1 class="identity-name" id="nameEl">{{ card.name }}</h1>
+    <p class="identity-title" id="titleEl">{{ card.title }}</p>
+    <p class="identity-company" id="companyEl">{{ card.company }}</p>
+    <p class="identity-bio" id="bioEl">{{ card.bio }}</p>
+  </div>
+
+  <!-- PRIMARY ACTIONS -->
+  <div class="actions" id="actionsEl">
+    <a class="action-btn" id="callBtn" href="tel:{{ card.phone }}" aria-label="Call this contact">
+      <div class="icon-circle">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.4 21 3 13.6 3 4.5c0-.6.4-1 1-1H8c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
+      </div>
+      <span>Call</span>
+    </a>
+    <a class="action-btn" id="waBtn" href="https://wa.me/{{ card.social.whatsapp | replace(' ','') | replace('+','') if card.social and card.social.whatsapp else '#' }}" aria-label="Message on WhatsApp">
+      <div class="icon-circle" style="background:#25d366;box-shadow:0 4px 14px rgba(37,211,102,.35)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      </div>
+      <span>WhatsApp</span>
+    </a>
+    <a class="action-btn" id="emailBtn" href="mailto:{{ card.email }}" aria-label="Send an email">
+      <div class="icon-circle" style="background:#ea4335;box-shadow:0 4px 14px rgba(234,67,53,.3)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+      </div>
+      <span>Email</span>
+    </a>
+    <button class="action-btn" id="saveBtn" onclick="saveContact()" aria-label="Save contact to phone">
+      <div class="icon-circle" style="background:#0f0f0f;box-shadow:0 4px 14px rgba(0,0,0,.25)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+      </div>
+      <span>Save</span>
+    </button>
+  </div>
+
+  <!-- CONTACT INFO -->
+  {% if card.phone or card.email or card.address %}
+  <div class="section" id="contactSection">
+    <p class="section-label">Contact</p>
+    <div class="info-list" id="infoList">
+      {% if card.phone %}
+      <a class="info-row clickable" href="tel:{{ card.phone }}" target="_blank" rel="noopener">
+        <div class="info-icon"><svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:var(--accent)"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.4 21 3 13.6 3 4.5c0-.6.4-1 1-1H8c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg></div>
+        <div class="info-text"><div class="info-value">{{ card.phone }}</div><div class="info-label">Mobile</div></div>
+        <div class="info-chevron"><svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></div>
+      </a>
+      {% endif %}
+      {% if card.email %}
+      <a class="info-row clickable" href="mailto:{{ card.email }}" target="_blank" rel="noopener">
+        <div class="info-icon"><svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:var(--accent)"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div>
+        <div class="info-text"><div class="info-value">{{ card.email }}</div><div class="info-label">Email</div></div>
+        <div class="info-chevron"><svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></div>
+      </a>
+      {% endif %}
+      {% if card.address %}
+      <a class="info-row clickable" href="https://maps.google.com/?q={{ card.address | urlencode }}" target="_blank" rel="noopener">
+        <div class="info-icon"><svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:var(--accent)"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>
+        <div class="info-text"><div class="info-value">{{ card.address }}</div><div class="info-label">Address</div></div>
+        <div class="info-chevron"><svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></div>
+      </a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- HOURS -->
+  <div class="section" id="hoursSection" data-hide>
+    <p class="section-label">Hours</p>
+    <div class="hours-card" id="hoursCard"></div>
+  </div>
+
+  <!-- WEBSITE / CUSTOM LINKS -->
+  {% if card.website or card.custom_links %}
+  <div class="section" id="linksSection">
+    <p class="section-label">Links</p>
+    <div id="linksContainer">
+      {% if card.website %}
+      <a class="link-btn" href="{{ card.website }}" target="_blank" rel="noopener">
+        <div class="link-btn-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg></div>
+        <span class="link-btn-text">Visit Website</span>
+        <div class="link-btn-arrow"><svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></div>
+      </a>
+      {% endif %}
+      {% for link in card.custom_links or [] %}
+      <a class="link-btn" href="{{ link.url }}" target="_blank" rel="noopener">
+        <div class="link-btn-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+        <span class="link-btn-text">{{ link.label }}</span>
+        <div class="link-btn-arrow"><svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- SOCIAL LINKS -->
+  {% set s = card.social %}
+  {% if s and (s.whatsapp or s.instagram or s.linkedin or s.twitter or s.facebook or s.youtube) %}
+  <div class="section" id="socialSection">
+    <p class="section-label">Social</p>
+    <div class="social-grid" id="socialGrid">
+      {% if s.whatsapp %}
+      <a class="social-btn" href="https://wa.me/{{ s.whatsapp | replace(' ','') | replace('+','') }}" target="_blank" rel="noopener">
+        <div class="social-icon" style="background:#25d36614"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></div>
+        <span>WhatsApp</span>
+      </a>
+      {% endif %}
+      {% if s.instagram %}
+      <a class="social-btn" href="{{ s.instagram }}" target="_blank" rel="noopener">
+        <div class="social-icon" style="background:#e1306c14"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#e1306c"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></div>
+        <span>Instagram</span>
+      </a>
+      {% endif %}
+      {% if s.linkedin %}
+      <a class="social-btn" href="{{ s.linkedin }}" target="_blank" rel="noopener">
+        <div class="social-icon" style="background:#0077b514"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#0077b5"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg></div>
+        <span>LinkedIn</span>
+      </a>
+      {% endif %}
+      {% if s.twitter %}
+      <a class="social-btn" href="{{ s.twitter }}" target="_blank" rel="noopener">
+        <div class="social-icon" style="background:#1da1f214"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#1da1f2"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg></div>
+        <span>Twitter</span>
+      </a>
+      {% endif %}
+      {% if s.facebook %}
+      <a class="social-btn" href="{{ s.facebook }}" target="_blank" rel="noopener">
+        <div class="social-icon" style="background:#1877f214"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#1877f2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></div>
+        <span>Facebook</span>
+      </a>
+      {% endif %}
+      {% if s.youtube %}
+      <a class="social-btn" href="{{ s.youtube }}" target="_blank" rel="noopener">
+        <div class="social-icon" style="background:#ff000014"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#ff0000"><path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg></div>
+        <span>YouTube</span>
+      </a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- PHOTO GALLERY -->
+  <div class="section" id="gallerySection" data-hide>
+    <p class="section-label">Gallery</p>
+    <div class="gallery-grid" id="galleryGrid"></div>
+  </div>
+
+  <!-- VIDEO -->
+  <div class="section" id="videoSection" data-hide>
+    <p class="section-label">Video</p>
+    <div class="video-wrap" id="videoWrap"></div>
+  </div>
+
+  <!-- UPI PAYMENT -->
+  {% if card.upi %}
+  <div class="section" id="upiSection">
+    <p class="section-label">UPI Payment</p>
+    <div class="upi-card" id="upiCard">
+      <div class="upi-id-row">
+        <div class="upi-id-icon" aria-hidden="true"><svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:var(--accent)"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg></div>
+        <div class="upi-id-text">
+          <div class="upi-id-value" id="upiIdDisplay">{{ card.upi }}</div>
+          <div class="upi-id-sublabel">UPI ID</div>
+        </div>
+      </div>
+      <div class="upi-actions">
+        <a class="upi-btn pay" href="upi://pay?pa={{ card.upi }}&pn={{ card.name }}&cu=INR" role="button" aria-label="Pay {{ card.name }} via UPI">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:#fff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/></svg>
+          Pay via UPI
+        </a>
+        <button class="upi-btn copy" onclick="copyUPI('{{ card.upi }}')" aria-label="Copy UPI ID {{ card.upi }} to clipboard">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:var(--accent)"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+          Copy UPI ID
+        </button>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div style="height:20px"></div>
+
+  <!-- BRANDED FOOTER -->
+  <div style="
+    text-align:center;
+    padding: 18px 16px 24px;
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+  ">
+    <p style="
+      font-size:.72rem;
+      color: var(--text-3);
+      letter-spacing:.3px;
+      font-weight:500;
+    ">Powered by</p>
+    <div style="
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      margin-top:5px;
+    ">
+      <span style="font-size:.85rem;font-weight:700;color:var(--text-1);letter-spacing:-.2px;">He5 Solutions</span>
+    </div>
+  </div>
+
+  <div style="height:20px"></div>
+
+  <!-- BOTTOM BAR -->
+  <div class="bottom-bar">
+    <button class="bar-btn secondary" onclick="shareCard()" aria-label="Share this business card">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>
+      Share Card
+    </button>
+    <button class="bar-btn primary" onclick="saveContact()" aria-label="Save contact to your phone">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+      Add Contact
+    </button>
+  </div>
+
+</div><!-- /card -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
+  <button class="lightbox-close" onclick="closeLightbox()" aria-label="Close image viewer">✕</button>
+  <img src="" alt="" id="lightboxImg" />
+</div>
+
+<script>
+/* ─────────────────────────────────────────────────────────
+   CARD DATA — injected by Flask / Jinja2 server-side
+   Used by saveContact(), shareCard(), copyUPI()
+───────────────────────────────────────────────────────── */
+const CARD_DATA = {
+  name:    {{ card.name    | tojson }},
+  title:   {{ card.title   | tojson }},
+  company: {{ card.company | tojson }},
+  phone:   {{ card.phone   | tojson }},
+  email:   {{ card.email   | tojson }},
+  address: {{ card.address | tojson }},
+  website: {{ card.website | tojson }},
+  upi:     {{ card.upi     | tojson }},
+};
+
+
+/* ─────────────────────────────────────────────────────────
+   INFO LIST BUILDER
+───────────────────────────────────────────────────────── */
+function buildInfoList(d) {
+  const list = document.getElementById("infoList");
+  const rows = [];
+
+  if (d.phone) rows.push({
+    icon: phoneIcon(),
+    value: d.phone,
+    label: "Mobile",
+    href: `tel:${d.phone.replace(/\s/g,"")}`,
+  });
+  if (d.email) rows.push({
+    icon: emailIcon(),
+    value: d.email,
+    label: "Email",
+    href: `mailto:${d.email}`,
+  });
+  if (d.address) rows.push({
+    icon: mapIcon(),
+    value: d.address,
+    label: "Address",
+    href: `https://maps.google.com/?q=${encodeURIComponent(d.address)}`,
+  });
+
+  if (!rows.length) {
+    document.getElementById("contactSection").setAttribute("data-hide","");
+    return;
+  }
+
+  list.innerHTML = rows.map(r => `
+    <a class="info-row clickable" href="${r.href}" target="_blank" rel="noopener">
+      <div class="info-icon">${r.icon}</div>
+      <div class="info-text">
+        <div class="info-value">${r.value}</div>
+        <div class="info-label">${r.label}</div>
+      </div>
+      <div class="info-chevron">${chevronIcon()}</div>
+    </a>`).join("");
+}
+
+/* ─────────────────────────────────────────────────────────
+   HOURS BUILDER
+───────────────────────────────────────────────────────── */
+function buildHours(hours) {
+  const sec  = document.getElementById("hoursSection");
+  const card = document.getElementById("hoursCard");
+  const days = ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"];
+  const today = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"][new Date().getDay()];
+
+  const rows = days.map(d => {
+    const t = hours[d] || "Closed";
+    const isClosed = t.toLowerCase() === "closed";
+    const isToday  = d === today;
+    return `<div class="hours-row ${isToday ? "today" : ""} ${isClosed ? "closed" : ""}">
+      <span class="day">${cap(d)}</span>
+      <span class="time">${t}</span>
+    </div>`;
+  });
+
+  card.innerHTML = rows.join("");
+  sec.removeAttribute("data-hide");
+}
+
+/* ─────────────────────────────────────────────────────────
+   LINKS BUILDER
+───────────────────────────────────────────────────────── */
+function buildLinks(d) {
+  const sec       = document.getElementById("linksSection");
+  const container = document.getElementById("linksContainer");
+  const items     = [];
+
+  if (d.website) items.push({ label: "Visit Website", url: d.website, icon: globeIcon() });
+  (d.customLinks || []).forEach(l => items.push({ label: l.label, url: l.url, icon: linkIcon() }));
+
+  if (!items.length) return;
+
+  container.innerHTML = items.map(l => `
+    <a class="link-btn" href="${l.url}" target="_blank" rel="noopener">
+      <div class="link-btn-icon">${l.icon}</div>
+      <span class="link-btn-text">${l.label}</span>
+      <div class="link-btn-arrow">${chevronIcon()}</div>
+    </a>`).join("");
+
+  sec.removeAttribute("data-hide");
+}
+
+/* ─────────────────────────────────────────────────────────
+   SOCIAL BUILDER
+───────────────────────────────────────────────────────── */
+const SOCIAL_DEFS = [
+  { key:"whatsapp",  label:"WhatsApp",  icon: waIcon(),  color:"#25d366", prefix:"https://wa.me/" },
+  { key:"instagram", label:"Instagram", icon: igIcon(),  color:"#e1306c", prefix:"" },
+  { key:"linkedin",  label:"LinkedIn",  icon: liIcon(),  color:"#0077b5", prefix:"" },
+  { key:"twitter",   label:"Twitter",   icon: twIcon(),  color:"#1da1f2", prefix:"" },
+  { key:"facebook",  label:"Facebook",  icon: fbIcon(),  color:"#1877f2", prefix:"" },
+  { key:"youtube",   label:"YouTube",   icon: ytIcon(),  color:"#ff0000", prefix:"" },
+];
+
+function buildSocial(social) {
+  const sec  = document.getElementById("socialSection");
+  const grid = document.getElementById("socialGrid");
+  const active = SOCIAL_DEFS.filter(s => social[s.key]);
+
+  if (!active.length) return;
+
+  grid.innerHTML = active.map(s => {
+    const raw = social[s.key].replace(/\s/g,"");
+    const url = s.key === "whatsapp"
+      ? `https://wa.me/${raw.replace(/[^0-9]/g,"")}`
+      : raw;
+    return `<a class="social-btn" href="${url}" target="_blank" rel="noopener">
+      <div class="social-icon" style="background:${s.color}14">${s.icon}</div>
+      <span>${s.label}</span>
+    </a>`;
+  }).join("");
+
+  sec.removeAttribute("data-hide");
+}
+
+/* ─────────────────────────────────────────────────────────
+   GALLERY BUILDER
+───────────────────────────────────────────────────────── */
+function buildGallery(images) {
+  const sec  = document.getElementById("gallerySection");
+  const grid = document.getElementById("galleryGrid");
+
+  grid.innerHTML = images.map((src, i) => `
+    <img class="gallery-img" src="${src}" alt="${CARD_DATA.name} gallery photo ${i+1}" loading="lazy"
+         onclick="openLightbox('${src}', '${CARD_DATA.name} gallery photo ${i+1}')" />`).join("");
+
+  sec.removeAttribute("data-hide");
+}
+
+/* ─────────────────────────────────────────────────────────
+   VIDEO BUILDER  (YouTube / Vimeo)
+───────────────────────────────────────────────────────── */
+function buildVideo(url) {
+  const sec  = document.getElementById("videoSection");
+  const wrap = document.getElementById("videoWrap");
+  let embed  = url;
+
+  // Convert YouTube watch URL → embed
+  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  if (ytMatch) embed = `https://www.youtube.com/embed/${ytMatch[1]}`;
+
+  // Convert Vimeo
+  const viMatch = url.match(/vimeo\.com\/(\d+)/);
+  if (viMatch) embed = `https://player.vimeo.com/video/${viMatch[1]}`;
+
+  wrap.innerHTML = `<iframe src="${embed}" allow="autoplay; fullscreen" allowfullscreen loading="lazy"></iframe>`;
+  sec.removeAttribute("data-hide");
+}
+
+/* ─────────────────────────────────────────────────────────
+   UPI PAYMENT BUILDER
+───────────────────────────────────────────────────────── */
+function buildUPI(upiId, name) {
+  const sec  = document.getElementById("upiSection");
+  const card = document.getElementById("upiCard");
+
+  if (!upiId) return;
+
+  const payUrl = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(name || "")}&cu=INR`;
+
+  card.innerHTML = `
+    <div class="upi-id-row">
+      <div class="upi-id-icon" aria-hidden="true">${upiIcon()}</div>
+      <div class="upi-id-text">
+        <div class="upi-id-value" id="upiIdDisplay">${upiId}</div>
+        <div class="upi-id-sublabel">UPI ID</div>
+      </div>
+    </div>
+    <div class="upi-actions">
+      <a class="upi-btn pay" href="${payUrl}" role="button" aria-label="Pay ${name || ''} via UPI">
+        ${upiPayIcon()}
+        Pay via UPI
+      </a>
+      <button class="upi-btn copy" onclick="copyUPI('${upiId}')" aria-label="Copy UPI ID ${upiId} to clipboard">
+        ${copyIcon()}
+        Copy UPI ID
+      </button>
+    </div>`;
+
+  sec.removeAttribute("data-hide");
+}
+
+async function copyUPI(upiId) {
+  try {
+    await navigator.clipboard.writeText(upiId);
+    showToast("UPI ID copied ✓");
+  } catch (_) {
+    // Fallback for browsers without clipboard API
+    const el = document.createElement("textarea");
+    el.value = upiId;
+    el.style.cssText = "position:fixed;opacity:0;pointer-events:none";
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand("copy");
+    document.body.removeChild(el);
+    showToast("UPI ID copied ✓");
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   SAVE AS VCARD
+───────────────────────────────────────────────────────── */
+function saveContact() {
+  const d = CARD_DATA;
+  const vcf = [
+    "BEGIN:VCARD",
+    "VERSION:3.0",
+    `FN:${d.name}`,
+    `ORG:${d.company}`,
+    `TITLE:${d.title}`,
+    d.phone  ? `TEL;TYPE=CELL,VOICE:${d.phone.replace(/\s/g,"")}` : "",
+    d.email  ? `EMAIL;TYPE=WORK:${d.email}` : "",
+    d.address? `ADR;TYPE=WORK:;;${d.address};;;;` : "",
+    d.website? `URL:${d.website}` : "",
+    "END:VCARD",
+  ].filter(Boolean).join("\r\n");
+
+  const blob = new Blob([vcf], {type:"text/vcard;charset=utf-8"});
+  const link = document.createElement("a");
+  link.href  = URL.createObjectURL(blob);
+  link.download = `${d.name.replace(/\s+/g,"_")}.vcf`;
+  link.click();
+  showToast("Contact saved ✓");
+}
+
+/* ─────────────────────────────────────────────────────────
+   SHARE CARD
+───────────────────────────────────────────────────────── */
+async function shareCard() {
+  const url = window.location.href;
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: CARD_DATA.name, url });
+    } catch(_) {}
+  } else {
+    await navigator.clipboard.writeText(url).catch(()=>{});
+    showToast("Link copied to clipboard ✓");
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   LIGHTBOX
+───────────────────────────────────────────────────────── */
+function openLightbox(src, alt) {
+  const img = document.getElementById("lightboxImg");
+  img.src = src;
+  img.alt = alt || "Gallery photo";
+  document.getElementById("lightbox").classList.add("open");
+}
+function closeLightbox() {
+  document.getElementById("lightbox").classList.remove("open");
+}
+
+/* ─────────────────────────────────────────────────────────
+   TOAST
+───────────────────────────────────────────────────────── */
+function showToast(msg, dur = 2200) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), dur);
+}
+
+/* ─────────────────────────────────────────────────────────
+   HELPERS
+───────────────────────────────────────────────────────── */
+function getInitials(name="") {
+  return name.split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase();
+}
+function cap(str) { return str.charAt(0).toUpperCase() + str.slice(1); }
+
+/* ─────────────────────────────────────────────────────────
+   INLINE SVG ICONS
+───────────────────────────────────────────────────────── */
+function phoneIcon() {
+  return `<svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:var(--accent)"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.4 21 3 13.6 3 4.5c0-.6.4-1 1-1H8c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>`;
+}
+function emailIcon() {
+  return `<svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:var(--accent)"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>`;
+}
+function mapIcon() {
+  return `<svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:var(--accent)"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`;
+}
+function globeIcon() {
+  return `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>`;
+}
+function linkIcon() {
+  return `<svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>`;
+}
+function chevronIcon() {
+  return `<svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>`;
+}
+function waIcon() {
+  return `<svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>`;
+}
+function igIcon() {
+  return `<svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#e1306c"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>`;
+}
+function liIcon() {
+  return `<svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#0077b5"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>`;
+}
+function twIcon() {
+  return `<svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#1da1f2"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>`;
+}
+function fbIcon() {
+  return `<svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#1877f2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>`;
+}
+function ytIcon() {
+  return `<svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#ff0000"><path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>`;
+}
+function upiIcon() {
+  return `<svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:var(--accent)"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>`;
+}
+function upiPayIcon() {
+  return `<svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:#fff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/></svg>`;
+}
+function copyIcon() {
+  return `<svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:var(--accent)"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>`;
+}
+</script>
+</body>
+</html>
