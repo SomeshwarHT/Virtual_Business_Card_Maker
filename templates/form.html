@@ -2,862 +2,1574 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>Create Your Card</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CardCraft — Create Your Card</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='form.css') }}">
-
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
   <style>
-
-    /* ── RESET & BASE ── */
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      /* Brand */
-      --accent:          #fc7800;
-      --accent-hover:    #e56b00;
-      --accent-deep:     #c85a00;
-      --accent-soft:     #fff3e6;
-      --accent-border:   #ffc280;
+      --accent:        #fc7800;
+      --accent-hover:  #e56b00;
+      --accent-deep:   #c85a00;
+      --accent-soft:   #fff3e6;
+      --accent-border: #ffc280;
+      --brand-dark:    #0f0f0f;
+      --surface:       #ffffff;
+      --surface2:      #f8f7f5;
+      --bg:            #f0ede9;
+      --text-1:        #0f0f0f;
+      --text-2:        #4b5563;
+      --text-3:        #9ca3af;
+      --text-ph:       #b8b4ae;
+      --border:        #e5e1da;
+      --radius:        14px;
+      --radius-sm:     8px;
+      --shadow-card:   0 2px 16px rgba(0,0,0,.07), 0 1px 4px rgba(0,0,0,.04);
+      --tr:            .18s ease;
+    }
+    html { font-size:16px; scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+    body { font-family:'Outfit',sans-serif; background:var(--bg); color:var(--text-1); min-height:100vh; -webkit-font-smoothing:antialiased; }
 
-      /* Dark brand surfaces */
-      --brand-dark:      #0f0f0f;
-      --brand-mid:       #1e1e1e;
-      --brand-surface:   #2a2a2a;
+    /* ── NAVBAR ── */
+    .navbar { background:var(--brand-dark); border-bottom:1px solid #2a2a2a; position:sticky; top:0; z-index:300; }
+    .navbar-inner { max-width:1440px; margin:0 auto; padding:0 24px; height:56px; display:flex; align-items:center; justify-content:space-between; }
+    .nav-logo { display:flex; align-items:center; gap:9px; text-decoration:none; }
+    .nav-logo-icon { width:28px; height:28px; flex-shrink:0; }
+    .nav-logo-text { font-size:1rem; font-weight:700; color:#fff; letter-spacing:-.3px; }
+    .nav-badge { font-size:.68rem; font-weight:700; color:var(--brand-dark); background:var(--accent); padding:3px 10px; border-radius:99px; letter-spacing:.4px; }
 
-      /* Light surfaces */
-      --surface:         #ffffff;
-      --surface2:        #f8f7f5;
-      --bg:              #f0ede9;
+    /* ── PROFILE POPUP ── */
+    .nav-right { display:flex; align-items:center; gap:12px; position:relative; }
 
-      /* Text */
-      --text-1:          #0f0f0f;
-      --text-2:          #4b5563;
-      --text-3:          #9ca3af;
-      --text-placeholder:#b8b4ae;
+    .profile-trigger {
+      width:34px; height:34px; border-radius:50%;
+      background:linear-gradient(135deg,var(--accent),var(--accent-deep));
+      color:#fff; font-size:.82rem; font-weight:700;
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; border:2px solid rgba(255,255,255,.15);
+      overflow:hidden; flex-shrink:0; user-select:none;
+    }
+    .profile-trigger img { width:100%; height:100%; object-fit:cover; }
 
-      /* Borders */
-      --border:          #e5e1da;
-      --border-focus:    #fc7800;
+    .profile-popup {
+      position:absolute; top:calc(100% + 10px); right:0;
+      width:280px; background:#fff; border-radius:14px;
+      box-shadow:0 8px 40px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.08);
+      border:1px solid var(--border);
+      z-index:1000; display:none; overflow:hidden;
+    }
+    .profile-popup.open { display:block; }
 
-      /* States */
-      --error:           #e53935;
-      --error-soft:      #ffeaea;
-      --success:         #22c55e;
+    .popup-header {
+      padding:14px 16px 12px;
+      border-bottom:1px solid var(--border);
+      display:flex; align-items:center; gap:10px;
+    }
+    .popup-avatar {
+      width:38px; height:38px; border-radius:50%;
+      background:linear-gradient(135deg,var(--accent),var(--accent-deep));
+      color:#fff; font-size:.88rem; font-weight:700;
+      display:flex; align-items:center; justify-content:center;
+      flex-shrink:0; overflow:hidden;
+    }
+    .popup-avatar img { width:100%; height:100%; object-fit:cover; }
+    .popup-name { font-size:.88rem; font-weight:700; color:var(--text-1); }
+    .popup-email { font-size:.72rem; color:var(--text-3); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px; }
 
-      /* Layout */
-      --radius:          14px;
-      --radius-sm:       8px;
-      --radius-input:    10px;
-      --max-w:           520px;
-
-      /* Shadows */
-      --shadow-card:     0 2px 16px rgba(0,0,0,.07), 0 1px 4px rgba(0,0,0,.04);
-      --shadow-btn:      0 4px 18px rgba(252,120,0,.32);
-      --shadow-bar:      0 -4px 24px rgba(0,0,0,.09);
-
-      /* Transitions */
-      --transition:      .18s ease;
+    .popup-section-label {
+      font-size:.62rem; font-weight:700; color:var(--text-3);
+      letter-spacing:.8px; text-transform:uppercase;
+      padding:10px 16px 6px;
     }
 
-    html {
-      font-size: 16px;
-      scroll-behavior: smooth;
-      -webkit-text-size-adjust: 100%;
+    .popup-cards-list { padding:0 8px 6px; display:flex; flex-direction:column; gap:4px; }
+
+    .popup-card-item {
+      display:flex; align-items:center; gap:9px;
+      padding:8px 10px; border-radius:8px;
+      text-decoration:none; cursor:pointer;
+      transition:background var(--tr);
+    }
+    .popup-card-item:hover { background:var(--surface2); }
+
+    .popup-card-thumb {
+      width:36px; height:26px; border-radius:5px;
+      background:linear-gradient(135deg,#0f0f0f,#1e1000 55%,#fc7800);
+      flex-shrink:0; overflow:hidden; display:flex; align-items:center; justify-content:center;
+    }
+    .popup-card-thumb img { width:100%; height:100%; object-fit:cover; }
+    .popup-card-thumb-initials { font-size:.5rem; font-weight:700; color:#fff; letter-spacing:.5px; }
+
+    .popup-card-info { flex:1; min-width:0; }
+    .popup-card-name { font-size:.8rem; font-weight:600; color:var(--text-1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .popup-card-sub { font-size:.68rem; color:var(--text-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .popup-card-edit { font-size:.65rem; font-weight:600; color:var(--accent); padding:3px 7px; border-radius:4px; background:var(--accent-soft); border:1px solid var(--accent-border); white-space:nowrap; }
+    .popup-card-delete { font-size:.65rem; font-weight:600; color:#dc2626; padding:3px 7px; border-radius:4px; background:#fee2e2; border:1px solid #fca5a5; white-space:nowrap; cursor:pointer; display:flex; align-items:center; line-height:1; font-family:'Outfit',sans-serif; }
+    .popup-card-delete:hover { background:#fecaca; }
+
+    .popup-card-label-wrap { padding:4px 8px 2px; }
+    .popup-card-label-input {
+      width:100%; height:30px; font-size:.75rem; font-family:'Outfit',sans-serif;
+      border:1px solid var(--border); border-radius:6px; padding:0 8px;
+      background:var(--surface2); color:var(--text-1); outline:none;
+      transition:border-color var(--tr);
+    }
+    .popup-card-label-input:focus { border-color:var(--accent); background:var(--surface); }
+    .popup-card-label-save { font-size:.68rem; color:var(--accent); font-weight:600; cursor:pointer; margin-left:4px; white-space:nowrap; background:none; border:none; font-family:'Outfit',sans-serif; padding:0; }
+
+    /* Confirm delete overlay */
+    .del-confirm {
+      position:fixed; inset:0; z-index:9999;
+      background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center;
+    }
+    .del-confirm-box {
+      background:#fff; border-radius:14px; padding:24px 28px; max-width:320px; width:90%;
+      box-shadow:0 16px 60px rgba(0,0,0,.25); text-align:center;
+    }
+    .del-confirm-title { font-size:1rem; font-weight:700; color:var(--text-1); margin-bottom:6px; }
+    .del-confirm-sub { font-size:.82rem; color:var(--text-2); line-height:1.5; margin-bottom:18px; }
+    .del-confirm-btns { display:flex; gap:10px; justify-content:center; }
+    .del-btn-cancel { padding:9px 20px; border-radius:8px; border:1.5px solid var(--border); background:var(--surface2); color:var(--text-1); font-family:'Outfit',sans-serif; font-size:.84rem; font-weight:600; cursor:pointer; }
+    .del-btn-cancel:hover { background:var(--border); }
+    .del-btn-ok { padding:9px 20px; border-radius:8px; border:none; background:#dc2626; color:#fff; font-family:'Outfit',sans-serif; font-size:.84rem; font-weight:600; cursor:pointer; }
+    .del-btn-ok:hover { background:#b91c1c; }
+
+    /* ── THEME PICKER ── */
+    .theme-grid { display:flex; flex-wrap:wrap; gap:10px; }
+    .theme-swatch {
+      display:flex; flex-direction:column; align-items:center; gap:5px;
+      cursor:pointer; position:relative;
+    }
+    .theme-swatch-circle {
+      width:48px; height:48px; border-radius:50%;
+      border:2.5px solid var(--border);
+      background:conic-gradient(from 135deg, var(--ts-a) 0%, var(--ts-b) 50%, var(--ts-c) 100%);
+      transition:border-color var(--tr),transform var(--tr);
+      position:relative;
+    }
+    .theme-swatch.active .theme-swatch-circle { border-color:var(--accent); transform:scale(1.12); box-shadow:0 0 0 3px rgba(252,120,0,.2); }
+    .theme-swatch-label { font-size:.65rem; font-weight:600; color:var(--text-2); text-align:center; }
+    .theme-swatch .theme-check {
+      position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+      width:16px; height:16px; background:#fff; border-radius:50%;
+      display:none; align-items:center; justify-content:center;
+    }
+    .theme-swatch.active .theme-check { display:flex; }
+    .theme-check svg { width:10px; height:10px; fill:var(--accent); }
+
+
+    .popup-add-btn {
+      display:flex; align-items:center; gap:8px;
+      padding:9px 16px; margin:4px 8px 8px;
+      border-radius:8px; border:1.5px dashed var(--accent-border);
+      background:var(--accent-soft); color:var(--accent-deep);
+      font-family:'Outfit',sans-serif; font-size:.8rem; font-weight:600;
+      cursor:pointer; text-decoration:none;
+      transition:background var(--tr);
+    }
+    .popup-add-btn:hover { background:#ffe8cc; }
+    .popup-add-btn svg { width:14px; height:14px; fill:var(--accent-deep); flex-shrink:0; }
+
+    .popup-divider { border:none; border-top:1px solid var(--border); margin:0; }
+
+    .popup-logout {
+      display:flex; align-items:center; gap:8px;
+      padding:11px 16px; color:#dc2626; font-size:.84rem; font-weight:600;
+      text-decoration:none; cursor:pointer; transition:background var(--tr);
+    }
+    .popup-logout:hover { background:#fee2e2; }
+    .popup-logout svg { width:15px; height:15px; fill:#dc2626; }
+
+    /* ── TWO-COLUMN EDITOR ── */
+    .editor { display:grid; grid-template-columns:1fr 430px; min-height:calc(100vh - 56px); max-width:1440px; margin:0 auto; }
+
+    /* ── LEFT: FORM ── */
+    .form-panel { padding:32px 32px 110px; overflow-y:auto; border-right:1px solid var(--border); }
+    .form-hero { margin-bottom:24px; }
+    .form-title { font-size:1.5rem; font-weight:700; color:var(--text-1); letter-spacing:-.4px; line-height:1.2; }
+    .form-title::after { content:''; display:block; width:34px; height:3px; background:var(--accent); border-radius:99px; margin-top:8px; }
+    .form-subtitle { font-size:.875rem; color:var(--text-2); line-height:1.6; margin-top:6px; }
+
+    .form-section { background:var(--surface); border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow-card); padding:18px 20px 22px; margin-bottom:14px; }
+    .sec-head { display:flex; align-items:flex-start; gap:11px; margin-bottom:16px; padding-bottom:13px; border-bottom:1px solid var(--border); }
+    .sec-badge { width:28px; height:28px; border-radius:var(--radius-sm); background:var(--brand-dark); color:var(--accent); font-size:.65rem; font-weight:800; letter-spacing:.5px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .sec-title { font-size:.9rem; font-weight:700; color:var(--text-1); letter-spacing:-.2px; margin-bottom:1px; }
+    .sec-desc { font-size:.74rem; color:var(--text-3); }
+
+    .fields-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .field-full { grid-column:1/-1; }
+    .field-wrap { display:flex; flex-direction:column; gap:5px; }
+
+    .field-label { font-size:.78rem; font-weight:600; color:var(--text-2); display:flex; align-items:center; gap:5px; letter-spacing:.1px; }
+    .fhint { font-size:.7rem; font-weight:400; color:var(--text-3); margin-left:auto; }
+
+    .field-input { width:100%; height:41px; padding:0 12px; border:1.5px solid var(--border); border-radius:var(--radius-sm); background:var(--surface2); font-family:'Outfit',sans-serif; font-size:.875rem; color:var(--text-1); outline:none; transition:border-color var(--tr),background var(--tr),box-shadow var(--tr); -webkit-appearance:none; }
+    .field-input::placeholder { color:var(--text-ph); }
+    .field-input:hover { border-color:var(--accent-border); background:var(--surface); }
+    .field-input:focus { border-color:var(--accent); background:var(--surface); box-shadow:0 0 0 3px rgba(252,120,0,.12); }
+    .field-input.ic { padding-left:36px; }
+    .field-textarea { height:auto; padding:10px 12px; resize:vertical; min-height:76px; line-height:1.5; }
+
+    .iw { position:relative; display:flex; align-items:center; }
+    .ii { position:absolute; left:11px; width:14px; height:14px; fill:var(--text-3); pointer-events:none; transition:fill var(--tr); }
+    .iw:focus-within .ii { fill:var(--accent); }
+
+    .hint { font-size:.71rem; color:var(--text-3); margin-top:2px; line-height:1.5; }
+    .hint code { font-size:.69rem; background:var(--accent-soft); border:1px solid var(--accent-border); border-radius:3px; padding:1px 4px; color:var(--accent-deep); }
+
+    /* ── IMAGES UPLOAD ROW ── */
+    .images-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+    .img-upload-box { display:flex; flex-direction:column; gap:6px; }
+    .img-upload-label { font-size:.78rem; font-weight:600; color:var(--text-2); }
+
+    .img-upload-area {
+      position:relative;
+      border:1.5px dashed var(--border);
+      border-radius:var(--radius-sm);
+      background:var(--surface2);
+      overflow:hidden;
+      transition:border-color var(--tr),background var(--tr);
+      cursor:pointer;
+    }
+    .img-upload-area:hover { border-color:var(--accent); background:var(--accent-soft); }
+    .img-upload-area input[type="file"] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; z-index:2; }
+
+    .img-upload-inner {
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      padding:16px 10px;
+      text-align:center;
     }
 
-    body {
-      font-family: 'Outfit', sans-serif;
-      background: var(--bg);
-      color: var(--text-1);
-      min-height: 100vh;
-      line-height: 1.5;
-      -webkit-font-smoothing: antialiased;
+    .img-upload-inner svg { width:22px; height:22px; fill:var(--text-3); transition:fill var(--tr); }
+    .img-upload-area:hover .img-upload-inner svg { fill:var(--accent-deep); }
+    .img-upload-inner span { font-size:.74rem; color:var(--text-2); font-weight:500; transition:color var(--tr); }
+    .img-upload-area:hover .img-upload-inner span { color:var(--accent-deep); }
+
+    /* Banner preview */
+    .banner-preview-wrap {
+      width:100%;
+      height:70px;
+      border-radius:var(--radius-sm);
+      overflow:hidden;
+      display:none;
+      position:relative;
+    }
+    .banner-preview-img { width:100%; height:100%; object-fit:cover; display:block; }
+
+    .banner-placeholder {
+      width:100%;
+      height:70px;
+      border-radius:var(--radius-sm);
+      background:linear-gradient(135deg,#0f0f0f 0%,#1e1000 55%,#fc7800 100%);
     }
 
-    /* ── PAGE HEADER ── */
-    .page-header {
-      background: var(--brand-dark);
-      border-bottom: 1px solid #2a2a2a;
-      position: sticky;
-      top: 0;
-      z-index: 200;
+    /* Profile preview */
+    .profile-preview-wrap {
+      width:56px; height:56px;
+      border-radius:50%;
+      overflow:hidden;
+      border:2.5px solid var(--border);
+      display:none;
+      flex-shrink:0;
     }
+    .profile-preview-img { width:100%; height:100%; object-fit:cover; display:block; }
 
-    .header-inner {
-      max-width: var(--max-w);
-      margin: 0 auto;
-      padding: 14px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    /* ── SHAPE & POSITION OPTIONS ── */
+    .options-row { display:flex; gap:12px; align-items:flex-start; flex-wrap:wrap; }
+    .option-group { display:flex; flex-direction:column; gap:7px; flex:1; min-width:140px; }
+    .option-group-label { font-size:.72rem; font-weight:600; color:var(--text-3); letter-spacing:.5px; text-transform:uppercase; }
+    .option-btns { display:flex; gap:8px; }
+
+    .shape-btn {
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:5px; padding:8px 12px;
+      border:1.5px solid var(--border);
+      border-radius:var(--radius-sm);
+      background:var(--surface2);
+      cursor:pointer; font-family:'Outfit',sans-serif; font-size:.72rem; font-weight:600;
+      color:var(--text-2);
+      transition:border-color var(--tr),background var(--tr),color var(--tr);
+      position:relative;
     }
+    .shape-btn:hover { border-color:var(--accent-border); background:var(--accent-soft); color:var(--accent-deep); }
+    .shape-btn.active { border-color:var(--accent); background:var(--accent-soft); color:var(--accent-deep); }
 
-    .header-logo {
-      display: flex;
-      align-items: center;
-      gap: 9px;
+    .shape-icon-round {
+      width:28px; height:28px; border-radius:50%;
+      background:var(--brand-dark);
+      display:flex; align-items:center; justify-content:center;
     }
-
-    .logo-icon { width: 28px; height: 28px; flex-shrink: 0; }
-
-    .logo-text {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: #ffffff;
-      letter-spacing: -.3px;
+    .shape-icon-square {
+      width:28px; height:28px; border-radius:5px;
+      background:var(--brand-dark);
+      display:flex; align-items:center; justify-content:center;
     }
+    .shape-tick { width:12px; height:12px; fill:#fff; }
+    .shape-tick-hidden { opacity:0; }
 
-    .header-step {
-      font-size: .72rem;
-      font-weight: 700;
-      color: var(--brand-dark);
-      background: var(--accent);
-      padding: 4px 11px;
-      border-radius: 99px;
-      letter-spacing: .4px;
+    .pos-btn {
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:4px; padding:7px 10px;
+      border:1.5px solid var(--border);
+      border-radius:var(--radius-sm);
+      background:var(--surface2);
+      cursor:pointer; font-family:'Outfit',sans-serif; font-size:.7rem; font-weight:600;
+      color:var(--text-2);
+      transition:border-color var(--tr),background var(--tr),color var(--tr);
     }
+    .pos-btn:hover { border-color:var(--accent-border); background:var(--accent-soft); color:var(--accent-deep); }
+    .pos-btn.active { border-color:var(--accent); background:var(--accent-soft); color:var(--accent-deep); }
+    .pos-icon { width:28px; height:18px; display:flex; align-items:center; border-radius:3px; background:rgba(0,0,0,.06); padding:2px; gap:2px; }
+    .pos-dot { width:8px; height:8px; border-radius:50%; background:var(--brand-dark); flex-shrink:0; }
+    .pos-line { flex:1; height:2px; background:rgba(0,0,0,.15); border-radius:99px; }
+    .pos-btn.active .pos-dot { background:var(--accent); }
 
-    /* ── MAIN WRAPPER ── */
-    .main-wrap {
-      max-width: var(--max-w);
-      margin: 0 auto;
-      padding: 24px 16px 0;
+    /* ── ROLES / BASIC INFO ── */
+    .role-block { border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px; margin-bottom:10px; background:var(--surface2); position:relative; }
+    .role-block-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+    .role-num { font-size:.68rem; font-weight:700; color:var(--accent); background:var(--accent-soft); border:1px solid var(--accent-border); border-radius:4px; padding:2px 8px; }
+    .role-remove-btn {
+      background:none; border:none; cursor:pointer; color:var(--text-3); font-size:.8rem; padding:4px 6px;
+      border-radius:4px; transition:background var(--tr),color var(--tr);
     }
+    .role-remove-btn:hover { background:#fee2e2; color:#dc2626; }
 
-    .form-container { width: 100%; }
-
-    /* ── HERO ── */
-    .form-hero { padding: 4px 4px 24px; }
-
-    .form-title {
-      font-size: 1.65rem;
-      font-weight: 700;
-      color: var(--text-1);
-      letter-spacing: -.4px;
-      line-height: 1.2;
-      margin-bottom: 8px;
+    .add-role-btn {
+      display:flex; align-items:center; gap:7px;
+      padding:9px 14px;
+      border:1.5px dashed var(--accent-border);
+      border-radius:var(--radius-sm);
+      background:var(--accent-soft);
+      color:var(--accent-deep);
+      font-family:'Outfit',sans-serif; font-size:.82rem; font-weight:600;
+      cursor:pointer;
+      transition:background var(--tr),border-color var(--tr);
+      width:100%;
+      justify-content:center;
     }
+    .add-role-btn:hover { background:#ffe8cc; border-color:var(--accent); }
+    .add-role-btn svg { width:14px; height:14px; fill:var(--accent-deep); }
 
-    .form-title::after {
-      content: '';
-      display: block;
-      width: 40px;
-      height: 3px;
-      background: var(--accent);
-      border-radius: 99px;
-      margin-top: 8px;
+    .roles-limit-msg { font-size:.75rem; color:#dc2626; background:#fee2e2; border:1px solid #fca5a5; border-radius:6px; padding:6px 10px; display:none; margin-top:8px; }
+
+    /* Text align options for identity block */
+    .align-row { display:flex; gap:8px; margin-top:10px; }
+    .align-btn {
+      display:flex; align-items:center; justify-content:center; gap:5px;
+      padding:6px 12px;
+      border:1.5px solid var(--border);
+      border-radius:var(--radius-sm);
+      background:var(--surface2);
+      cursor:pointer; font-family:'Outfit',sans-serif; font-size:.72rem; font-weight:600;
+      color:var(--text-2);
+      transition:border-color var(--tr),background var(--tr),color var(--tr);
     }
+    .align-btn:hover { border-color:var(--accent-border); background:var(--accent-soft); color:var(--accent-deep); }
+    .align-btn.active { border-color:var(--accent); background:var(--accent-soft); color:var(--accent-deep); }
+    .align-btn svg { width:14px; height:14px; fill:currentColor; }
 
-    .form-subtitle {
-      font-size: .9rem;
-      color: var(--text-2);
-      line-height: 1.6;
-      margin-top: 4px;
+    /* Social icons in labels */
+    .sli { width:15px; height:15px; border-radius:3px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .sli svg { width:9px; height:9px; fill:#fff; }
+    .wa-bg { background:#25d366; }
+    .ig-bg { background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); }
+    .li-bg { background:#0077b5; }
+    .tw-bg { background:#1da1f2; }
+    .fb-bg { background:#1877f2; }
+    .yt-bg { background:#ff0000; }
+
+    .cl-group { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px; display:flex; flex-direction:column; gap:8px; }
+    .cl-tag { font-size:.67rem; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--accent-deep); background:var(--accent-soft); border:1px solid var(--accent-border); padding:2px 7px; border-radius:4px; align-self:flex-start; }
+    .fp { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .fp-item { display:flex; flex-direction:column; gap:5px; }
+
+    /* ── RIGHT: PREVIEW ── */
+    .preview-panel { background:var(--bg); position:sticky; top:56px; height:calc(100vh - 56px - 62px); display:flex; flex-direction:column; overflow:hidden; }
+    .preview-head { padding:14px 20px 12px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; background:var(--surface); flex-shrink:0; }
+    .preview-label { font-size:.68rem; font-weight:700; color:var(--text-3); letter-spacing:1px; text-transform:uppercase; display:flex; align-items:center; gap:7px; }
+    .live-dot { width:7px; height:7px; border-radius:50%; background:#22c55e; animation:livepulse 2s ease infinite; }
+    @keyframes livepulse { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(34,197,94,.4)} 50%{opacity:.8;box-shadow:0 0 0 4px rgba(34,197,94,0)} }
+    .preview-scroll { flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; padding:24px 16px 32px; display:flex; justify-content:center; align-items:flex-start; scroll-behavior:smooth; }
+
+    /* ── CARD WIDGET ── */
+    .cpw { width:100%; max-width:350px; background:var(--surface); border-radius:18px; box-shadow:0 8px 40px rgba(0,0,0,.14),0 2px 8px rgba(0,0,0,.06); overflow:visible; position:relative; }
+    .cpw-hero { height:80px; position:relative; overflow:hidden; border-radius:18px 18px 0 0; background:linear-gradient(135deg,#0f0f0f 0%,#1e1000 55%,#fc7800 100%); }
+    .cpw-hero-img { width:100%; height:100%; object-fit:cover; display:none; }
+    .cpw-hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 70% 90% at 80% 20%,rgba(252,120,0,.45) 0%,transparent 70%); pointer-events:none; }
+
+    /* Avatar */
+    .cpw-av-wrap { position:absolute; z-index:10; transition:left var(--tr),right var(--tr),transform var(--tr); }
+    .cpw-av-wrap.pos-left   { top:44px; left:16px; transform:none; }
+    .cpw-av-wrap.pos-center { top:44px; left:50%; transform:translateX(-50%); }
+    .cpw-av-wrap.pos-right  { top:44px; right:16px; left:auto; transform:none; }
+
+    .cpw-av { width:80px; height:80px; border-radius:50%; border:3px solid #fff; background:linear-gradient(135deg,#fc7800,#c85a00); display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:700; color:#fff; overflow:hidden; box-shadow:0 4px 16px rgba(0,0,0,.18); font-family:'DM Serif Display',serif; transition:border-radius var(--tr); }
+    .cpw-av.sq { border-radius:14px; }
+    .cpw-av img { width:100%; height:100%; object-fit:cover; display:none; }
+
+    .cpw-identity { padding:14px 16px 10px; transition:text-align var(--tr); }
+    .cpw-identity.align-left   { text-align:left; }
+    .cpw-identity.align-center { text-align:center; }
+    .cpw-identity.align-right  { text-align:right; }
+
+    /* Padding-top adapts to avatar position:
+       Center: avatar straddles hero, needs 48px to clear the 80px avatar half below hero (80-44=36px below hero, plus 12px gap = 48px).
+       Left/Right: same avatar hangs 36px below hero, so also need 48px to fully clear it. */
+    .cpw-av-wrap.pos-center ~ .cpw-identity { padding-top:48px; }
+    .cpw-av-wrap.pos-left ~ .cpw-identity,
+    .cpw-av-wrap.pos-right ~ .cpw-identity  { padding-top:48px; min-height:0; }
+
+    .cpw-name { font-family:'DM Serif Display',serif; font-size:1.2rem; font-weight:400; color:var(--text-1); letter-spacing:-.2px; line-height:1.2; }
+    .cpw-name.empty { color:var(--text-3); font-family:'Outfit',sans-serif; font-size:.82rem; font-weight:400; font-style:italic; }
+    .cpw-designations { margin-top:3px; }
+    .cpw-title { font-size:.72rem; color:var(--accent); font-weight:500; letter-spacing:.5px; text-transform:uppercase; line-height:1.4; }
+    .cpw-company { font-size:.8rem; color:var(--text-2); margin-top:2px; }
+    .cpw-bio { font-size:.73rem; color:var(--text-2); margin-top:5px; line-height:1.55; }
+
+    /* multi-role preview */
+    .cpw-role-entry { margin-bottom:6px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+    .cpw-role-entry:last-child { border-bottom:none; margin-bottom:0; padding-bottom:0; }
+
+    .cpw-upi { display:flex; align-items:center; gap:6px; padding:6px 10px; background:var(--accent-soft); border-radius:6px; border:1px solid var(--accent-border); margin-top:4px; }
+    .cpw-upi-icon { width:16px; height:16px; fill:var(--accent); flex-shrink:0; }
+    .cpw-upi-val { font-size:.72rem; color:var(--accent-deep); font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+    .cpw-actions { display:flex; justify-content:center; gap:10px; padding:4px 18px 14px; flex-wrap:wrap; }
+    .cpw-action { display:flex; flex-direction:column; align-items:center; gap:4px; }
+    .cpw-circle { width:44px; height:44px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; box-shadow:0 3px 12px rgba(252,120,0,.35); }
+    .cpw-circle svg { width:18px; height:18px; fill:#fff; }
+    .cpw-action span { font-size:.62rem; font-weight:600; color:var(--text-2); letter-spacing:.4px; text-transform:uppercase; }
+
+    .cpw-section { padding:0 12px 8px; }
+    .cpw-slabel { font-size:.6rem; font-weight:700; color:var(--text-3); letter-spacing:1.2px; text-transform:uppercase; padding:8px 5px 5px; }
+    .cpw-info-list { background:var(--surface); border-radius:11px; border:1px solid var(--border); overflow:hidden; }
+    .cpw-info-row { display:flex; align-items:center; gap:9px; padding:9px 11px; border-bottom:1px solid var(--border); }
+    .cpw-info-row:last-child { border-bottom:none; }
+    .cpw-info-icon { width:28px; height:28px; border-radius:7px; background:var(--accent-soft); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .cpw-info-icon svg { width:13px; height:13px; fill:var(--accent); }
+    .cpw-info-val { font-size:.77rem; font-weight:500; color:var(--text-1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .cpw-info-lbl { font-size:.65rem; color:var(--text-3); }
+
+    /* Social grid — centered */
+    .cpw-social-grid { display:flex; flex-wrap:wrap; justify-content:center; gap:6px; padding:0 8px; }
+    .cpw-sbtn { display:flex; flex-direction:column; align-items:center; gap:3px; padding:8px 10px; border-radius:7px; background:var(--surface2); border:1px solid var(--border); min-width:52px; }
+    .cpw-sbtn span { font-size:.57rem; font-weight:600; color:var(--text-2); }
+    .cpw-si { width:22px; height:22px; display:flex; align-items:center; justify-content:center; }
+    .cpw-si svg { width:18px; height:18px; }
+
+    .cpw-empty { display:flex; flex-direction:column; align-items:center; padding:20px 18px; text-align:center; gap:5px; }
+    .cpw-empty-ico { font-size:1.6rem; opacity:.3; }
+    .cpw-empty-txt { font-size:.75rem; color:var(--text-3); line-height:1.5; }
+
+    /* ── SUBMIT BAR ── */
+    .submit-bar { position:fixed; bottom:0; left:0; right:0; background:var(--brand-dark); border-top:2px solid var(--accent); z-index:400; padding:10px 24px calc(10px + env(safe-area-inset-bottom)); }
+    .submit-bar-inner { max-width:1440px; margin:0 auto; display:flex; align-items:center; gap:16px; justify-content:space-between; }
+    .sub-info { display:flex; align-items:center; gap:12px; min-width:0; }
+    .sub-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent-deep)); color:#fff; font-size:.78rem; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; border:2px solid rgba(255,255,255,.12); overflow:hidden; }
+    .sub-avatar img { width:100%; height:100%; object-fit:cover; display:none; }
+    .sub-meta { min-width:0; }
+    .sub-name { font-size:.88rem; font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:220px; }
+    .sub-sub { font-size:.7rem; color:rgba(255,255,255,.45); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:220px; }
+    .submit-btn { display:inline-flex; align-items:center; gap:8px; padding:0 22px; height:42px; background:var(--accent); border-radius:999px; color:#fff; font-family:'Outfit',sans-serif; font-size:.88rem; font-weight:700; border:none; cursor:pointer; box-shadow:0 4px 18px rgba(252,120,0,.35); transition:background var(--tr),transform var(--tr); white-space:nowrap; flex-shrink:0; }
+    .submit-btn svg { width:15px; height:15px; fill:#fff; }
+    .submit-btn:hover { background:var(--accent-hover); }
+    .submit-btn:active { transform:scale(.96); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width:900px) {
+      .editor { grid-template-columns:1fr; }
+      .preview-panel { position:static; height:auto; max-height:calc(100vh - 56px - 62px); border-top:1px solid var(--border); order:-1; }
+      .preview-scroll { padding:14px 12px 20px; }
+      .form-panel { padding:20px 16px 100px; border-right:none; }
+      .fields-grid,.fp { grid-template-columns:1fr; }
+      .images-row { grid-template-columns:1fr; }
     }
-
-    /* ── FORM SECTION ── */
-    .form-section {
-      background: var(--surface);
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow-card);
-      padding: 20px 20px 24px;
-      margin-bottom: 16px;
-      animation: fadeUp .35s ease both;
+    @media (min-width:901px) and (max-width:1100px) {
+      .editor { grid-template-columns:1fr 370px; }
+      .form-panel { padding:24px 24px 110px; }
     }
-
-    .form-section:nth-child(1) { animation-delay: .04s; }
-    .form-section:nth-child(2) { animation-delay: .08s; }
-    .form-section:nth-child(3) { animation-delay: .12s; }
-    .form-section:nth-child(4) { animation-delay: .16s; }
-    .form-section:nth-child(5) { animation-delay: .20s; }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(12px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ── SECTION HEADER ── */
-    .section-header {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .section-badge {
-      width: 32px;
-      height: 32px;
-      border-radius: var(--radius-sm);
-      background: var(--brand-dark);
-      color: var(--accent);
-      font-size: .72rem;
-      font-weight: 800;
-      letter-spacing: .5px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    .section-title {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--text-1);
-      letter-spacing: -.2px;
-      margin-bottom: 2px;
-    }
-
-    .section-desc {
-      font-size: .78rem;
-      color: var(--text-3);
-      font-weight: 400;
-    }
-
-    /* ── FIELDS GRID ── */
-    .fields-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-
-    .field-full { grid-column: 1 / -1; }
-
-    /* ── FIELD WRAP ── */
-    .field-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    /* ── LABELS ── */
-    .field-label {
-      font-size: .82rem;
-      font-weight: 600;
-      color: var(--text-2);
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      letter-spacing: .1px;
-    }
-
-    .required-dot { color: var(--accent); font-size: .9rem; line-height: 1; }
-    .field-hint   { font-size: .73rem; font-weight: 400; color: var(--text-3); margin-left: auto; }
-
-    /* ── INPUTS ── */
-    .field-input {
-      width: 100%;
-      height: 44px;
-      padding: 0 13px;
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius-input);
-      background: var(--surface2);
-      font-family: 'Outfit', sans-serif;
-      font-size: .9rem;
-      font-weight: 400;
-      color: var(--text-1);
-      outline: none;
-      transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
-      -webkit-appearance: none;
-      appearance: none;
-    }
-
-    .field-input::placeholder { color: var(--text-placeholder); font-weight: 400; }
-    .field-input:hover         { border-color: var(--accent-border); background: var(--surface); }
-    .field-input:focus         { border-color: var(--border-focus); background: var(--surface); box-shadow: 0 0 0 3px rgba(252,120,0,.12); }
-    .field-input.has-icon      { padding-left: 40px; }
-
-    /* Input icon wrapper */
-    .input-icon-wrap { position: relative; display: flex; align-items: center; }
-
-    .input-icon {
-      position: absolute;
-      left: 12px;
-      width: 16px;
-      height: 16px;
-      fill: var(--text-3);
-      pointer-events: none;
-      flex-shrink: 0;
-      transition: fill var(--transition);
-    }
-
-    .input-icon-wrap:focus-within .input-icon { fill: var(--accent); }
-
-    /* Textarea */
-    .field-textarea { height: auto; padding: 11px 13px; resize: vertical; min-height: 84px; line-height: 1.5; }
-
-    /* Char counter */
-    .char-count { font-size: .72rem; color: var(--text-3); text-align: right; margin-top: -2px; transition: color var(--transition); }
-    .char-count.warn { color: var(--error); }
-
-    /* ── VALIDATION STATES ── */
-    .field-input.is-error  { border-color: var(--error); background: var(--error-soft); }
-    .field-input.is-error:focus { box-shadow: 0 0 0 3px rgba(229,57,53,.12); }
-    .field-input.is-valid  { border-color: var(--success); }
-    .field-error { font-size: .75rem; color: var(--error); font-weight: 500; min-height: 16px; display: block; }
-
-    /* ── HINT BLOCK ── */
-    .field-hint-block { font-size: .75rem; color: var(--text-3); margin-top: 2px; line-height: 1.5; }
-    .field-hint-block code {
-      font-family: 'Outfit', monospace;
-      font-size: .73rem;
-      background: var(--accent-soft);
-      border: 1px solid var(--accent-border);
-      border-radius: 4px;
-      padding: 1px 5px;
-      color: var(--accent-deep);
-    }
-
-    /* ── CUSTOM LINK GROUP ── */
-    .custom-link-group {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .custom-link-tag {
-      font-size: .7rem;
-      font-weight: 700;
-      letter-spacing: .8px;
-      text-transform: uppercase;
-      color: var(--accent-deep);
-      background: var(--accent-soft);
-      border: 1px solid var(--accent-border);
-      padding: 3px 8px;
-      border-radius: 4px;
-      align-self: flex-start;
-    }
-
-    .field-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .field-pair-item { display: flex; flex-direction: column; gap: 5px; }
-
-    /* ── SOCIAL LABEL ICONS ── */
-    .social-label-icon {
-      width: 18px;
-      height: 18px;
-      border-radius: 4px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .social-label-icon svg { width: 11px; height: 11px; fill: #fff; }
-    .social-wa { background: #25d366; }
-    .social-ig { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
-    .social-li { background: #0077b5; }
-    .social-tw { background: #1da1f2; }
-    .social-fb { background: #1877f2; }
-    .social-yt { background: #ff0000; }
-
-    /* ── SPACER ── */
-    .submit-spacer { height: 96px; }
-
-    /* ── FIXED SUBMIT BAR ── */
-    .submit-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: var(--brand-dark);
-      border-top: 2px solid var(--accent);
-      box-shadow: var(--shadow-bar);
-      z-index: 300;
-      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
-    }
-
-    .submit-bar-inner {
-      max-width: var(--max-w);
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .submit-preview { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
-
-    .preview-avatar {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #fc7800, #c85a00);
-      color: #fff;
-      font-size: .82rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      letter-spacing: 1px;
-      user-select: none;
-      transition: background var(--transition);
-      border: 2px solid rgba(255,255,255,.12);
-    }
-
-    .preview-meta { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-
-    .preview-name {
-      font-size: .86rem;
-      font-weight: 600;
-      color: #ffffff;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 130px;
-    }
-
-    .preview-sub {
-      font-size: .72rem;
-      color: rgba(255,255,255,.45);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 130px;
-    }
-
-    /* Submit button */
-    .submit-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      padding: 0 22px;
-      height: 46px;
-      border-radius: var(--radius-sm);
-      background: var(--accent);
-      color: #fff;
-      font-family: 'Outfit', sans-serif;
-      font-size: .9rem;
-      font-weight: 700;
-      letter-spacing: .2px;
-      border: none;
-      cursor: pointer;
-      box-shadow: var(--shadow-btn);
-      transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
-      white-space: nowrap;
-      flex-shrink: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .submit-btn svg { width: 17px; height: 17px; fill: #fff; flex-shrink: 0; }
-    .submit-btn:hover    { background: var(--accent-hover); box-shadow: 0 6px 22px rgba(252,120,0,.42); }
-    .submit-btn:active   { transform: scale(.96); box-shadow: 0 2px 8px rgba(252,120,0,.28); }
-    .submit-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-    .submit-btn.loading  { pointer-events: none; opacity: .75; }
-
-    /* ── SHAKE ANIMATION ── */
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      20%       { transform: translateX(-5px); }
-      40%       { transform: translateX(5px); }
-      60%       { transform: translateX(-4px); }
-      80%       { transform: translateX(4px); }
-    }
-
-    .shake { animation: shake .35s ease; }
-
-    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-    /* ── DESKTOP (≥560px) ── */
-    @media (min-width: 560px) {
-      .main-wrap { padding: 32px 24px 0; }
-      .form-title { font-size: 1.9rem; }
-      .form-section { padding: 24px 24px 28px; margin-bottom: 18px; }
-      .submit-bar { padding: 12px 24px calc(12px + env(safe-area-inset-bottom)); }
-      .preview-name, .preview-sub { max-width: 200px; }
-    }
-
-    /* ── MOBILE: single column ── */
-    @media (max-width: 399px) {
-      .fields-grid { grid-template-columns: 1fr; }
-      .field-pair  { grid-template-columns: 1fr; }
-      .submit-btn  { padding: 0 16px; font-size: .84rem; }
-    }
-
+    :focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
   </style>
-
 </head>
 <body>
 
-  <!-- PAGE HEADER -->
-  <header class="page-header">
-    <div class="header-inner">
-      <div class="header-logo">
-        <svg class="logo-icon" viewBox="0 0 32 32" aria-hidden="true">
-          <rect x="0" y="0" width="32" height="32" rx="6" fill="#fc7800"/>
-          <rect x="4" y="6" width="24" height="20" rx="3" fill="#0f0f0f" opacity=".85"/>
-          <circle cx="11" cy="14" r="4" fill="#fc7800" opacity=".95"/>
-          <rect x="17" y="11" width="9" height="2" rx="1" fill="#fff" opacity=".8"/>
-          <rect x="17" y="15" width="6" height="2" rx="1" fill="#fff" opacity=".55"/>
-          <rect x="5" y="21" width="22" height="2" rx="1" fill="#fc7800" opacity=".4"/>
-        </svg>
-        <span class="logo-text">CardCraft</span>
+<!-- NAVBAR -->
+<header class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="nav-logo">
+      <svg class="nav-logo-icon" viewBox="0 0 32 32">
+        <rect width="32" height="32" rx="6" fill="#fc7800"/>
+        <rect x="4" y="6" width="24" height="20" rx="3" fill="#0f0f0f" opacity=".85"/>
+        <circle cx="11" cy="14" r="4" fill="#fc7800" opacity=".95"/>
+        <rect x="17" y="11" width="9" height="2" rx="1" fill="#fff" opacity=".8"/>
+        <rect x="17" y="15" width="6" height="2" rx="1" fill="#fff" opacity=".55"/>
+        <rect x="5" y="21" width="22" height="2" rx="1" fill="#fc7800" opacity=".4"/>
+      </svg>
+      <span class="nav-logo-text">CardCraft</span>
+    </a>
+    <div class="nav-right">
+      <span class="nav-badge">{% if edit_card %}Editing Card{% else %}Card Editor{% endif %}</span>
+      <!-- Profile trigger -->
+      <div class="profile-trigger" id="profileTrigger" onclick="togglePopup()">
+        {% if current_user.profile_pic %}
+        <img src="{{ current_user.profile_pic }}" alt="{{ current_user.name }}" onerror="this.style.display='none';this.parentElement.textContent='{{ current_user.name[0]|upper }}';" />
+        {% else %}
+        {{ current_user.name[0]|upper }}
+        {% endif %}
       </div>
-      <span class="header-step">Step 1 of 1</span>
-    </div>
-  </header>
-
-  <!-- MAIN WRAPPER -->
-  <main class="main-wrap">
-    <div class="form-container">
-
-      <!-- HERO -->
-      <div class="form-hero">
-        <h1 class="form-title">Build your digital card</h1>
-        <p class="form-subtitle">Fill in the details below. Only your name is required — everything else is optional.</p>
-      </div>
-
-      <!-- FORM -->
-      <form id="card-form" method="POST" action="{{ url_for('save_card') }}" enctype="multipart/form-data">
-
-        <!-- ── SECTION 1: BASIC INFO ── -->
-        <section class="form-section" aria-labelledby="sec-basic">
-          <div class="section-header">
-            <div class="section-badge">01</div>
-            <div>
-              <h2 class="section-title" id="sec-basic">Basic Information</h2>
-              <p class="section-desc">How you want to be introduced</p>
-            </div>
+      <!-- Profile popup -->
+      <div class="profile-popup" id="profilePopup">
+        <div class="popup-header">
+          <div class="popup-avatar">
+            {% if current_user.profile_pic %}
+            <img src="{{ current_user.profile_pic }}" alt="" onerror="this.style.display='none';this.parentElement.textContent='{{ current_user.name[0]|upper }}';" />
+            {% else %}
+            {{ current_user.name[0]|upper }}
+            {% endif %}
           </div>
-
-          <div class="fields-grid">
-            <div class="field-wrap field-full">
-              <label class="field-label" for="name">
-                Full Name
-                <span class="required-dot" aria-label="required">*</span>
-              </label>
-              <input
-                class="field-input"
-                type="text"
-                id="name"
-                name="name"
-                placeholder="e.g. Alex Morgan"
-                autocomplete="name"
-                required
-                aria-required="true"
-              />
-              <span class="field-error" id="name-error" role="alert" aria-live="polite"></span>
-            </div>
-
-            <div class="field-wrap field-full">
-              <label class="field-label" for="profile_pic">Profile Picture</label>
-              <input
-                class="field-input"
-                type="file"
-                id="profile_pic"
-                name="profile_pic"
-                accept="image/*"
-                style="padding:10px 13px;height:auto;cursor:pointer;"
-              />
-              <p class="field-hint-block">Upload a photo for your card (JPG, PNG, GIF, WebP).</p>
-            </div>
-
-            <div class="field-wrap">
-              <label class="field-label" for="designation">Designation / Title(s)</label>
-              <textarea
-                class="field-input field-textarea"
-                id="designation"
-                name="designation"
-                placeholder="e.g. Product Designer&#10;UX Lead&#10;Co-Founder"
-                rows="3"
-                style="min-height:72px"
-              ></textarea>
-              <p class="field-hint-block">Enter one designation per line for multiple titles.</p>
-            </div>
-
-            <div class="field-wrap">
-              <label class="field-label" for="company">Company / Organisation</label>
-              <input
-                class="field-input"
-                type="text"
-                id="company"
-                name="company"
-                placeholder="e.g. Pixel & Co."
-                autocomplete="organization"
-              />
-            </div>
-
-            <div class="field-wrap field-full">
-              <label class="field-label" for="bio">
-                Bio
-                <span class="field-hint">Short description shown on card</span>
-              </label>
-              <textarea
-                class="field-input field-textarea"
-                id="bio"
-                name="bio"
-                placeholder="e.g. Designer crafting digital experiences that delight users and drive results."
-                rows="3"
-                maxlength="200"
-              ></textarea>
-              <span class="char-count" id="bioCount">0 / 200</span>
-            </div>
-          </div>
-        </section>
-
-        <!-- ── SECTION 2: CONTACT ── -->
-        <section class="form-section" aria-labelledby="sec-contact">
-          <div class="section-header">
-            <div class="section-badge">02</div>
-            <div>
-              <h2 class="section-title" id="sec-contact">Contact Details</h2>
-              <p class="section-desc">How people can reach you</p>
-            </div>
-          </div>
-
-          <div class="fields-grid">
-            <div class="field-wrap">
-              <label class="field-label" for="phone">Phone Number</label>
-              <div class="input-icon-wrap">
-                <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.4 21 3 13.6 3 4.5c0-.6.4-1 1-1H8c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
-                <input
-                  class="field-input has-icon"
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  placeholder="+91 98765 43210"
-                  autocomplete="tel"
-                />
-              </div>
-            </div>
-
-            <div class="field-wrap">
-              <label class="field-label" for="email">Email Address</label>
-              <div class="input-icon-wrap">
-                <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-                <input
-                  class="field-input has-icon"
-                  type="email"
-                  id="email"
-                  name="email"
-                  placeholder="you@example.com"
-                  autocomplete="email"
-                />
-              </div>
-            </div>
-
-            <div class="field-wrap field-full">
-              <label class="field-label" for="address">Address</label>
-              <div class="input-icon-wrap">
-                <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                <input
-                  class="field-input has-icon"
-                  type="text"
-                  id="address"
-                  name="address"
-                  placeholder="e.g. Chennai, Tamil Nadu, India"
-                  autocomplete="street-address"
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ── SECTION 3: WEBSITE & LINKS ── -->
-        <section class="form-section" aria-labelledby="sec-links">
-          <div class="section-header">
-            <div class="section-badge">03</div>
-            <div>
-              <h2 class="section-title" id="sec-links">Website &amp; Links</h2>
-              <p class="section-desc">Your web presence and resources</p>
-            </div>
-          </div>
-
-          <div class="fields-grid">
-            <div class="field-wrap field-full">
-              <label class="field-label" for="website">Website URL</label>
-              <div class="input-icon-wrap">
-                <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-                <input
-                  class="field-input has-icon"
-                  type="url"
-                  id="website"
-                  name="website"
-                  placeholder="https://yourwebsite.com"
-                />
-              </div>
-            </div>
-
-            <div class="field-wrap field-full">
-              <div class="custom-link-group">
-                <div class="custom-link-tag">Custom Link</div>
-                <div class="field-pair">
-                  <div class="field-pair-item">
-                    <label class="field-label" for="customLabel">Link Label</label>
-                    <input
-                      class="field-input"
-                      type="text"
-                      id="customLabel"
-                      name="customLabel"
-                      placeholder="e.g. Download Brochure"
-                    />
-                  </div>
-                  <div class="field-pair-item">
-                    <label class="field-label" for="customURL">Link URL</label>
-                    <input
-                      class="field-input"
-                      type="url"
-                      id="customURL"
-                      name="customURL"
-                      placeholder="https://example.com/file.pdf"
-                    />
-                  </div>
-                </div>
-                <p class="field-hint-block">Both label and URL are needed to add a custom link to your card.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ── SECTION 4: SOCIAL ── -->
-        <section class="form-section" aria-labelledby="sec-social">
-          <div class="section-header">
-            <div class="section-badge">04</div>
-            <div>
-              <h2 class="section-title" id="sec-social">Social Profiles</h2>
-              <p class="section-desc">Add links to your social accounts</p>
-            </div>
-          </div>
-
-          <div class="fields-grid">
-
-            <div class="field-wrap">
-              <label class="field-label" for="whatsapp">
-                <span class="social-label-icon social-wa" aria-hidden="true">
-                  <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                </span>
-                WhatsApp
-              </label>
-              <input class="field-input" type="tel" id="whatsapp" name="whatsapp" placeholder="+91 98765 43210" autocomplete="tel" />
-            </div>
-
-            <div class="field-wrap">
-              <label class="field-label" for="instagram">
-                <span class="social-label-icon social-ig" aria-hidden="true">
-                  <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                </span>
-                Instagram
-              </label>
-              <input class="field-input" type="url" id="instagram" name="instagram" placeholder="https://instagram.com/yourhandle" />
-            </div>
-
-            <div class="field-wrap">
-              <label class="field-label" for="linkedin">
-                <span class="social-label-icon social-li" aria-hidden="true">
-                  <svg viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                </span>
-                LinkedIn
-              </label>
-              <input class="field-input" type="url" id="linkedin" name="linkedin" placeholder="https://linkedin.com/in/yourprofile" />
-            </div>
-
-            <div class="field-wrap">
-              <label class="field-label" for="twitter">
-                <span class="social-label-icon social-tw" aria-hidden="true">
-                  <svg viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
-                </span>
-                Twitter / X
-              </label>
-              <input class="field-input" type="url" id="twitter" name="twitter" placeholder="https://twitter.com/yourhandle" />
-            </div>
-
-            <div class="field-wrap">
-              <label class="field-label" for="facebook">
-                <span class="social-label-icon social-fb" aria-hidden="true">
-                  <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                </span>
-                Facebook
-              </label>
-              <input class="field-input" type="url" id="facebook" name="facebook" placeholder="https://facebook.com/yourpage" />
-            </div>
-
-            <div class="field-wrap">
-              <label class="field-label" for="youtube">
-                <span class="social-label-icon social-yt" aria-hidden="true">
-                  <svg viewBox="0 0 24 24"><path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
-                </span>
-                YouTube
-              </label>
-              <input class="field-input" type="url" id="youtube" name="youtube" placeholder="https://youtube.com/@yourchannel" />
-            </div>
-
-          </div>
-        </section>
-
-        <!-- ── SECTION 5: UPI ── -->
-        <section class="form-section" aria-labelledby="sec-upi">
-          <div class="section-header">
-            <div class="section-badge">05</div>
-            <div>
-              <h2 class="section-title" id="sec-upi">UPI Payment</h2>
-              <p class="section-desc">Let people pay you directly from your card</p>
-            </div>
-          </div>
-
-          <div class="fields-grid">
-            <div class="field-wrap field-full">
-              <label class="field-label" for="upi">UPI ID</label>
-              <div class="input-icon-wrap">
-                <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-                <input
-                  class="field-input has-icon"
-                  type="text"
-                  id="upi"
-                  name="upi"
-                  placeholder="yourname@upi"
-                  autocomplete="off"
-                  spellcheck="false"
-                />
-              </div>
-              <p class="field-hint-block">e.g. <code>alexmorgan@okicici</code> or <code>9876543210@paytm</code></p>
-            </div>
-          </div>
-        </section>
-
-        <!-- SPACER so content isn't hidden under fixed button on mobile -->
-        <div class="submit-spacer" aria-hidden="true"></div>
-
-        <!-- HE5 FOOTER -->
-        <div style="text-align:center;padding:4px 0 8px;">
-          <p style="font-size:.7rem;color:#9ca3af;letter-spacing:.3px;">Powered by</p>
-          <div style="display:inline-flex;align-items:center;gap:6px;margin-top:4px;">
-            <svg width="18" height="18" viewBox="0 0 32 32" aria-hidden="true">
-              <rect width="32" height="32" rx="6" fill="#fc7800"/>
-              <text x="4" y="24" font-family="sans-serif" font-weight="900" font-size="19" fill="#fff">H5</text>
-            </svg>
-            <span style="font-size:.82rem;font-weight:700;color:#4b5563;letter-spacing:-.2px;">He5 Solutions</span>
+          <div>
+            <div class="popup-name">{{ current_user.name }}</div>
+            <div class="popup-email">{{ current_user.email }}</div>
           </div>
         </div>
 
-      </form><!-- /form -->
-    </div><!-- /form-container -->
-  </main>
-
-  <!-- FIXED SUBMIT BAR -->
-  <div class="submit-bar" role="region" aria-label="Form submission">
-    <div class="submit-bar-inner">
-      <div class="submit-preview" id="submitPreview">
-        <div class="preview-avatar" id="previewAvatar" aria-hidden="true">?</div>
-        <div class="preview-meta">
-          <span class="preview-name" id="previewName">Your name</span>
-          <span class="preview-sub" id="previewSub">Fill in your details above</span>
+        {% if user_cards %}
+        <div class="popup-section-label">My Cards</div>
+        <div class="popup-cards-list">
+          {% for c in user_cards %}
+          <div class="popup-card-item" style="cursor:default;">
+            <div class="popup-card-thumb">
+              {% if c.profile_pic %}
+              <img src="{{ url_for('static', filename='uploads/' + c.profile_pic) }}" alt="" />
+              {% else %}
+              <span class="popup-card-thumb-initials">{{ (c.name or '?')[:2]|upper }}</span>
+              {% endif %}
+            </div>
+            <div class="popup-card-info" style="cursor:pointer;" onclick="window.location='{{ url_for('view_card', card_id=c.id) }}'">
+              <div class="popup-card-name">{{ c.card_label or c.name or 'Untitled Card' }}</div>
+              <div class="popup-card-sub">{{ (c.roles[0].designation if c.roles else c.designation) or 'No role set' }}</div>
+            </div>
+            <a class="popup-card-edit" href="{{ url_for('edit_card', card_id=c.id) }}">Edit</a>
+            <button class="popup-card-delete" onclick="confirmDeleteCard({{ c.id }}, '{{ (c.card_label or c.name or 'this card')|replace("'","\\'")|e }}')" title="Delete card">✕</button>
+          </div>
+          <!-- Card label rename row -->
+          <div class="popup-card-label-wrap">
+            <div style="display:flex;align-items:center;gap:4px;">
+              <input class="popup-card-label-input" type="text" maxlength="80"
+                placeholder="Card label (optional)"
+                value="{{ c.card_label or '' }}"
+                id="card-label-{{ c.id }}"
+                onkeydown="if(event.key==='Enter'){saveCardLabel({{ c.id }});}" />
+              <button class="popup-card-label-save" onclick="saveCardLabel({{ c.id }})">Save</button>
+            </div>
+          </div>
+          {% endfor %}
         </div>
+        {% endif %}
+
+        <a class="popup-add-btn" href="{{ url_for('form') }}">
+          <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          Create New Card
+        </a>
+
+        <hr class="popup-divider" />
+        <a class="popup-logout" href="{{ url_for('logout') }}">
+          <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+          Sign out
+        </a>
       </div>
-      <button type="submit" form="card-form" class="submit-btn" aria-label="Generate and view your business card"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>Generate Card</button>
     </div>
   </div>
+</header>
+
+<div class="editor">
+
+  <!-- ════════ LEFT: FORM ════════ -->
+  <div class="form-panel">
+    <div class="form-hero">
+      <h1 class="form-title">{% if edit_card %}Edit your card{% else %}Build your card{% endif %}</h1>
+      <p class="form-subtitle">Fill in your details — the preview updates live on the right.</p>
+    </div>
+
+    <form id="card-form" method="POST" action="{{ url_for('save_card') }}" enctype="multipart/form-data">
+
+      <!-- Hidden fields for shape/position/align and card id when editing -->
+      <input type="hidden" id="pic_shape" name="pic_shape" value="{{ edit_card.pic_shape if edit_card else 'round' }}" />
+      <input type="hidden" id="pic_position" name="pic_position" value="{{ edit_card.pic_position if edit_card else 'center' }}" />
+      <input type="hidden" id="identity_align" name="identity_align" value="{{ edit_card.identity_align if edit_card else 'center' }}" />
+      <input type="hidden" id="theme" name="theme" value="{{ edit_card.theme if edit_card else 'midnight' }}" />
+      <input type="hidden" id="card_label" name="card_label" value="{{ edit_card.card_label if edit_card and edit_card.card_label else '' }}" />
+      {% if edit_card %}
+      <input type="hidden" name="card_id" value="{{ edit_card.id }}" />
+      {% endif %}
+
+      <!-- §1 Basic Info -->
+      <section class="form-section">
+        <div class="sec-head">
+          <div class="sec-badge">01</div>
+          <div><h2 class="sec-title">Photos &amp; Basic Information</h2><p class="sec-desc">Your name, photos and roles</p></div>
+        </div>
+
+        <!-- Full Name — first field in section -->
+        <div class="fields-grid" style="margin-bottom:14px;">
+          <div class="field-wrap field-full">
+            <label class="field-label" for="name">Full Name</label>
+            <input class="field-input" type="text" id="name" name="name"
+              placeholder="e.g. Alex Morgan" autocomplete="name"
+              value="{{ edit_card.name if edit_card else '' }}" />
+          </div>
+        </div>
+
+        <!-- Images Row -->
+        <div class="fields-grid">
+          <div class="field-wrap field-full">
+            <label class="field-label">Profile &amp; Banner Photos</label>
+            <div class="images-row">
+              <!-- Profile Pic -->
+              <div class="img-upload-box">
+                <span style="font-size:.73rem;color:var(--text-3);font-weight:500;">Profile Picture</span>
+                <div class="img-upload-area" id="profileUploadArea">
+                  <input type="file" id="profile_pic" name="profile_pic" accept="image/*" />
+                  <div class="img-upload-inner" id="profileUploadInner">
+                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    <span id="profileFileLabel">{% if edit_card and edit_card.profile_pic %}Change photo…{% else %}Choose photo…{% endif %}</span>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+                  <div class="profile-preview-wrap" id="profilePreviewWrap" style="{% if edit_card and edit_card.profile_pic %}display:flex;{% endif %}">
+                    <img class="profile-preview-img" id="profilePreviewImg" alt="Profile preview"
+                      src="{% if edit_card and edit_card.profile_pic %}{{ url_for('static', filename='uploads/' + edit_card.profile_pic) }}{% endif %}" />
+                  </div>
+                  <span id="profilePreviewName" style="font-size:.72rem;color:var(--text-3);"></span>
+                </div>
+              </div>
+
+              <!-- Banner -->
+              <div class="img-upload-box">
+                <span style="font-size:.73rem;color:var(--text-3);font-weight:500;">Banner Image</span>
+                <div class="img-upload-area" id="bannerUploadArea">
+                  <input type="file" id="banner_pic" name="banner_pic" accept="image/*" />
+                  <div class="img-upload-inner" id="bannerUploadInner">
+                    <svg viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zm-5-7l-3 3.72L10 13l-4 5h12l-3-2z"/></svg>
+                    <span id="bannerFileLabel">{% if edit_card and edit_card.banner_pic %}Change banner…{% else %}Choose banner…{% endif %}</span>
+                  </div>
+                </div>
+                <div id="bannerPreviewContainer" style="{% if edit_card and edit_card.banner_pic %}display:block;{% else %}display:none;{% endif %}margin-top:4px;">
+                  <div class="banner-preview-wrap" style="display:block;">
+                    <img class="banner-preview-img" id="bannerPreviewImg" alt="Banner preview"
+                      src="{% if edit_card and edit_card.banner_pic %}{{ url_for('static', filename='uploads/' + edit_card.banner_pic) }}{% endif %}" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- end images row -->
+        </div>
+
+        <!-- Roles (Designation + Company + Bio) — repeatable -->
+        <div style="margin-top:14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <label class="field-label" style="margin-bottom:0;">Roles &amp; Designations</label>
+            <span style="font-size:.72rem;color:var(--text-3);">Up to 8 roles</span>
+          </div>
+          <div id="rolesContainer"></div>
+          <button type="button" class="add-role-btn" id="addRoleBtn" onclick="addRole()">
+            <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            Add Another Role
+          </button>
+          <div class="roles-limit-msg" id="rolesLimitMsg">You can add a maximum of 8 roles.</div>
+        </div>
+
+      </section>
+
+      <!-- §1b Customize Card -->
+      <section class="form-section">
+        <div class="sec-head">
+          <div class="sec-badge" style="background:linear-gradient(135deg,var(--accent),var(--accent-deep));color:#fff;">🎨</div>
+          <div><h2 class="sec-title">Customize Card</h2><p class="sec-desc">Choose a theme and layout for your card</p></div>
+        </div>
+
+        <!-- Theme Picker -->
+        <div style="margin-bottom:18px;">
+          <label class="field-label" style="margin-bottom:10px;display:block;">Card Theme</label>
+          <div class="theme-grid">
+
+            <div class="theme-swatch {% if not edit_card or (edit_card.theme or 'midnight') == 'midnight' %}active{% endif %}" id="theme-midnight" onclick="setTheme('midnight')">
+              <div class="theme-swatch-circle" style="--ts-a:#0f0f0f;--ts-b:#1e1000;--ts-c:#fc7800;">
+                <div class="theme-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+              </div>
+              <span class="theme-swatch-label">Midnight</span>
+            </div>
+
+            <div class="theme-swatch {% if edit_card and edit_card.theme == 'ocean' %}active{% endif %}" id="theme-ocean" onclick="setTheme('ocean')">
+              <div class="theme-swatch-circle" style="--ts-a:#0a1628;--ts-b:#0d3060;--ts-c:#0ea5e9;">
+                <div class="theme-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+              </div>
+              <span class="theme-swatch-label">Ocean</span>
+            </div>
+
+            <div class="theme-swatch {% if edit_card and edit_card.theme == 'forest' %}active{% endif %}" id="theme-forest" onclick="setTheme('forest')">
+              <div class="theme-swatch-circle" style="--ts-a:#0a1a0f;--ts-b:#14391e;--ts-c:#22c55e;">
+                <div class="theme-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+              </div>
+              <span class="theme-swatch-label">Forest</span>
+            </div>
+
+            <div class="theme-swatch {% if edit_card and edit_card.theme == 'rose' %}active{% endif %}" id="theme-rose" onclick="setTheme('rose')">
+              <div class="theme-swatch-circle" style="--ts-a:#1a0a10;--ts-b:#3d1020;--ts-c:#f43f5e;">
+                <div class="theme-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+              </div>
+              <span class="theme-swatch-label">Rose</span>
+            </div>
+
+            <div class="theme-swatch {% if edit_card and edit_card.theme == 'violet' %}active{% endif %}" id="theme-violet" onclick="setTheme('violet')">
+              <div class="theme-swatch-circle" style="--ts-a:#0f0a1e;--ts-b:#1e0f45;--ts-c:#7c3aed;">
+                <div class="theme-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+              </div>
+              <span class="theme-swatch-label">Violet</span>
+            </div>
+
+            <div class="theme-swatch {% if edit_card and edit_card.theme == 'amber' %}active{% endif %}" id="theme-amber" onclick="setTheme('amber')">
+              <div class="theme-swatch-circle" style="--ts-a:#1a1000;--ts-b:#3d2500;--ts-c:#f59e0b;">
+                <div class="theme-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+              </div>
+              <span class="theme-swatch-label">Amber</span>
+            </div>
+
+            <div class="theme-swatch {% if edit_card and edit_card.theme == 'slate' %}active{% endif %}" id="theme-slate" onclick="setTheme('slate')">
+              <div class="theme-swatch-circle" style="--ts-a:#0f172a;--ts-b:#1e293b;--ts-c:#64748b;">
+                <div class="theme-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+              </div>
+              <span class="theme-swatch-label">Slate</span>
+            </div>
+
+            <div class="theme-swatch {% if edit_card and edit_card.theme == 'crimson' %}active{% endif %}" id="theme-crimson" onclick="setTheme('crimson')">
+              <div class="theme-swatch-circle" style="--ts-a:#1a0505;--ts-b:#3d0a0a;--ts-c:#dc2626;">
+                <div class="theme-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+              </div>
+              <span class="theme-swatch-label">Crimson</span>
+            </div>
+
+            <div class="theme-swatch {% if edit_card and edit_card.theme == 'teal' %}active{% endif %}" id="theme-teal" onclick="setTheme('teal')">
+              <div class="theme-swatch-circle" style="--ts-a:#031a18;--ts-b:#063a36;--ts-c:#14b8a6;">
+                <div class="theme-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+              </div>
+              <span class="theme-swatch-label">Teal</span>
+            </div>
+
+            <div class="theme-swatch {% if edit_card and edit_card.theme == 'gold' %}active{% endif %}" id="theme-gold" onclick="setTheme('gold')">
+              <div class="theme-swatch-circle" style="--ts-a:#12100a;--ts-b:#2e2508;--ts-c:#eab308;">
+                <div class="theme-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+              </div>
+              <span class="theme-swatch-label">Gold</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Shape & Position options (moved from §1) -->
+        <div style="margin-bottom:14px;">
+          <div class="options-row">
+            <!-- Shape -->
+            <div class="option-group">
+              <span class="option-group-label">Profile Shape</span>
+              <div class="option-btns">
+                <button type="button" class="shape-btn {% if not edit_card or edit_card.pic_shape == 'round' %}active{% endif %}" id="shapeRoundBtn" onclick="setShape('round')">
+                  <div class="shape-icon-round">
+                    <svg class="shape-tick {% if edit_card and edit_card.pic_shape == 'square' %}shape-tick-hidden{% endif %}" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                  </div>
+                  Round
+                </button>
+                <button type="button" class="shape-btn {% if edit_card and edit_card.pic_shape == 'square' %}active{% endif %}" id="shapeSquareBtn" onclick="setShape('square')">
+                  <div class="shape-icon-square">
+                    <svg class="shape-tick {% if not edit_card or edit_card.pic_shape != 'square' %}shape-tick-hidden{% endif %}" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                  </div>
+                  Square
+                </button>
+              </div>
+            </div>
+
+            <!-- Position -->
+            <div class="option-group">
+              <span class="option-group-label">Profile Position</span>
+              <div class="option-btns">
+                <button type="button" class="pos-btn {% if edit_card and edit_card.pic_position == 'left' %}active{% endif %}" id="posLeftBtn" onclick="setPosition('left')">
+                  <div class="pos-icon" style="justify-content:flex-start;">
+                    <div class="pos-dot"></div>
+                    <div class="pos-line"></div>
+                  </div>
+                  Left
+                </button>
+                <button type="button" class="pos-btn {% if not edit_card or edit_card.pic_position == 'center' %}active{% endif %}" id="posCenterBtn" onclick="setPosition('center')">
+                  <div class="pos-icon" style="justify-content:center;">
+                    <div class="pos-line"></div>
+                    <div class="pos-dot"></div>
+                    <div class="pos-line"></div>
+                  </div>
+                  Center
+                </button>
+                <button type="button" class="pos-btn {% if edit_card and edit_card.pic_position == 'right' %}active{% endif %}" id="posRightBtn" onclick="setPosition('right')">
+                  <div class="pos-icon" style="justify-content:flex-end;">
+                    <div class="pos-line"></div>
+                    <div class="pos-dot"></div>
+                  </div>
+                  Right
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Name & Info Alignment (moved from §1) -->
+        <div>
+          <label class="field-label" style="margin-bottom:7px;">Name &amp; Info Alignment</label>
+          <div class="align-row">
+            <button type="button" class="align-btn {% if edit_card and edit_card.identity_align == 'left' %}active{% endif %}" id="alignLeftBtn" onclick="setAlign('left')">
+              <svg viewBox="0 0 24 24"><path d="M15 15H3v2h12v-2zm0-8H3v2h12V7zM3 13h18v-2H3v2zm0 8h18v-2H3v2zM3 3v2h18V3H3z"/></svg>
+              Left
+            </button>
+            <button type="button" class="align-btn {% if not edit_card or edit_card.identity_align == 'center' %}active{% endif %}" id="alignCenterBtn" onclick="setAlign('center')">
+              <svg viewBox="0 0 24 24"><path d="M7 15v2h10v-2H7zm-4 6h18v-2H3v2zm0-8h18v-2H3v2zm4-6v2h10V7H7zM3 3v2h18V3H3z"/></svg>
+              Center
+            </button>
+            <button type="button" class="align-btn {% if edit_card and edit_card.identity_align == 'right' %}active{% endif %}" id="alignRightBtn" onclick="setAlign('right')">
+              <svg viewBox="0 0 24 24"><path d="M3 21h18v-2H3v2zm6-4h12v-2H9v2zm-6-4h18v-2H3v2zm6-4h12V7H9v2zM3 3v2h18V3H3z"/></svg>
+              Right
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- §2 Contact -->
+      <section class="form-section">
+        <div class="sec-head">
+          <div class="sec-badge">02</div>
+          <div><h2 class="sec-title">Contact Details</h2><p class="sec-desc">How people can reach you</p></div>
+        </div>
+        <div class="fields-grid">
+
+          <div class="field-wrap">
+            <label class="field-label" for="phone">Phone Number</label>
+            <div class="iw">
+              <svg class="ii" viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.4 21 3 13.6 3 4.5c0-.6.4-1 1-1H8c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
+              <input class="field-input ic" type="tel" id="phone" name="phone" placeholder="+91 98765 43210" autocomplete="tel" value="{{ edit_card.phone if edit_card and edit_card.phone else '' }}" />
+            </div>
+          </div>
+
+          <div class="field-wrap">
+            <label class="field-label" for="email">Email Address</label>
+            <div class="iw">
+              <svg class="ii" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+              <input class="field-input ic" type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" value="{{ edit_card.email if edit_card and edit_card.email else '' }}" />
+            </div>
+          </div>
+
+          <div class="field-wrap field-full">
+            <label class="field-label" for="address">Address</label>
+            <div class="iw">
+              <svg class="ii" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+              <input class="field-input ic" type="text" id="address" name="address" placeholder="e.g. Chennai, Tamil Nadu, India" autocomplete="street-address" value="{{ edit_card.address if edit_card and edit_card.address else '' }}" />
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- §3 Website & Links -->
+      <section class="form-section">
+        <div class="sec-head">
+          <div class="sec-badge">03</div>
+          <div><h2 class="sec-title">Website &amp; Links</h2><p class="sec-desc">Your web presence and resources</p></div>
+        </div>
+        <div class="fields-grid">
+
+          <div class="field-wrap field-full">
+            <label class="field-label" for="website">Website URL</label>
+            <div class="iw">
+              <svg class="ii" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+              <input class="field-input ic" type="url" id="website" name="website" placeholder="https://yourwebsite.com" value="{{ edit_card.website if edit_card and edit_card.website else '' }}" />
+            </div>
+          </div>
+
+          <div class="field-wrap field-full">
+            <div class="cl-group">
+              <div class="cl-tag">Custom Link</div>
+              <div class="fp">
+                <div class="fp-item">
+                  <label class="field-label" for="customLabel">Link Label</label>
+                  <input class="field-input" type="text" id="customLabel" name="customLabel" placeholder="e.g. Download Brochure" />
+                </div>
+                <div class="fp-item">
+                  <label class="field-label" for="customURL">Link URL</label>
+                  <input class="field-input" type="url" id="customURL" name="customURL" placeholder="https://example.com/file.pdf" />
+                </div>
+              </div>
+              <p class="hint">Both label and URL are needed to add a custom link.</p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- §4 Social -->
+      <section class="form-section">
+        <div class="sec-head">
+          <div class="sec-badge">04</div>
+          <div><h2 class="sec-title">Social Profiles</h2><p class="sec-desc">Add links to your social accounts</p></div>
+        </div>
+        <div class="fields-grid">
+
+          <div class="field-wrap">
+            <label class="field-label" for="whatsapp">
+              <span class="sli wa-bg"><svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></span>
+              WhatsApp
+            </label>
+            <input class="field-input" type="tel" id="whatsapp" name="whatsapp" placeholder="+91 98765 43210" autocomplete="tel" value="{{ edit_card.whatsapp if edit_card and edit_card.whatsapp else '' }}" />
+          </div>
+
+          <div class="field-wrap">
+            <label class="field-label" for="instagram">
+              <span class="sli ig-bg"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></span>
+              Instagram
+            </label>
+            <input class="field-input" type="url" id="instagram" name="instagram" placeholder="https://instagram.com/handle" value="{{ edit_card.instagram if edit_card and edit_card.instagram else '' }}" />
+          </div>
+
+          <div class="field-wrap">
+            <label class="field-label" for="linkedin">
+              <span class="sli li-bg"><svg viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg></span>
+              LinkedIn
+            </label>
+            <input class="field-input" type="url" id="linkedin" name="linkedin" placeholder="https://linkedin.com/in/profile" value="{{ edit_card.linkedin if edit_card and edit_card.linkedin else '' }}" />
+          </div>
+
+          <div class="field-wrap">
+            <label class="field-label" for="twitter">
+              <span class="sli tw-bg"><svg viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg></span>
+              Twitter / X
+            </label>
+            <input class="field-input" type="url" id="twitter" name="twitter" placeholder="https://twitter.com/handle" value="{{ edit_card.twitter if edit_card and edit_card.twitter else '' }}" />
+          </div>
+
+          <div class="field-wrap">
+            <label class="field-label" for="facebook">
+              <span class="sli fb-bg"><svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></span>
+              Facebook
+            </label>
+            <input class="field-input" type="url" id="facebook" name="facebook" placeholder="https://facebook.com/page" value="{{ edit_card.facebook if edit_card and edit_card.facebook else '' }}" />
+          </div>
+
+          <div class="field-wrap">
+            <label class="field-label" for="youtube">
+              <span class="sli yt-bg"><svg viewBox="0 0 24 24"><path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg></span>
+              YouTube
+            </label>
+            <input class="field-input" type="url" id="youtube" name="youtube" placeholder="https://youtube.com/@channel" value="{{ edit_card.youtube if edit_card and edit_card.youtube else '' }}" />
+          </div>
+
+        </div>
+      </section>
+
+      <!-- §5 UPI -->
+      <section class="form-section">
+        <div class="sec-head">
+          <div class="sec-badge">05</div>
+          <div><h2 class="sec-title">UPI Payment</h2><p class="sec-desc">Let people pay you directly from your card</p></div>
+        </div>
+        <div class="fields-grid">
+          <div class="field-wrap field-full">
+            <label class="field-label" for="upi">UPI ID</label>
+            <div class="iw">
+              <svg class="ii" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+              <input class="field-input ic" type="text" id="upi" name="upi" placeholder="yourname@upi" autocomplete="off" spellcheck="false" value="{{ edit_card.upi if edit_card and edit_card.upi else '' }}" />
+            </div>
+            <p class="hint">e.g. <code>alexmorgan@okicici</code> or <code>9876543210@paytm</code></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <div style="text-align:center;padding:4px 0 8px;">
+        <p style="font-size:.66rem;color:#9ca3af;letter-spacing:.3px;">Powered by</p>
+        <div style="display:inline-flex;align-items:center;gap:5px;margin-top:4px;">
+          <svg width="15" height="15" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#fc7800"/><text x="4" y="24" font-family="sans-serif" font-weight="900" font-size="19" fill="#fff">H5</text></svg>
+          <span style="font-size:.76rem;font-weight:700;color:#4b5563;">He5 Solutions</span>
+        </div>
+      </div>
+
+    </form>
+  </div><!-- /form-panel -->
+
+  <!-- ════════ RIGHT: PREVIEW ════════ -->
+  <aside class="preview-panel" aria-label="Live card preview">
+    <div class="preview-head">
+      <div class="preview-label">
+        <div class="live-dot"></div>
+        Live Preview
+      </div>
+    </div>
+    <div class="preview-scroll">
+      <div class="cpw" id="cardWidget">
+
+        <!-- Hero / Banner -->
+        <div class="cpw-hero" id="pHero">
+          <img id="pBannerImg" class="cpw-hero-img" alt="" {% if edit_card and edit_card.banner_pic %}src="{{ url_for('static', filename='uploads/' + edit_card.banner_pic) }}" style="display:block;"{% endif %} />
+        </div>
+
+        <!-- Avatar -->
+        <div class="cpw-av-wrap pos-{{ edit_card.pic_position if edit_card else 'center' }}" id="pAvWrap">
+          <div class="cpw-av {% if edit_card and edit_card.pic_shape == 'square' %}sq{% endif %}" id="pAvatar">
+            {% if edit_card and edit_card.profile_pic %}
+            <img id="pAvatarImg" alt="" src="{{ url_for('static', filename='uploads/' + edit_card.profile_pic) }}" style="display:block;" />
+            <span id="pInitials" style="display:none;">{{ (edit_card.name or '?')[:2]|upper if edit_card else '?' }}</span>
+            {% else %}
+            <img id="pAvatarImg" alt="" />
+            <span id="pInitials">{{ (edit_card.name or '?')[0]|upper if edit_card else '?' }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Identity -->
+        <div class="cpw-identity align-{{ edit_card.identity_align if edit_card else 'center' }}" id="pIdentity">
+          <div class="cpw-name {% if not edit_card or not edit_card.name %}empty{% endif %}" id="pName">{{ edit_card.name if edit_card and edit_card.name else 'Your name will appear here' }}</div>
+          <div class="cpw-designations" id="pDesig"></div>
+          <div id="pUpiRow" style="display:none;"></div>
+        </div>
+
+        <!-- Actions -->
+        <div class="cpw-actions">
+          <div class="cpw-action" id="pCallBtn" style="display:none">
+            <div class="cpw-circle"><svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.4 21 3 13.6 3 4.5c0-.6.4-1 1-1H8c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg></div>
+            <span>Call</span>
+          </div>
+          <div class="cpw-action" id="pWaBtn" style="display:none">
+            <div class="cpw-circle" style="background:#25d366;box-shadow:0 3px 12px rgba(37,211,102,.35)"><svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></div>
+            <span>WhatsApp</span>
+          </div>
+          <div class="cpw-action" id="pEmailBtn" style="display:none">
+            <div class="cpw-circle" style="background:#ea4335;box-shadow:0 3px 12px rgba(234,67,53,.3)"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div>
+            <span>Email</span>
+          </div>
+          <div class="cpw-action">
+            <div class="cpw-circle" style="background:#0f0f0f;box-shadow:0 3px 12px rgba(0,0,0,.25)"><svg viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg></div>
+            <span>Save</span>
+          </div>
+        </div>
+
+        <!-- Contact -->
+        <div class="cpw-section" id="pContactSec" style="display:none">
+          <div class="cpw-slabel">Contact</div>
+          <div class="cpw-info-list" id="pContactList"></div>
+        </div>
+
+        <!-- Social -->
+        <div class="cpw-section" id="pSocialSec" style="display:none">
+          <div class="cpw-slabel">Social</div>
+          <div class="cpw-social-grid" id="pSocialGrid"></div>
+        </div>
+
+        <!-- Empty nudge -->
+        <div class="cpw-empty" id="pEmpty" {% if edit_card %}style="display:none"{% endif %}>
+          <div class="cpw-empty-ico">✏️</div>
+          <div class="cpw-empty-txt">Start filling in your details<br>to see the live preview update.</div>
+        </div>
+
+      </div><!-- /cpw -->
+    </div><!-- /preview-scroll -->
+  </aside>
+
+</div><!-- /editor -->
+
+<!-- FIXED SUBMIT BAR -->
+<div class="submit-bar">
+  <div class="submit-bar-inner">
+    <div class="sub-info">
+      <div class="sub-avatar" id="barAvatar">
+        {% if edit_card and edit_card.profile_pic %}
+        <img id="barAvatarImg" alt="" src="{{ url_for('static', filename='uploads/' + edit_card.profile_pic) }}" style="display:block;" />
+        <span id="barInitials" style="display:none;">{{ (edit_card.name or '?')[0]|upper }}</span>
+        {% else %}
+        <img id="barAvatarImg" alt="" />
+        <span id="barInitials">{{ (edit_card.name or current_user.name or '?')[0]|upper }}</span>
+        {% endif %}
+      </div>
+      <div class="sub-meta">
+        <div class="sub-name" id="barName">{{ edit_card.name if edit_card and edit_card.name else current_user.name or 'Your name' }}</div>
+        <div class="sub-sub" id="barSub">{% if edit_card and edit_card.roles %}{{ edit_card.roles[0].designation or edit_card.roles[0].company or 'Fill in your details above' }}{% else %}Fill in your details above{% endif %}</div>
+      </div>
+    </div>
+    <button type="submit" form="card-form" class="submit-btn">
+      <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+      {% if edit_card %}Save Changes{% else %}Generate Card{% endif %}
+    </button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   PROFILE POPUP
+═══════════════════════════════════════ */
+function togglePopup() {
+  document.getElementById('profilePopup').classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+  const popup = document.getElementById('profilePopup');
+  const trigger = document.getElementById('profileTrigger');
+  if (popup.classList.contains('open') && !popup.contains(e.target) && !trigger.contains(e.target)) {
+    popup.classList.remove('open');
+  }
+});
+
+/* ═══════════════════════════════════════
+   CARD LABEL (RENAME)
+═══════════════════════════════════════ */
+async function saveCardLabel(cardId) {
+  const input = document.getElementById(`card-label-${cardId}`);
+  if (!input) return;
+  const label = input.value.trim();
+  try {
+    const fd = new FormData();
+    fd.append('card_label', label);
+    const res = await fetch(`/card/${cardId}/update_label`, { method:'POST', body: fd });
+    const data = await res.json();
+    if (data.success) {
+      // Update display in popup
+      const nameEl = input.closest('.popup-card-label-wrap')?.previousElementSibling?.querySelector('.popup-card-name');
+      if (nameEl) nameEl.textContent = label || nameEl.textContent;
+      input.blur();
+    }
+  } catch(e) { /* silently ignore */ }
+}
+
+/* ═══════════════════════════════════════
+   DELETE CARD
+═══════════════════════════════════════ */
+function confirmDeleteCard(cardId, cardName) {
+  // Build overlay
+  const overlay = document.createElement('div');
+  overlay.className = 'del-confirm';
+  overlay.innerHTML = `
+    <div class="del-confirm-box">
+      <div class="del-confirm-title">Delete Card?</div>
+      <div class="del-confirm-sub">Are you sure you want to delete <strong>${cardName}</strong>? This cannot be undone.</div>
+      <div class="del-confirm-btns">
+        <button class="del-btn-cancel" onclick="this.closest('.del-confirm').remove()">Cancel</button>
+        <button class="del-btn-ok" onclick="doDeleteCard(${cardId}, this)">Delete</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+}
+
+async function doDeleteCard(cardId, btn) {
+  btn.disabled = true;
+  btn.textContent = 'Deleting…';
+  try {
+    const res = await fetch(`/card/${cardId}/delete`, { method:'POST' });
+    const data = await res.json();
+    if (data.success) {
+      // Remove card row from popup
+      const input = document.getElementById(`card-label-${cardId}`);
+      if (input) {
+        const labelWrap = input.closest('.popup-card-label-wrap');
+        const cardItem = labelWrap?.previousElementSibling;
+        if (labelWrap) labelWrap.remove();
+        if (cardItem) cardItem.remove();
+      }
+      btn.closest('.del-confirm')?.remove();
+    }
+  } catch(e) {
+    btn.closest('.del-confirm')?.remove();
+  }
+}
+
+/* ═══════════════════════════════════════
+   THEME
+═══════════════════════════════════════ */
+const THEMES = {
+  midnight: { a:'#0f0f0f', b:'#1e1000', c:'#fc7800', accent:'#fc7800', accentSoft:'#fff3e6', accentBorder:'#ffc280', accentDeep:'#c85a00', bodyFrom:'#ffffff', bodyTo:'#ffffff' },
+  ocean:    { a:'#0a1628', b:'#0d3060', c:'#0ea5e9', accent:'#0284c7', accentSoft:'#e0f2fe', accentBorder:'#7dd3fc', accentDeep:'#0284c7', bodyFrom:'#f0f9ff', bodyTo:'#e0f2fe' },
+  forest:   { a:'#0a1a0f', b:'#14391e', c:'#22c55e', accent:'#15803d', accentSoft:'#dcfce7', accentBorder:'#86efac', accentDeep:'#15803d', bodyFrom:'#f0fdf4', bodyTo:'#dcfce7' },
+  rose:     { a:'#1a0a10', b:'#3d1020', c:'#f43f5e', accent:'#be123c', accentSoft:'#ffe4e6', accentBorder:'#fda4af', accentDeep:'#be123c', bodyFrom:'#fff1f2', bodyTo:'#ffe4e6' },
+  violet:   { a:'#0f0a1e', b:'#1e0f45', c:'#7c3aed', accent:'#6d28d9', accentSoft:'#ede9fe', accentBorder:'#c4b5fd', accentDeep:'#6d28d9', bodyFrom:'#f5f3ff', bodyTo:'#ede9fe' },
+  amber:    { a:'#1a1000', b:'#3d2500', c:'#f59e0b', accent:'#b45309', accentSoft:'#fef3c7', accentBorder:'#fcd34d', accentDeep:'#b45309', bodyFrom:'#fffbeb', bodyTo:'#fef3c7' },
+  slate:    { a:'#0f172a', b:'#1e293b', c:'#64748b', accent:'#334155', accentSoft:'#f1f5f9', accentBorder:'#cbd5e1', accentDeep:'#334155', bodyFrom:'#f8fafc', bodyTo:'#f1f5f9' },
+  crimson:  { a:'#1a0505', b:'#3d0a0a', c:'#dc2626', accent:'#b91c1c', accentSoft:'#fee2e2', accentBorder:'#fca5a5', accentDeep:'#b91c1c', bodyFrom:'#fff5f5', bodyTo:'#fee2e2' },
+  teal:     { a:'#031a18', b:'#063a36', c:'#14b8a6', accent:'#0f766e', accentSoft:'#ccfbf1', accentBorder:'#5eead4', accentDeep:'#0f766e', bodyFrom:'#f0fdfa', bodyTo:'#ccfbf1' },
+  gold:     { a:'#12100a', b:'#2e2508', c:'#eab308', accent:'#a16207', accentSoft:'#fefce8', accentBorder:'#fde047', accentDeep:'#a16207', bodyFrom:'#fefce8', bodyTo:'#fef9c3' },
+};
+
+function setTheme(t) {
+  document.getElementById('theme').value = t;
+  // Update active swatch
+  document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('active'));
+  const sw = document.getElementById(`theme-${t}`);
+  if (sw) sw.classList.add('active');
+
+  const th = THEMES[t] || THEMES.midnight;
+
+  // Update preview hero gradient
+  const hero = document.getElementById('pHero');
+  if (hero) {
+    const bannerImg = document.getElementById('pBannerImg');
+    const hasBanner = bannerImg && bannerImg.style.display !== 'none' && bannerImg.src && bannerImg.src !== window.location.href;
+    if (!hasBanner) {
+      hero.style.background = `linear-gradient(135deg,${th.a} 0%,${th.b} 55%,${th.c} 100%)`;
+    }
+  }
+
+  // Apply light body gradient to preview card widget background
+  const cardWidget = document.getElementById('cardWidget');
+  if (cardWidget) {
+    cardWidget.style.background = `linear-gradient(160deg, ${th.bodyFrom} 0%, ${th.bodyTo} 100%)`;
+  }
+
+  // Update preview accent: call circle, designation text
+  if (cardWidget) {
+    cardWidget.querySelectorAll('.cpw-circle:not([data-fixed-color])').forEach(el => {
+      const bg = el.style.background;
+      if (!bg || bg === '' || bg.includes('var(--accent)')) {
+        el.style.background = th.accent;
+      }
+    });
+    cardWidget.querySelectorAll('.cpw-title').forEach(el => {
+      el.style.color = th.accent;
+    });
+  }
+}
+
+// Apply initial theme on load
+(function(){
+  const t = document.getElementById('theme').value || 'midnight';
+  setTheme(t);
+})();
+
+/* ═══════════════════════════════════════
+   ROLES SYSTEM
+═══════════════════════════════════════ */
+const MAX_ROLES = 8;
+let roleCount = 0;
+
+function getRoles() {
+  const results = [];
+  document.querySelectorAll('.role-block').forEach(block => {
+    results.push({
+      designation: block.querySelector('.role-designation').value.trim(),
+      company: block.querySelector('.role-company').value.trim(),
+      bio: block.querySelector('.role-bio').value.trim(),
+    });
+  });
+  return results;
+}
+
+function addRole(desig, company, bio) {
+  if (roleCount >= MAX_ROLES) {
+    document.getElementById('rolesLimitMsg').style.display = 'block';
+    return;
+  }
+  document.getElementById('rolesLimitMsg').style.display = 'none';
+  roleCount++;
+  const idx = roleCount;
+  const container = document.getElementById('rolesContainer');
+  const block = document.createElement('div');
+  block.className = 'role-block';
+  block.id = `role-block-${idx}`;
+  block.innerHTML = `
+    <div class="role-block-head">
+      <span class="role-num">Role ${idx}</span>
+      ${idx > 1 ? `<button type="button" class="role-remove-btn" onclick="removeRole(${idx})" title="Remove this role">✕ Remove</button>` : ''}
+    </div>
+    <div class="fields-grid">
+      <div class="field-wrap field-full">
+        <label class="field-label">Designation / Title <span class="fhint" id="desig-count-${idx}">0/100</span></label>
+        <input class="field-input role-designation" type="text" name="designation[]" maxlength="100" placeholder="e.g. Product Designer" oninput="updateDesigCount(${idx},this);update();" value="${escAttr(desig||'')}" />
+      </div>
+      <div class="field-wrap field-full">
+        <label class="field-label">Company / Organisation</label>
+        <input class="field-input role-company" type="text" name="company[]" placeholder="e.g. Pixel &amp; Co." oninput="update();" value="${escAttr(company||'')}" />
+      </div>
+      <div class="field-wrap field-full">
+        <label class="field-label">Bio <span class="fhint" id="bio-count-${idx}">0/200</span></label>
+        <textarea class="field-input field-textarea role-bio" name="bio[]" maxlength="200" placeholder="Short description about this role…" rows="2" oninput="updateBioCount(${idx},this);update();">${esc(bio||'')}</textarea>
+      </div>
+    </div>`;
+  container.appendChild(block);
+  // Update character counts for pre-filled values
+  const desigEl = block.querySelector('.role-designation');
+  const bioEl = block.querySelector('.role-bio');
+  if (desigEl.value) updateDesigCount(idx, desigEl);
+  if (bioEl.value) updateBioCount(idx, bioEl);
+  update();
+}
+
+function escAttr(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function updateDesigCount(idx, el) {
+  const c = document.getElementById(`desig-count-${idx}`);
+  if (c) c.textContent = `${el.value.length}/100`;
+}
+
+function updateBioCount(idx, el) {
+  const c = document.getElementById(`bio-count-${idx}`);
+  if (c) c.textContent = `${el.value.length}/200`;
+}
+
+function removeRole(idx) {
+  const block = document.getElementById(`role-block-${idx}`);
+  if (block) { block.remove(); roleCount = Math.max(0, roleCount - 1); update(); }
+  if (roleCount < MAX_ROLES) document.getElementById('rolesLimitMsg').style.display = 'none';
+}
+
+/* ═══════════════════════════════════════
+   SHAPE / POSITION / ALIGN
+═══════════════════════════════════════ */
+function setShape(s) {
+  document.getElementById('pic_shape').value = s;
+  document.getElementById('shapeRoundBtn').classList.toggle('active', s === 'round');
+  document.getElementById('shapeSquareBtn').classList.toggle('active', s === 'square');
+  document.querySelector('#shapeRoundBtn .shape-tick').classList.toggle('shape-tick-hidden', s !== 'round');
+  document.querySelector('#shapeSquareBtn .shape-tick').classList.toggle('shape-tick-hidden', s !== 'square');
+  const av = document.getElementById('pAvatar');
+  av.classList.toggle('sq', s === 'square');
+}
+
+function setPosition(p) {
+  document.getElementById('pic_position').value = p;
+  ['left','center','right'].forEach(pos => {
+    document.getElementById(`pos${pos.charAt(0).toUpperCase()+pos.slice(1)}Btn`).classList.toggle('active', pos === p);
+  });
+  const wrap = document.getElementById('pAvWrap');
+  wrap.className = `cpw-av-wrap pos-${p}`;
+  const identity = document.getElementById('pIdentity');
+  identity.style.paddingTop = '48px';
+  identity.style.minHeight = '';
+}
+
+function setAlign(a) {
+  document.getElementById('identity_align').value = a;
+  ['left','center','right'].forEach(al => {
+    document.getElementById(`align${al.charAt(0).toUpperCase()+al.slice(1)}Btn`).classList.toggle('active', al === a);
+  });
+  const id = document.getElementById('pIdentity');
+  id.className = `cpw-identity align-${a}`;
+  id.style.paddingTop = '48px';
+  id.style.minHeight = '';
+}
+
+/* ═══════════════════════════════════════
+   LIVE PREVIEW ENGINE
+═══════════════════════════════════════ */
+const G = id => document.getElementById(id);
+
+function initials(n) {
+  if (!n) return '?';
+  return (n.trim().split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase()) || '?';
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function update() {
+  const name    = (G('name') && G('name').value.trim()) || '';
+  const phone   = (G('phone') && G('phone').value.trim()) || '';
+  const email   = (G('email') && G('email').value.trim()) || '';
+  const address = (G('address') && G('address').value.trim()) || '';
+  const wa      = (G('whatsapp') && G('whatsapp').value.trim()) || '';
+  const ig      = (G('instagram') && G('instagram').value.trim()) || '';
+  const li      = (G('linkedin') && G('linkedin').value.trim()) || '';
+  const tw      = (G('twitter') && G('twitter').value.trim()) || '';
+  const fb      = (G('facebook') && G('facebook').value.trim()) || '';
+  const yt      = (G('youtube') && G('youtube').value.trim()) || '';
+  const upi     = (G('upi') && G('upi').value.trim()) || '';
+
+  const roles = getRoles();
+  const firstRole = roles[0] || {};
+  const desig = firstRole.designation || '';
+  const company = firstRole.company || '';
+
+  const ini = initials(name);
+  const hasData = name || desig || company || phone || email || address || upi;
+
+  // Name
+  const pn = G('pName');
+  if (name) { pn.textContent = name; pn.classList.remove('empty'); }
+  else { pn.textContent = 'Your name will appear here'; pn.classList.add('empty'); }
+
+  // Initials
+  G('pInitials').textContent = ini;
+  G('barInitials').textContent = ini;
+
+  // Bar
+  G('barName').textContent = name || 'Your name';
+  G('barSub').textContent  = desig || company || 'Fill in your details above';
+
+  // Designations — show ALL roles including company and bio
+  const de = G('pDesig');
+  de.innerHTML = '';
+
+  roles.forEach((role, i) => {
+    if (!role.designation && !role.company && !role.bio) return;
+    const entry = document.createElement('div');
+    entry.className = 'cpw-role-entry';
+    if (role.designation) {
+      const p = document.createElement('p');
+      p.className = 'cpw-title';
+      p.textContent = role.designation;
+      entry.appendChild(p);
+    }
+    if (role.company) {
+      const p = document.createElement('p');
+      p.className = 'cpw-company';
+      p.textContent = role.company;
+      entry.appendChild(p);
+    }
+    if (role.bio) {
+      const p = document.createElement('p');
+      p.className = 'cpw-bio';
+      p.textContent = role.bio;
+      entry.appendChild(p);
+    }
+    de.appendChild(entry);
+  });
+
+  // UPI in preview
+  const upiRow = G('pUpiRow');
+  if (upi) {
+    upiRow.style.display = '';
+    upiRow.innerHTML = `<div class="cpw-upi"><svg class="cpw-upi-icon" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg><span class="cpw-upi-val">${esc(upi)}</span></div>`;
+  } else {
+    upiRow.style.display = 'none';
+    upiRow.innerHTML = '';
+  }
+
+  // Action buttons
+  G('pCallBtn').style.display  = phone ? '' : 'none';
+  G('pWaBtn').style.display    = wa    ? '' : 'none';
+  G('pEmailBtn').style.display = email ? '' : 'none';
+
+  // Contact rows
+  const rows = [];
+  if(phone)   rows.push({svg:phoneS(), val:phone,   lbl:'Mobile'});
+  if(email)   rows.push({svg:emailS(), val:email,   lbl:'Email'});
+  if(address) rows.push({svg:mapS(),   val:address, lbl:'Address'});
+  const cs = G('pContactSec'), cl = G('pContactList');
+  if(rows.length){
+    cl.innerHTML=rows.map(r=>`<div class="cpw-info-row"><div class="cpw-info-icon">${r.svg}</div><div><div class="cpw-info-val">${esc(r.val)}</div><div class="cpw-info-lbl">${r.lbl}</div></div></div>`).join('');
+    cs.style.display='';
+  } else cs.style.display='none';
+
+  // Social — center aligned
+  const socials=[
+    {v:wa, icon:waS(),  lbl:'WhatsApp'},
+    {v:ig, icon:igS(),  lbl:'Instagram'},
+    {v:li, icon:liS(),  lbl:'LinkedIn'},
+    {v:tw, icon:twS(),  lbl:'Twitter'},
+    {v:fb, icon:fbS(),  lbl:'Facebook'},
+    {v:yt, icon:ytS(),  lbl:'YouTube'},
+  ].filter(s=>s.v);
+  const ss=G('pSocialSec'), sg=G('pSocialGrid');
+  if(socials.length){
+    sg.innerHTML=socials.map(s=>`<div class="cpw-sbtn"><div class="cpw-si">${s.icon}</div><span>${s.lbl}</span></div>`).join('');
+    ss.style.display='';
+  } else ss.style.display='none';
+
+  // Empty nudge
+  G('pEmpty').style.display = hasData ? 'none' : '';
+}
+
+/* ── PROFILE PIC ── */
+G('profile_pic').addEventListener('change', function(){
+  const file=this.files[0]; if(!file) return;
+  const name = file.name.length>22 ? file.name.slice(0,22)+'…' : file.name;
+  G('profileFileLabel').textContent = name;
+  G('profilePreviewName').textContent = name;
+  const r=new FileReader();
+  r.onload=e=>{
+    const src=e.target.result;
+    const pw = G('profilePreviewWrap'); pw.style.display='flex';
+    G('profilePreviewImg').src = src;
+    const ai=G('pAvatarImg'); ai.src=src; ai.style.display='block'; G('pInitials').style.display='none';
+    const bi=G('barAvatarImg'); bi.src=src; bi.style.display='block'; G('barInitials').style.display='none';
+  };
+  r.readAsDataURL(file);
+});
+
+/* ── BANNER ── */
+G('banner_pic').addEventListener('change', function(){
+  const file=this.files[0]; if(!file) return;
+  G('bannerFileLabel').textContent = file.name.length>20 ? file.name.slice(0,20)+'…' : file.name;
+  const r=new FileReader();
+  r.onload=e=>{
+    const src=e.target.result;
+    G('bannerPreviewContainer').style.display='block';
+    G('bannerPreviewImg').src=src;
+    const heroImg = G('pBannerImg');
+    heroImg.src = src;
+    heroImg.style.display='block';
+    G('pHero').style.setProperty('--hero-overlay','none');
+  };
+  r.readAsDataURL(file);
+});
+
+/* ── BIND ALL FIELDS & INIT ── */
+document.querySelectorAll('.field-input').forEach(el=>{
+  el.addEventListener('input', update);
+  el.addEventListener('change', update);
+});
+
+/* ── INIT ROLES ── */
+{% if edit_card and edit_card.roles %}
+  {% for role in edit_card.roles %}
+  addRole({{ role.designation | tojson }}, {{ role.company | tojson }}, {{ role.bio | tojson }});
+  {% endfor %}
+{% else %}
+  // Pre-fill name from home page sessionStorage if available
+  const pendingName = sessionStorage.getItem('pendingName');
+  if (pendingName && G('name') && !G('name').value) {
+    G('name').value = pendingName;
+    sessionStorage.removeItem('pendingName');
+  }
+  addRole();
+{% endif %}
+
+// Apply initial position/align state to preview
+(function(){
+  const pos = document.getElementById('pic_position').value || 'center';
+  const al  = document.getElementById('identity_align').value || 'center';
+  const wrap = G('pAvWrap');
+  if(wrap) wrap.className = `cpw-av-wrap pos-${pos}`;
+  const identity = G('pIdentity');
+  if(identity){
+    identity.className = `cpw-identity align-${al}`;
+    identity.style.paddingTop = '48px';
+    identity.style.minHeight = '';
+  }
+})();
+
+update();
+
+/* ── SVG ICON HELPERS ── */
+function phoneS(){return`<svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:var(--accent)"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.4 21 3 13.6 3 4.5c0-.6.4-1 1-1H8c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>`;}
+function emailS(){return`<svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:var(--accent)"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>`;}
+function mapS(){return`<svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:var(--accent)"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`;}
+function waS(){return`<svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>`;}
+function igS(){return`<svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#e1306c"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>`;}
+function liS(){return`<svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#0077b5"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>`;}
+function twS(){return`<svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#1da1f2"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>`;}
+function fbS(){return`<svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#1877f2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>`;}
+function ytS(){return`<svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#ff0000"><path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>`;}
+</script>
 </body>
 </html>

@@ -1,8 +1,16 @@
-.env
-venv/
-instance/
+# Python
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
+venv/
+.env
+
+# Flask instance & database
+instance/
+*.db
+
+# Uploads (user images)
 static/uploads/
+
+# OS
+.DS_Store
+Thumbs.db
