@@ -521,7 +521,7 @@
       </div>
 
       <!-- FORM -->
-      <form id="card-form" method="POST" action="{{ url_for('save_card') }}">
+      <form id="card-form" method="POST" action="{{ url_for('save_card') }}" enctype="multipart/form-data">
 
         <!-- ── SECTION 1: BASIC INFO ── -->
         <section class="form-section" aria-labelledby="sec-basic">
@@ -552,16 +552,30 @@
               <span class="field-error" id="name-error" role="alert" aria-live="polite"></span>
             </div>
 
-            <div class="field-wrap">
-              <label class="field-label" for="title">Designation / Title</label>
+            <div class="field-wrap field-full">
+              <label class="field-label" for="profile_pic">Profile Picture</label>
               <input
                 class="field-input"
-                type="text"
-                id="title"
-                name="title"
-                placeholder="e.g. Product Designer"
-                autocomplete="organization-title"
+                type="file"
+                id="profile_pic"
+                name="profile_pic"
+                accept="image/*"
+                style="padding:10px 13px;height:auto;cursor:pointer;"
               />
+              <p class="field-hint-block">Upload a photo for your card (JPG, PNG, GIF, WebP).</p>
+            </div>
+
+            <div class="field-wrap">
+              <label class="field-label" for="designation">Designation / Title(s)</label>
+              <textarea
+                class="field-input field-textarea"
+                id="designation"
+                name="designation"
+                placeholder="e.g. Product Designer&#10;UX Lead&#10;Co-Founder"
+                rows="3"
+                style="min-height:72px"
+              ></textarea>
+              <p class="field-hint-block">Enter one designation per line for multiple titles.</p>
             </div>
 
             <div class="field-wrap">

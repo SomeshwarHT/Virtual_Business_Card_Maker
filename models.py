@@ -20,7 +20,11 @@ class Card(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     name = db.Column(db.String(100))
-    title = db.Column(db.String(100))
+
+    # Feature 2: Multiple designations (replaces single title)
+    title = db.Column(db.String(100))           # kept for backward compat
+    designation = db.Column(db.Text)            # multi-line designations
+
     company = db.Column(db.String(150))
     bio = db.Column(db.Text)
 
@@ -30,4 +34,20 @@ class Card(db.Model):
     website = db.Column(db.String(200))
     upi = db.Column(db.String(100))
 
+    # Feature 3: Profile picture upload (card-specific)
+    profile_pic = db.Column(db.String(300))
+
+    # Feature 1: Social media profiles
+    instagram = db.Column(db.String(300))
+    linkedin  = db.Column(db.String(300))
+    twitter   = db.Column(db.String(300))
+    facebook  = db.Column(db.String(300))
+    youtube   = db.Column(db.String(300))
+    whatsapp  = db.Column(db.String(50))
+
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Convenience property so card.social.instagram etc. still works in templates
+    @property
+    def social(self):
+        return self

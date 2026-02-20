@@ -1,11 +1,21 @@
-from flask import Flask, render_template, request, redirect, url_for
+import os
+from flask import Flask, render_template, request, redirect, url_for, Response
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 from authlib.integrations.flask_client import OAuth
+from werkzeug.utils import secure_filename
 from config import Config
 from models import db, User, Card
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
+# Upload folder config
+UPLOAD_FOLDER = os.path.join(app.root_path, 'static', 'uploads')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Initialize DB
 db.init_app(app)
@@ -43,7 +53,6 @@ def home():
     return render_template("home.html")
 
 
-
 @app.route("/login")
 def login():
     redirect_uri = url_for("auth_callback", _external=True)
@@ -55,7 +64,6 @@ def auth_callback():
 
     resp = google.get("https://openidconnect.googleapis.com/v1/userinfo")
     user_info = resp.json()
-
 
     google_id = user_info["sub"]
 
@@ -84,10 +92,22 @@ def form():
 def save_card():
     data = request.form
 
+    # Handle profile picture upload
+    profile_pic_filename = None
+    if 'profile_pic' in request.files:
+        file = request.files['profile_pic']
+        if file and file.filename and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            # Make unique with user id prefix
+            filename = f"{current_user.id}_{filename}"
+            file.save(os.path.join(UPLOAD_FOLDER, filename))
+            profile_pic_filename = filename
+
     new_card = Card(
         user_id=current_user.id,
         name=data.get("name"),
         title=data.get("title"),
+        designation=data.get("designation"),
         company=data.get("company"),
         bio=data.get("bio"),
         phone=data.get("phone"),
@@ -95,6 +115,14 @@ def save_card():
         address=data.get("address"),
         website=data.get("website"),
         upi=data.get("upi"),
+        profile_pic=profile_pic_filename,
+        # Social media
+        instagram=data.get("instagram"),
+        linkedin=data.get("linkedin"),
+        twitter=data.get("twitter"),
+        facebook=data.get("facebook"),
+        youtube=data.get("youtube"),
+        whatsapp=data.get("whatsapp"),
     )
 
     db.session.add(new_card)
@@ -106,6 +134,52 @@ def save_card():
 def view_card(card_id):
     card = Card.query.get_or_404(card_id)
     return render_template("card.html", card=card)
+
+@app.route("/download_contact/<int:card_id>")
+def download_contact(card_id):
+    card = Card.query.get_or_404(card_id)
+
+    lines = [
+        "BEGIN:VCARD",
+        "VERSION:3.0",
+        f"FN:{card.name or ''}",
+        f"ORG:{card.company or ''}",
+    ]
+
+    # Designation / title
+    designation = card.designation or card.title or ''
+    if designation:
+        # Use first line as TITLE in vCard
+        first_title = designation.strip().splitlines()[0]
+        lines.append(f"TITLE:{first_title}")
+
+    if card.phone:
+        lines.append(f"TEL;TYPE=CELL,VOICE:{card.phone.replace(' ', '')}")
+    if card.email:
+        lines.append(f"EMAIL;TYPE=WORK:{card.email}")
+    if card.address:
+        lines.append(f"ADR;TYPE=WORK:;;{card.address};;;;")
+    if card.website:
+        lines.append(f"URL:{card.website}")
+    if card.instagram:
+        lines.append(f"X-SOCIALPROFILE;type=instagram:{card.instagram}")
+    if card.linkedin:
+        lines.append(f"X-SOCIALPROFILE;type=linkedin:{card.linkedin}")
+    if card.twitter:
+        lines.append(f"X-SOCIALPROFILE;type=twitter:{card.twitter}")
+
+    lines.append("END:VCARD")
+
+    vcf_content = "\r\n".join(lines)
+    safe_name = (card.name or "contact").replace(" ", "_")
+
+    return Response(
+        vcf_content,
+        mimetype="text/vcard",
+        headers={
+            "Content-Disposition": f'attachment; filename="{safe_name}.vcf"'
+        }
+    )
 
 @app.route("/logout")
 @login_required
