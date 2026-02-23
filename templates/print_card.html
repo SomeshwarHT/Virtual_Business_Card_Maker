@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Print Card — {{ card.name }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* ── PRINT CONTROLS (SCREEN ONLY) ── */
+    .print-controls {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .print-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: #fc7800;
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-size: .9rem;
+      font-weight: 600;
+      border-radius: 8px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(252,120,0,.3);
+      transition: all .15s ease;
+    }
+
+    .print-btn:hover {
+      background: #e56b00;
+      transform: translateY(-1px);
+    }
+
+    .print-btn svg { width: 16px; height: 16px; fill: #fff; }
+
+    .print-btn-secondary {
+      background: #0f0f0f;
+      box-shadow: 0 4px 12px rgba(0,0,0,.2);
+    }
+
+    .print-btn-secondary:hover { background: #1a1a1a; }
+
+    /* ── VISITING CARD (3.5in x 2in) ── */
+    .card-wrapper {
+      width: 3.5in;
+      height: 2in;
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.15);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ── SCREEN: scale up for better preview ── */
+    @media screen {
+      .card-scale-container {
+        transform: scale(1.7);
+        transform-origin: center center;
+      }
+      body {
+        min-height: 100vh;
+        padding: 80px 20px;
+      }
+    }
+
+    /* ══════════════════════════════════════════
+       CLASSIC LAYOUT  — info left, QR right
+    ══════════════════════════════════════════ */
+    .layout-classic .card-content {
+      width: 100%;
+      height: 100%;
+      padding: 18px 18px 22px;
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .layout-classic .card-left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .layout-classic .card-right {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ══════════════════════════════════════════
+       CENTERED LAYOUT  — content top, QR below
+    ══════════════════════════════════════════ */
+    .layout-centered .card-content {
+      width: 100%;
+      height: 100%;
+      padding: 14px 18px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .layout-centered .card-top {
+      width: 100%;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .layout-centered .card-bottom {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .layout-centered .card-contacts {
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      column-gap: 10px;
+      row-gap: 2px;
+    }
+
+    /* ══════════════════════════════════════════
+       SPLIT LAYOUT  — colored left, white right
+    ══════════════════════════════════════════ */
+    .layout-split .card-content {
+      width: 100%;
+      height: 100%;
+      display: flex;
+    }
+
+    .layout-split .split-left {
+      width: 38%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 14px 13px;
+      overflow: hidden;
+    }
+
+    .layout-split .split-right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 12px 18px;
+      gap: 5px;
+    }
+
+    /* ── SHARED CARD TEXT ── */
+    .card-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f0f0f;
+      letter-spacing: -.2px;
+      line-height: 1.2;
+      margin-bottom: 2px;
+    }
+
+    .card-designation {
+      font-size: 9.5px;
+      font-weight: 600;
+      letter-spacing: .3px;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .card-company {
+      font-size: 9px;
+      color: #4b5563;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .card-divider {
+      width: 36px;
+      height: 2px;
+      border-radius: 2px;
+      margin-bottom: 6px;
+    }
+
+    .card-contacts {
+      display: flex;
+      flex-direction: column;
+      gap: 2.5px;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 7.5px;
+      color: #4b5563;
+    }
+
+    .contact-item svg {
+      width: 8px;
+      height: 8px;
+      flex-shrink: 0;
+    }
+
+    .contact-value {
+      font-weight: 500;
+      color: #0f0f0f;
+    }
+
+    .card-custom-text {
+      font-size: 7.5px;
+      color: #9ca3af;
+      font-style: italic;
+      margin-top: 5px;
+      line-height: 1.4;
+    }
+
+    /* ── QR CODE ── */
+    .qr-wrapper {
+      width: 70px;
+      height: 70px;
+      padding: 4px;
+      background: #ffffff;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qr-code {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .qr-label {
+      font-size: 7px;
+      text-align: center;
+      margin-top: 4px;
+      font-weight: 600;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+    }
+
+    /* ── BRANDING ── */
+    .card-brand {
+      position: absolute;
+      bottom: 6px;
+      left: 14px;
+      font-size: 6.5px;
+      color: #c9c9c9;
+      letter-spacing: .2px;
+    }
+
+    /* ── PRINT STYLES ── */
+    @media print {
+      @page {
+        size: 3.5in 2in;
+        margin: 0;
+      }
+
+      body {
+        background: #ffffff;
+        padding: 0;
+        margin: 0;
+      }
+
+      .print-controls { display: none !important; }
+
+      .card-scale-container { transform: none !important; }
+
+      .card-wrapper {
+        width: 3.5in;
+        height: 2in;
+        box-shadow: none;
+        border-radius: 0;
+        margin: 0;
+        page-break-after: always;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PRINT CONTROLS (HIDDEN ON PRINT) -->
+  <div class="print-controls">
+    <button class="print-btn" onclick="window.print()">
+      <svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+      Print Card
+    </button>
+    <a href="{{ url_for('view_card', card_id=card.id) }}" class="print-btn print-btn-secondary">
+      <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      Close
+    </a>
+  </div>
+
+  {# ── Resolve accent color ── #}
+  {% set pc = card.print_color or 'black' %}
+  {% if pc == 'blue' %}
+    {% set accent_hex = '#1d4ed8' %}
+    {% set accent_light = '#dbeafe' %}
+  {% elif pc == 'green' %}
+    {% set accent_hex = '#15803d' %}
+    {% set accent_light = '#dcfce7' %}
+  {% elif pc == 'purple' %}
+    {% set accent_hex = '#6d28d9' %}
+    {% set accent_light = '#ede9fe' %}
+  {% elif pc == 'orange' %}
+    {% set accent_hex = '#ea6000' %}
+    {% set accent_light = '#fff3e6' %}
+  {% else %}
+    {% set accent_hex = '#0f0f0f' %}
+    {% set accent_light = '#f1f1f1' %}
+  {% endif %}
+
+  {# ── Resolve template ── #}
+  {% set tmpl = card.print_template or 'classic' %}
+
+  {# ── Resolve role fields ── #}
+  {% set roles = card.roles %}
+  {% set first_desig = roles[0].designation if roles else (card.designation or card.title or '') %}
+  {% set first_company = roles[0].company if roles else (card.company or '') %}
+
+  <!-- VISITING CARD -->
+  <div class="card-scale-container">
+  <div class="card-wrapper layout-{{ tmpl }}">
+
+    {# ════════════ CLASSIC LAYOUT ════════════ #}
+    {% if tmpl == 'classic' %}
+    <div class="card-content">
+
+      <div class="card-left">
+        <div class="card-name">{{ card.name }}</div>
+
+        {% if first_desig %}
+        <div class="card-designation" style="color:{{ accent_hex }};">{{ first_desig }}</div>
+        {% endif %}
+
+        {% if first_company %}
+        <div class="card-company">{{ first_company }}</div>
+        {% endif %}
+
+        <div class="card-divider" style="background:{{ accent_hex }};"></div>
+
+        <div class="card-contacts">
+          {% if card.print_show_phone and card.phone %}
+          <div class="contact-item">
+            <svg viewBox="0 0 24 24" style="fill:{{ accent_hex }};"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.4 21 3 13.6 3 4.5c0-.6.4-1 1-1H8c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
+            <span class="contact-value">{{ card.phone }}</span>
+          </div>
+          {% endif %}
+          {% if card.print_show_email and card.email %}
+          <div class="contact-item">
+            <svg viewBox="0 0 24 24" style="fill:{{ accent_hex }};"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            <span class="contact-value">{{ card.email }}</span>
+          </div>
+          {% endif %}
+          {% if card.print_show_address and card.address %}
+          <div class="contact-item">
+            <svg viewBox="0 0 24 24" style="fill:{{ accent_hex }};"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            <span class="contact-value">{{ card.address }}</span>
+          </div>
+          {% endif %}
+          {% if card.print_show_website and card.website %}
+          <div class="contact-item">
+            <svg viewBox="0 0 24 24" style="fill:{{ accent_hex }};"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+            <span class="contact-value">{{ card.website|replace('https://', '')|replace('http://', '') }}</span>
+          </div>
+          {% endif %}
+          {% if card.print_show_social %}
+            {% if card.instagram %}
+            <div class="contact-item">
+              <svg viewBox="0 0 24 24" style="fill:{{ accent_hex }};"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+              <span class="contact-value">Instagram</span>
+            </div>
+            {% endif %}
+            {% if card.linkedin %}
+            <div class="contact-item">
+              <svg viewBox="0 0 24 24" style="fill:{{ accent_hex }};"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+              <span class="contact-value">LinkedIn</span>
+            </div>
+            {% endif %}
+          {% endif %}
+        </div>
+
+        {% if card.print_custom_text %}
+        <div class="card-custom-text">{{ card.print_custom_text }}</div>
+        {% endif %}
+      </div>
+
+      <div class="card-right">
+        <div class="qr-wrapper" style="border: 1.5px solid {{ accent_hex }};">
+          <img src="data:image/png;base64,{{ qr_base64 }}" alt="QR Code" class="qr-code" />
+        </div>
+        <div class="qr-label" style="color:{{ accent_hex }};">Scan Me</div>
+      </div>
+
+    </div>
+
+    {# ════════════ CENTERED LAYOUT ════════════ #}
+    {% elif tmpl == 'centered' %}
+    <div class="card-content">
+
+      <div class="card-top">
+        <div class="card-name" style="text-align:center;">{{ card.name }}</div>
+
+        {% if first_desig %}
+        <div class="card-designation" style="color:{{ accent_hex }};text-align:center;">{{ first_desig }}</div>
+        {% endif %}
+
+        {% if first_company %}
+        <div class="card-company" style="text-align:center;margin-bottom:5px;">{{ first_company }}</div>
+        {% endif %}
+
+        <div class="card-divider" style="background:{{ accent_hex }};margin-left:auto;margin-right:auto;"></div>
+
+        <div class="card-contacts">
+          {% if card.print_show_phone and card.phone %}
+          <div class="contact-item">
+            <svg viewBox="0 0 24 24" style="fill:{{ accent_hex }};"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.4 21 3 13.6 3 4.5c0-.6.4-1 1-1H8c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
+            <span class="contact-value">{{ card.phone }}</span>
+          </div>
+          {% endif %}
+          {% if card.print_show_email and card.email %}
+          <div class="contact-item">
+            <svg viewBox="0 0 24 24" style="fill:{{ accent_hex }};"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            <span class="contact-value">{{ card.email }}</span>
+          </div>
+          {% endif %}
+          {% if card.print_show_website and card.website %}
+          <div class="contact-item">
+            <svg viewBox="0 0 24 24" style="fill:{{ accent_hex }};"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+            <span class="contact-value">{{ card.website|replace('https://', '')|replace('http://', '') }}</span>
+          </div>
+          {% endif %}
+          {% if card.print_show_address and card.address %}
+          <div class="contact-item">
+            <svg viewBox="0 0 24 24" style="fill:{{ accent_hex }};"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            <span class="contact-value">{{ card.address }}</span>
+          </div>
+          {% endif %}
+          {% if card.print_show_social %}
+            {% if card.instagram %}
+            <div class="contact-item">
+              <svg viewBox="0 0 24 24" style="fill:{{ accent_hex }};"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+              <span class="contact-value">Instagram</span>
+            </div>
+            {% endif %}
+            {% if card.linkedin %}
+            <div class="contact-item">
+              <svg viewBox="0 0 24 24" style="fill:{{ accent_hex }};"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+              <span class="contact-value">LinkedIn</span>
+            </div>
+            {% endif %}
+          {% endif %}
+        </div>
+
+        {% if card.print_custom_text %}
+        <div class="card-custom-text" style="text-align:center;">{{ card.print_custom_text }}</div>
+        {% endif %}
+      </div>
+
+      <div class="card-bottom">
+        <div class="qr-wrapper" style="width:52px;height:52px;border:1.5px solid {{ accent_hex }};">
+          <img src="data:image/png;base64,{{ qr_base64 }}" alt="QR Code" class="qr-code" />
+        </div>
+        <div class="qr-label" style="color:{{ accent_hex }};">Scan Me</div>
+      </div>
+
+    </div>
+
+    {# ════════════ SPLIT LAYOUT ════════════ #}
+    {% else %}
+    <div class="card-content">
+
+      <!-- Left: colored block -->
+      <div class="split-left" style="background:{{ accent_hex }};">
+        <div class="card-name" style="color:#ffffff;font-size:13px;margin-bottom:3px;">{{ card.name }}</div>
+
+        {% if first_desig %}
+        <div class="card-designation" style="color:rgba(255,255,255,.80);font-size:8.5px;margin-bottom:2px;">{{ first_desig }}</div>
+        {% endif %}
+
+        {% if first_company %}
+        <div class="card-company" style="color:rgba(255,255,255,.65);font-size:8px;margin-bottom:0;">{{ first_company }}</div>
+        {% endif %}
+
+        {% if card.print_custom_text %}
+        <div style="font-size:7px;color:rgba(255,255,255,.50);font-style:italic;margin-top:7px;line-height:1.4;">{{ card.print_custom_text }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Right: white section with QR + contacts -->
+      <div class="split-right">
+        <div class="qr-wrapper" style="width:62px;height:62px;border:1.5px solid {{ accent_hex }};">
+          <img src="data:image/png;base64,{{ qr_base64 }}" alt="QR Code" class="qr-code" />
+        </div>
+        <div class="qr-label" style="color:{{ accent_hex }};">Scan Me</div>
+
+        <div class="card-contacts" style="margin-top:4px;width:100%;">
+          {% if card.print_show_phone and card.phone %}
+          <div class="contact-item">
+            <svg viewBox="0 0 24 24" style="fill:{{ accent_hex }};"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.4 21 3 13.6 3 4.5c0-.6.4-1 1-1H8c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
+            <span class="contact-value">{{ card.phone }}</span>
+          </div>
+          {% endif %}
+          {% if card.print_show_email and card.email %}
+          <div class="contact-item">
+            <svg viewBox="0 0 24 24" style="fill:{{ accent_hex }};"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            <span class="contact-value">{{ card.email }}</span>
+          </div>
+          {% endif %}
+          {% if card.print_show_website and card.website %}
+          <div class="contact-item">
+            <svg viewBox="0 0 24 24" style="fill:{{ accent_hex }};"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+            <span class="contact-value">{{ card.website|replace('https://', '')|replace('http://', '') }}</span>
+          </div>
+          {% endif %}
+          {% if card.print_show_address and card.address %}
+          <div class="contact-item">
+            <svg viewBox="0 0 24 24" style="fill:{{ accent_hex }};"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            <span class="contact-value">{{ card.address }}</span>
+          </div>
+          {% endif %}
+          {% if card.print_show_social %}
+            {% if card.instagram %}
+            <div class="contact-item">
+              <svg viewBox="0 0 24 24" style="fill:{{ accent_hex }};"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+              <span class="contact-value">Instagram</span>
+            </div>
+            {% endif %}
+            {% if card.linkedin %}
+            <div class="contact-item">
+              <svg viewBox="0 0 24 24" style="fill:{{ accent_hex }};"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+              <span class="contact-value">LinkedIn</span>
+            </div>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+    {% endif %}
+
+    <!-- BRANDING -->
+    <div class="card-brand">CardCraft</div>
+
+  </div><!-- /card-wrapper -->
+  </div><!-- /card-scale-container -->
+
+</body>
+</html>

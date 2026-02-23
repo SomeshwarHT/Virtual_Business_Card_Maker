@@ -62,6 +62,18 @@ class Card(db.Model):
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    views = db.Column(db.Integer, default=0)
+
+    # ───────── PRINTABLE CARD CUSTOMIZATION ─────────
+    print_show_phone = db.Column(db.Boolean, default=True)
+    print_show_email = db.Column(db.Boolean, default=True)
+    print_show_address = db.Column(db.Boolean, default=False)
+    print_show_website = db.Column(db.Boolean, default=True)
+    print_show_social = db.Column(db.Boolean, default=False)
+    print_custom_text = db.Column(db.String(200))
+    print_template = db.Column(db.String(20), default='classic')
+    print_color = db.Column(db.String(20), default='black')
+
     @property
     def roles(self):
         """Return list of role dicts from roles_json, or build from legacy fields."""
@@ -78,3 +90,14 @@ class Card(db.Model):
     @property
     def social(self):
         return self
+    
+# ───────── CARD VIEW MODEL ─────────
+class CardView(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    card_id = db.Column(db.Integer, db.ForeignKey('card.id'), nullable=False)
+
+    # Either viewer_id OR session_id will be used
+    viewer_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    session_id = db.Column(db.String(100), nullable=True)
+
+    viewed_at = db.Column(db.DateTime, default=datetime.utcnow)

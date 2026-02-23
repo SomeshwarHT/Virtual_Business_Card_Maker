@@ -1,11 +1,16 @@
 import os
 import json
+import io
+import base64
 from flask import Flask, render_template, request, redirect, url_for, Response, jsonify
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 from authlib.integrations.flask_client import OAuth
 from werkzeug.utils import secure_filename
 from config import Config
-from models import db, User, Card
+from models import db, User, Card, CardView
+from flask import session
+import uuid
+import qrcode
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -26,6 +31,17 @@ def save_upload(file, prefix):
         file.save(os.path.join(UPLOAD_FOLDER, filename))
         return filename
     return None
+
+def generate_qr_base64(data):
+    """Generate QR code and return as base64 string."""
+    qr = qrcode.QRCode(version=1, box_size=10, border=2)
+    qr.add_data(data)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    buffer = io.BytesIO()
+    img.save(buffer, format='PNG')
+    buffer.seek(0)
+    return base64.b64encode(buffer.getvalue()).decode()
 
 # Initialize DB
 db.init_app(app)
@@ -59,7 +75,7 @@ with app.app_context():
 @app.route("/")
 def home():
     if current_user.is_authenticated:
-        return redirect(url_for("form"))
+        return redirect(url_for("dashboard"))
     return render_template("home.html")
 
 
@@ -90,7 +106,14 @@ def auth_callback():
         db.session.commit()
 
     login_user(user)
-    return redirect(url_for("form"))
+    return redirect(url_for("dashboard"))
+
+# ───────── NEW: DASHBOARD ROUTE ─────────
+@app.route("/dashboard")
+@login_required
+def dashboard():
+    user_cards = Card.query.filter_by(user_id=current_user.id).order_by(Card.created_at.desc()).all()
+    return render_template("dashboard.html", user_cards=user_cards)
 
 @app.route("/form")
 @login_required
@@ -144,6 +167,20 @@ def save_card():
     # Card label — validate uniqueness among this user's cards
     card_label = (data.get("card_label") or "").strip() or None
 
+    # ───────── PRINTABLE CARD SETTINGS ─────────
+    print_show_phone = data.get("print_show_phone") == "on"
+    print_show_email = data.get("print_show_email") == "on"
+    print_show_address = data.get("print_show_address") == "on"
+    print_show_website = data.get("print_show_website") == "on"
+    print_show_social = data.get("print_show_social") == "on"
+    print_custom_text = (data.get("print_custom_text") or "").strip() or None
+    print_template = data.get("print_template") or "classic"
+    print_color = data.get("print_color") or "black"
+    if print_template not in ("classic", "centered", "split"):
+        print_template = "classic"
+    if print_color not in ("black", "blue", "green", "purple", "orange"):
+        print_color = "black"
+
     if card_id:
         card = Card.query.get(int(card_id))
         if card and card.user_id == current_user.id:
@@ -173,6 +210,15 @@ def save_card():
             card.facebook      = data.get("facebook")
             card.youtube       = data.get("youtube")
             card.whatsapp      = data.get("whatsapp")
+            # ───────── PRINTABLE SETTINGS UPDATE ─────────
+            card.print_show_phone = print_show_phone
+            card.print_show_email = print_show_email
+            card.print_show_address = print_show_address
+            card.print_show_website = print_show_website
+            card.print_show_social = print_show_social
+            card.print_custom_text = print_custom_text
+            card.print_template = print_template
+            card.print_color = print_color
             db.session.commit()
             return redirect(url_for("view_card", card_id=card.id))
 
@@ -202,6 +248,15 @@ def save_card():
         facebook=data.get("facebook"),
         youtube=data.get("youtube"),
         whatsapp=data.get("whatsapp"),
+        # ───────── PRINTABLE SETTINGS NEW ─────────
+        print_show_phone=print_show_phone,
+        print_show_email=print_show_email,
+        print_show_address=print_show_address,
+        print_show_website=print_show_website,
+        print_show_social=print_show_social,
+        print_custom_text=print_custom_text,
+        print_template=print_template,
+        print_color=print_color,
     )
 
     db.session.add(new_card)
@@ -212,7 +267,64 @@ def save_card():
 @app.route("/card/<int:card_id>")
 def view_card(card_id):
     card = Card.query.get_or_404(card_id)
+
+    # Don't count owner views
+    if current_user.is_authenticated and current_user.id == card.user_id:
+        return render_template("card.html", card=card)
+
+    # Case 1: Logged-in user
+    if current_user.is_authenticated:
+
+        existing_view = CardView.query.filter_by(
+            card_id=card.id,
+            viewer_id=current_user.id
+        ).first()
+
+        if not existing_view:
+            new_view = CardView(
+                card_id=card.id,
+                viewer_id=current_user.id
+            )
+            db.session.add(new_view)
+            card.views += 1
+            db.session.commit()
+
+    # Case 2: Anonymous user
+    else:
+
+        # Create unique session ID if not exists
+        if "anon_id" not in session:
+            session["anon_id"] = str(uuid.uuid4())
+
+        existing_view = CardView.query.filter_by(
+            card_id=card.id,
+            session_id=session["anon_id"]
+        ).first()
+
+        if not existing_view:
+            new_view = CardView(
+                card_id=card.id,
+                session_id=session["anon_id"]
+            )
+            db.session.add(new_view)
+            card.views += 1
+            db.session.commit()
+
     return render_template("card.html", card=card)
+
+# ───────── NEW: PRINT CARD ROUTE ─────────
+@app.route("/card/<int:card_id>/print")
+@login_required
+def print_card(card_id):
+    card = Card.query.get_or_404(card_id)
+    if card.user_id != current_user.id:
+        return redirect(url_for("dashboard"))
+    
+    # Generate QR code
+    card_url = url_for("view_card", card_id=card.id, _external=True)
+    qr_base64 = generate_qr_base64(card_url)
+    
+    return render_template("print_card.html", card=card, qr_base64=qr_base64)
 
 @app.route("/card/<int:card_id>/delete", methods=["POST"])
 @login_required

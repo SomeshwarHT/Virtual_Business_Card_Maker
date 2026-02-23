@@ -40,6 +40,18 @@
     .nav-logo-text { font-size:1rem; font-weight:700; color:#fff; letter-spacing:-.3px; }
     .nav-badge { font-size:.68rem; font-weight:700; color:var(--brand-dark); background:var(--accent); padding:3px 10px; border-radius:99px; letter-spacing:.4px; }
 
+    .nav-dashboard-btn {
+      display:inline-flex; align-items:center; gap:6px;
+      padding:6px 14px; border-radius:8px;
+      background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14);
+      color:rgba(255,255,255,.85); font-family:'Outfit',sans-serif;
+      font-size:.78rem; font-weight:600; text-decoration:none;
+      transition:background var(--tr),border-color var(--tr),color var(--tr);
+      white-space:nowrap;
+    }
+    .nav-dashboard-btn:hover { background:rgba(255,255,255,.15); border-color:rgba(255,255,255,.28); color:#fff; }
+    .nav-dashboard-btn svg { width:13px; height:13px; fill:currentColor; flex-shrink:0; }
+
     /* ── PROFILE POPUP ── */
     .nav-right { display:flex; align-items:center; gap:12px; position:relative; }
 
@@ -400,9 +412,8 @@
 
     /* ── CARD WIDGET ── */
     .cpw { width:100%; max-width:350px; background:var(--surface); border-radius:18px; box-shadow:0 8px 40px rgba(0,0,0,.14),0 2px 8px rgba(0,0,0,.06); overflow:visible; position:relative; }
-    .cpw-hero { height:80px; position:relative; overflow:hidden; border-radius:18px 18px 0 0; background:linear-gradient(135deg,#0f0f0f 0%,#1e1000 55%,#fc7800 100%); }
+    .cpw-hero { height:80px; position:relative; overflow:hidden; border-radius:18px 18px 0 0; background:linear-gradient(135deg,#0f0f0f 0%,#1a1a1a 100%); }
     .cpw-hero-img { width:100%; height:100%; object-fit:cover; display:none; }
-    .cpw-hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 70% 90% at 80% 20%,rgba(252,120,0,.45) 0%,transparent 70%); pointer-events:none; }
 
     /* Avatar */
     .cpw-av-wrap { position:absolute; z-index:10; transition:left var(--tr),right var(--tr),transform var(--tr); }
@@ -515,6 +526,10 @@
       <span class="nav-logo-text">CardCraft</span>
     </a>
     <div class="nav-right">
+      <a href="{{ url_for('dashboard') }}" class="nav-dashboard-btn">
+        <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+        Dashboard
+      </a>
       <span class="nav-badge">{% if edit_card %}Editing Card{% else %}Card Editor{% endif %}</span>
       <!-- Profile trigger -->
       <div class="profile-trigger" id="profileTrigger" onclick="togglePopup()">
@@ -997,8 +1012,99 @@
         </div>
       </section>
 
-      <!-- Footer -->
-      <div style="text-align:center;padding:4px 0 8px;">
+      <!-- ───────── SECTION 6: PRINTABLE CARD SETTINGS ───────── -->
+      <div class="form-section">
+        <div class="sec-head">
+          <div class="sec-badge">06</div>
+          <div>
+            <h2 class="sec-title">Printable Card Settings</h2>
+            <p class="sec-desc">Customize what appears on your physical visiting card</p>
+          </div>
+        </div>
+
+        <div class="fields-grid">
+          <div class="field-wrap field-full">
+            <label class="field-label">Show on printable card:</label>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">
+              <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--text-2);cursor:pointer;">
+                <input type="checkbox" name="print_show_phone" {% if edit_card and edit_card.print_show_phone %}checked{% elif not edit_card %}checked{% endif %} style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent);" />
+                <span>Phone Number</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--text-2);cursor:pointer;">
+                <input type="checkbox" name="print_show_email" {% if edit_card and edit_card.print_show_email %}checked{% elif not edit_card %}checked{% endif %} style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent);" />
+                <span>Email Address</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--text-2);cursor:pointer;">
+                <input type="checkbox" name="print_show_address" {% if edit_card and edit_card.print_show_address %}checked{% endif %} style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent);" />
+                <span>Address</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--text-2);cursor:pointer;">
+                <input type="checkbox" name="print_show_website" {% if edit_card and edit_card.print_show_website %}checked{% elif not edit_card %}checked{% endif %} style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent);" />
+                <span>Website</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--text-2);cursor:pointer;">
+                <input type="checkbox" name="print_show_social" {% if edit_card and edit_card.print_show_social %}checked{% endif %} style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent);" />
+                <span>Social Media Icons</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="field-wrap field-full">
+            <label class="field-label" for="print_custom_text">Custom Text <span class="fhint">Optional tagline or note</span></label>
+            <input 
+              class="field-input" 
+              type="text" 
+              id="print_custom_text" 
+              name="print_custom_text" 
+              placeholder="e.g. Innovating the future of design"
+              value="{% if edit_card %}{{ edit_card.print_custom_text or '' }}{% endif %}"
+              maxlength="200"
+            />
+            <span class="hint">This text will appear at the bottom of your printable card</span>
+          </div>
+
+          <div class="field-wrap">
+            <label class="field-label" for="print_template">Card Layout</label>
+            <div class="iw">
+              <svg class="ii" viewBox="0 0 24 24"><path d="M3 5h8v5H3zm0 7h8v7H3zm10-7h8v12h-8z"/></svg>
+              <select class="field-input ic" id="print_template" name="print_template" style="cursor:pointer;">
+                <option value="classic"
+                  {% if edit_card and edit_card.print_template == 'classic' %}selected
+                  {% elif not edit_card %}selected{% endif %}>Classic — Info left, QR right</option>
+                <option value="centered"
+                  {% if edit_card and edit_card.print_template == 'centered' %}selected{% endif %}>Centered — Content top, QR below</option>
+                <option value="split"
+                  {% if edit_card and edit_card.print_template == 'split' %}selected{% endif %}>Split — Color block left, details right</option>
+              </select>
+            </div>
+            <p class="hint">Controls the layout of your printable visiting card</p>
+          </div>
+
+          <div class="field-wrap">
+            <label class="field-label" for="print_color">Accent Color</label>
+            <div class="iw">
+              <svg class="ii" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+              <select class="field-input ic" id="print_color" name="print_color" style="cursor:pointer;">
+                <option value="black"
+                  {% if edit_card and edit_card.print_color == 'black' %}selected
+                  {% elif not edit_card %}selected{% endif %}>Black</option>
+                <option value="blue"
+                  {% if edit_card and edit_card.print_color == 'blue' %}selected{% endif %}>Blue</option>
+                <option value="green"
+                  {% if edit_card and edit_card.print_color == 'green' %}selected{% endif %}>Green</option>
+                <option value="purple"
+                  {% if edit_card and edit_card.print_color == 'purple' %}selected{% endif %}>Purple</option>
+                <option value="orange"
+                  {% if edit_card and edit_card.print_color == 'orange' %}selected{% endif %}>Orange</option>
+              </select>
+            </div>
+            <p class="hint">Used for accents, borders and dividers on the printed card</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer — after all sections -->
+      <div style="text-align:center;padding:16px 0 10px;">
         <p style="font-size:.66rem;color:#9ca3af;letter-spacing:.3px;">Powered by</p>
         <div style="display:inline-flex;align-items:center;gap:5px;margin-top:4px;">
           <span style="font-size:.76rem;font-weight:700;color:#4b5563;">He5 Solutions</span>
@@ -1219,11 +1325,7 @@ function setTheme(t) {
   // Update preview hero gradient
   const hero = document.getElementById('pHero');
   if (hero) {
-    const bannerImg = document.getElementById('pBannerImg');
-    const hasBanner = bannerImg && bannerImg.style.display !== 'none' && bannerImg.src && bannerImg.src !== window.location.href;
-    if (!hasBanner) {
-      hero.style.background = `linear-gradient(135deg,${th.a} 0%,${th.b} 55%,${th.c} 100%)`;
-    }
+    hero.style.background = `linear-gradient(135deg,${th.a} 0%,${th.b} 55%,${th.c} 100%)`;
   }
 
   // Apply light body gradient to preview card widget background
