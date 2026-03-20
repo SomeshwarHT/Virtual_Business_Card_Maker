@@ -73,6 +73,8 @@ class Card(db.Model):
     print_custom_text = db.Column(db.String(200))
     print_template = db.Column(db.String(20), default='classic')
     print_color = db.Column(db.String(20), default='black')
+    print_background_color = db.Column(db.String(30), default='matte_black')
+    print_layout_json = db.Column(db.Text)
 
     @property
     def roles(self):

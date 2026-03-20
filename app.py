@@ -167,20 +167,6 @@ def save_card():
     # Card label — validate uniqueness among this user's cards
     card_label = (data.get("card_label") or "").strip() or None
 
-    # ───────── PRINTABLE CARD SETTINGS ─────────
-    print_show_phone = data.get("print_show_phone") == "on"
-    print_show_email = data.get("print_show_email") == "on"
-    print_show_address = data.get("print_show_address") == "on"
-    print_show_website = data.get("print_show_website") == "on"
-    print_show_social = data.get("print_show_social") == "on"
-    print_custom_text = (data.get("print_custom_text") or "").strip() or None
-    print_template = data.get("print_template") or "classic"
-    print_color = data.get("print_color") or "black"
-    if print_template not in ("classic", "centered", "split"):
-        print_template = "classic"
-    if print_color not in ("black", "blue", "green", "purple", "orange"):
-        print_color = "black"
-
     if card_id:
         card = Card.query.get(int(card_id))
         if card and card.user_id == current_user.id:
@@ -210,15 +196,6 @@ def save_card():
             card.facebook      = data.get("facebook")
             card.youtube       = data.get("youtube")
             card.whatsapp      = data.get("whatsapp")
-            # ───────── PRINTABLE SETTINGS UPDATE ─────────
-            card.print_show_phone = print_show_phone
-            card.print_show_email = print_show_email
-            card.print_show_address = print_show_address
-            card.print_show_website = print_show_website
-            card.print_show_social = print_show_social
-            card.print_custom_text = print_custom_text
-            card.print_template = print_template
-            card.print_color = print_color
             db.session.commit()
             return redirect(url_for("view_card", card_id=card.id))
 
@@ -248,15 +225,6 @@ def save_card():
         facebook=data.get("facebook"),
         youtube=data.get("youtube"),
         whatsapp=data.get("whatsapp"),
-        # ───────── PRINTABLE SETTINGS NEW ─────────
-        print_show_phone=print_show_phone,
-        print_show_email=print_show_email,
-        print_show_address=print_show_address,
-        print_show_website=print_show_website,
-        print_show_social=print_show_social,
-        print_custom_text=print_custom_text,
-        print_template=print_template,
-        print_color=print_color,
     )
 
     db.session.add(new_card)
@@ -312,7 +280,66 @@ def view_card(card_id):
 
     return render_template("card.html", card=card)
 
-# ───────── NEW: PRINT CARD ROUTE ─────────
+# ───────── DESIGNER & PRINT ROUTES ─────────
+
+@app.route("/card/<int:card_id>/designer")
+@login_required
+def card_designer(card_id):
+    card = Card.query.get_or_404(card_id)
+    if card.user_id != current_user.id:
+        return redirect(url_for("dashboard"))
+    
+    # Parse layout JSON in Python — never in templates
+    layout = {}
+    if card.print_layout_json:
+        try:
+            layout = json.loads(card.print_layout_json)
+        except (ValueError, TypeError):
+            layout = {}
+
+    positions    = layout.get('positions', {})
+    saved_bg     = layout.get('background', 'matte_black')
+    saved_accent = layout.get('accent', 'orange')
+    custom_text  = layout.get('custom_text', '')
+    show_phone   = layout.get('show_phone', True)
+    show_email   = layout.get('show_email', True)
+    show_website = layout.get('show_website', True)
+    show_address = layout.get('show_address', False)
+
+    # Generate QR code for designer preview
+    card_url = url_for("view_card", card_id=card.id, _external=True)
+    qr_base64 = generate_qr_base64(card_url)
+    
+    return render_template("designer.html",
+        card=card,
+        qr_base64=qr_base64,
+        positions=positions,
+        saved_bg=saved_bg,
+        saved_accent=saved_accent,
+        custom_text=custom_text,
+        show_phone=show_phone,
+        show_email=show_email,
+        show_website=show_website,
+        show_address=show_address,
+    )
+
+@app.route("/card/<int:card_id>/save_layout", methods=["POST"])
+@login_required
+def save_layout(card_id):
+    card = Card.query.get_or_404(card_id)
+    if card.user_id != current_user.id:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    layout_data = request.get_json()
+    if not layout_data:
+        return jsonify({'error': 'No data'}), 400
+
+    # Store everything in print_layout_json — single source of truth
+    card.print_layout_json = json.dumps(layout_data)
+    db.session.commit()
+    
+    return jsonify({'success': True})
+
 @app.route("/card/<int:card_id>/print")
 @login_required
 def print_card(card_id):
@@ -320,11 +347,39 @@ def print_card(card_id):
     if card.user_id != current_user.id:
         return redirect(url_for("dashboard"))
     
+    # Parse layout JSON in Python — never in templates
+    layout = {}
+    if card.print_layout_json:
+        try:
+            layout = json.loads(card.print_layout_json)
+        except (ValueError, TypeError):
+            layout = {}
+
+    positions    = layout.get('positions', {})
+    bg           = layout.get('background', 'matte_black')
+    accent       = layout.get('accent', 'orange')
+    custom_text  = layout.get('custom_text', '')
+    show_phone   = layout.get('show_phone', True)
+    show_email   = layout.get('show_email', True)
+    show_website = layout.get('show_website', True)
+    show_address = layout.get('show_address', False)
+
     # Generate QR code
     card_url = url_for("view_card", card_id=card.id, _external=True)
     qr_base64 = generate_qr_base64(card_url)
     
-    return render_template("print_card.html", card=card, qr_base64=qr_base64)
+    return render_template("print_card.html",
+        card=card,
+        qr_base64=qr_base64,
+        positions=positions,
+        bg=bg,
+        accent=accent,
+        custom_text=custom_text,
+        show_phone=show_phone,
+        show_email=show_email,
+        show_website=show_website,
+        show_address=show_address,
+    )
 
 @app.route("/card/<int:card_id>/delete", methods=["POST"])
 @login_required

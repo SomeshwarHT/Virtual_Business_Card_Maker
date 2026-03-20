@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Card Designer — {{ card.name }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/interactjs@1.10.19/dist/interact.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent:       #fc7800;
+      --accent-hover: #e56b00;
+      --brand:        #0f0f0f;
+      --surface:      #ffffff;
+      --bg:           #eeebe7;
+      --text-1:       #0f0f0f;
+      --text-2:       #4b5563;
+      --text-3:       #9ca3af;
+      --border:       #e2ddd8;
+      --radius:       12px;
+      --radius-sm:    8px;
+      --shadow:       0 2px 12px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.04);
+    }
+
+    html, body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text-1); -webkit-font-smoothing: antialiased; }
+
+    /* ── NAV ── */
+    .navbar { background: var(--brand); border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 200; }
+    .navbar-inner { max-width: 1440px; margin: 0 auto; padding: 0 20px; height: 52px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .nav-logo-icon { width: 26px; height: 26px; flex-shrink: 0; }
+    .nav-logo-text { font-size: .92rem; font-weight: 700; color: #fff; letter-spacing: -.3px; }
+    .nav-actions { display: flex; align-items: center; gap: 8px; }
+    .nav-btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 13px; border-radius: 6px; font-family: 'Outfit', sans-serif; font-size: .78rem; font-weight: 600; text-decoration: none; border: 1px solid rgba(255,255,255,.14); background: transparent; color: rgba(255,255,255,.7); cursor: pointer; transition: all .15s; }
+    .nav-btn:hover { color: #fff; border-color: rgba(255,255,255,.3); }
+    .nav-btn svg { width: 13px; height: 13px; fill: currentColor; }
+
+    /* ── PAGE LAYOUT ── */
+    .page { max-width: 1440px; margin: 0 auto; padding: 22px 20px 90px; display: grid; grid-template-columns: 256px 1fr; gap: 18px; align-items: start; }
+    @media (max-width: 1080px) { .page { grid-template-columns: 1fr; } .panel { position: static; } }
+
+    /* ── LEFT PANEL ── */
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); position: sticky; top: 64px; overflow: hidden; }
+    .panel-section { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .panel-section:last-child { border-bottom: none; }
+    .ctrl-label { font-size: .68rem; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 10px; display: block; }
+
+    /* Preset buttons */
+    .preset-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .preset-btn { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 10px 4px 8px; border: 2px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); cursor: pointer; font-family: 'Outfit', sans-serif; font-size: .68rem; font-weight: 600; color: var(--text-2); transition: border-color .14s, color .14s, background .14s; }
+    .preset-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .preset-btn.active { border-color: var(--accent); background: #fff5ea; color: var(--accent); }
+    .preset-icon { width: 100%; height: 22px; display: block; }
+
+    /* Color swatches */
+    .swatch-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+    .swatch { aspect-ratio: 1; border-radius: 6px; border: 2px solid transparent; cursor: pointer; position: relative; transition: transform .13s, box-shadow .13s; }
+    .swatch:hover { transform: scale(1.12); }
+    .swatch.active { border-color: var(--accent) !important; transform: scale(1.08); box-shadow: 0 0 0 3px rgba(252,120,0,.25); }
+    .swatch.active::after { content: '✓'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.7); }
+
+    /* BG swatches */
+    .sw-matte_black  { background: #1a1a1a; }
+    .sw-matte_navy   { background: #0f1f3d; }
+    .sw-matte_forest { background: #1a2f1a; }
+    .sw-matte_maroon { background: #3d1a1a; }
+    .sw-matte_slate  { background: #2d3748; }
+    .sw-matte_beige  { background: #e8dcc8; border-color: #c8bfa8 !important; }
+
+    /* Accent swatches */
+    .sw-orange { background: #fc7800; }
+    .sw-blue   { background: #2563eb; }
+    .sw-green  { background: #10b981; }
+    .sw-purple { background: #8b5cf6; }
+    .sw-red    { background: #ef4444; }
+    .sw-gold   { background: #f59e0b; }
+
+    /* Toggles */
+    .toggle-list { display: flex; flex-direction: column; gap: 7px; }
+    .toggle-item { display: flex; align-items: center; gap: 7px; font-size: .78rem; color: var(--text-2); cursor: pointer; }
+    .toggle-item input[type="checkbox"] { width: 14px; height: 14px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+
+    /* Custom text */
+    .ctrl-input { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: 'Outfit', sans-serif; font-size: .78rem; color: var(--text-1); outline: none; transition: border-color .15s; background: var(--surface); }
+    .ctrl-input:focus { border-color: var(--accent); }
+    .ctrl-hint { font-size: .67rem; color: var(--text-3); margin-top: 5px; }
+
+    /* ── CANVAS AREA ── */
+    .canvas-area { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 28px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+    .canvas-hint { font-size: .72rem; color: var(--text-3); text-align: center; }
+    .canvas-wrap { position: relative; width: 100%; }
+
+    /* ── THE CARD CANVAS — 630×360px = 3.5in×2in at 180dpi ── */
+    .canvas {
+      position: absolute; top: 0; left: 0;
+      width: 630px; height: 360px;
+      transform-origin: top left;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 12px 48px rgba(0,0,0,.28), 0 2px 8px rgba(0,0,0,.12);
+    }
+
+    /* Background — via CLASS (identical chain to print_card.html) */
+    .canvas.bg-matte_black  { background: #1a1a1a; }
+    .canvas.bg-matte_navy   { background: #0f1f3d; }
+    .canvas.bg-matte_forest { background: #1a2f1a; }
+    .canvas.bg-matte_maroon { background: #3d1a1a; }
+    .canvas.bg-matte_slate  { background: #2d3748; }
+    .canvas.bg-matte_beige  { background: #e8dcc8; }
+
+    /* Accent — via CLASS */
+    .canvas.accent-orange { --cur-accent: #fc7800; }
+    .canvas.accent-blue   { --cur-accent: #2563eb; }
+    .canvas.accent-green  { --cur-accent: #10b981; }
+    .canvas.accent-purple { --cur-accent: #8b5cf6; }
+    .canvas.accent-red    { --cur-accent: #ef4444; }
+    .canvas.accent-gold   { --cur-accent: #f59e0b; }
+
+    /* Text contrast — IDENTICAL to print_card.html */
+    .canvas.text-light .el-name        { color: #ffffff; }
+    .canvas.text-light .el-designation { color: var(--cur-accent); }
+    .canvas.text-light .el-company     { color: rgba(255,255,255,.65); }
+    .canvas.text-light .el-contact     { color: rgba(255,255,255,.82); }
+    .canvas.text-light .el-contact svg { fill: rgba(255,255,255,.5); }
+    .canvas.text-light .el-custom      { color: rgba(255,255,255,.55); }
+    .canvas.text-light .card-brand     { color: rgba(255,255,255,.18); }
+
+    .canvas.text-dark  .el-name        { color: #111111; }
+    .canvas.text-dark  .el-designation { color: var(--cur-accent); }
+    .canvas.text-dark  .el-company     { color: #374151; }
+    .canvas.text-dark  .el-contact     { color: #374151; }
+    .canvas.text-dark  .el-contact svg { fill: #9ca3af; }
+    .canvas.text-dark  .el-custom      { color: #6b7280; }
+    .canvas.text-dark  .card-brand     { color: rgba(0,0,0,.18); }
+
+    /* Draggable wrapper */
+    .card-el {
+      position: absolute;
+      font-family: 'Outfit', sans-serif;
+      cursor: move;
+      touch-action: none;
+      user-select: none;
+      padding: 2px 4px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+    .card-el:hover   { outline: 1.5px dashed rgba(252,120,0,.8); outline-offset: 2px; }
+    .card-el.dragging { outline: 2px solid #fc7800; outline-offset: 2px; z-index: 20; }
+
+    /* ── TYPOGRAPHY — MUST BE IDENTICAL TO print_card.html ── */
+    .el-name        { font-size: 26px; font-weight: 800; letter-spacing: -.5px; line-height: 1.1; white-space: nowrap; }
+    .el-designation { font-size: 10px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; white-space: nowrap; }
+    .el-company     { font-size: 13px; font-weight: 500; letter-spacing: .1px; white-space: nowrap; }
+    .el-contact     { font-size: 11px; display: flex; align-items: center; gap: 6px; white-space: nowrap; font-weight: 400; }
+    .el-contact svg { width: 11px; height: 11px; flex-shrink: 0; fill: currentColor; }
+    .el-custom      { font-size: 10px; font-style: italic; max-width: 260px; line-height: 1.5; white-space: normal; opacity: .8; }
+
+    /* QR — MUST BE IDENTICAL TO print_card.html */
+    .el-qr {
+      width: 110px; height: 110px;
+      padding: 7px;
+      background: #ffffff;
+      border: 3px solid var(--cur-accent, #fc7800);
+      border-radius: 10px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 4px;
+    }
+    .el-qr-img   { width: 82px; height: 82px; object-fit: contain; display: block; }
+    .el-qr-label { font-size: 6.5px; color: #9ca3af; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; }
+
+    /* CardCraft brand watermark */
+    .card-brand {
+      position: absolute; bottom: 9px; right: 14px;
+      font-size: 7px; font-weight: 500;
+      font-family: 'Outfit', sans-serif;
+      letter-spacing: .4px;
+      pointer-events: none; user-select: none;
+      opacity: .7;
+    }
+
+    /* ── BOTTOM BAR ── */
+    .bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 12px 20px; display: flex; justify-content: center; gap: 10px; z-index: 100; box-shadow: 0 -2px 16px rgba(0,0,0,.06); }
+    .bar-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 22px; border-radius: var(--radius-sm); font-family: 'Outfit', sans-serif; font-size: .85rem; font-weight: 600; text-decoration: none; border: none; cursor: pointer; transition: all .15s; }
+    .bar-btn-primary { background: var(--accent); color: #fff; }
+    .bar-btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+    .bar-btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+    .bar-btn-secondary { background: transparent; color: var(--text-2); border: 2px solid var(--border); }
+    .bar-btn-secondary:hover { border-color: #888; color: var(--text-1); }
+    .bar-btn svg { width: 14px; height: 14px; fill: currentColor; }
+
+    /* ── TOAST ── */
+    .toast { position: fixed; bottom: 76px; left: 50%; transform: translateX(-50%) translateY(16px); background: var(--brand); color: #fff; padding: 11px 18px; border-radius: var(--radius-sm); font-size: .82rem; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,.25); opacity: 0; pointer-events: none; transition: all .22s; z-index: 300; white-space: nowrap; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="{{ url_for('view_card', card_id=card.id) }}" class="nav-logo">
+      <svg class="nav-logo-icon" viewBox="0 0 32 32">
+        <rect width="32" height="32" rx="6" fill="#fc7800"/>
+        <rect x="4" y="6" width="24" height="20" rx="3" fill="#0f0f0f" opacity=".85"/>
+        <circle cx="11" cy="14" r="4" fill="#fc7800" opacity=".95"/>
+        <rect x="17" y="11" width="9" height="2" rx="1" fill="#fff" opacity=".8"/>
+        <rect x="17" y="15" width="6" height="2" rx="1" fill="#fff" opacity=".55"/>
+        <rect x="5" y="21" width="22" height="2" rx="1" fill="#fc7800" opacity=".4"/>
+      </svg>
+      <span class="nav-logo-text">Card Designer</span>
+    </a>
+    <div class="nav-actions">
+      <a href="{{ url_for('print_card', card_id=card.id) }}" class="nav-btn" target="_blank">
+        <svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+        Print Preview
+      </a>
+      <a href="{{ url_for('view_card', card_id=card.id) }}" class="nav-btn">
+        <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        Close
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE -->
+<div class="page">
+
+  <!-- LEFT PANEL -->
+  <div class="panel">
+
+    <div class="panel-section">
+      <span class="ctrl-label">Layout Preset</span>
+      <div class="preset-row">
+        <button class="preset-btn" data-preset="classic">
+          <svg class="preset-icon" viewBox="0 0 60 34" fill="none">
+            <rect x=".5" y=".5" width="59" height="33" rx="3" fill="#f4f4f4" stroke="#d4d4d4"/>
+            <rect x="5"  y="5"  width="28" height="5"   rx="1.5" fill="#9ca3af"/>
+            <rect x="5"  y="13" width="19" height="2.5" rx="1" fill="#d1d5db"/>
+            <rect x="5"  y="17" width="22" height="2.5" rx="1" fill="#d1d5db"/>
+            <rect x="5"  y="21" width="17" height="2.5" rx="1" fill="#d1d5db"/>
+            <rect x="5"  y="25" width="20" height="2.5" rx="1" fill="#d1d5db"/>
+            <rect x="37" y="6"  width="19" height="19"  rx="2.5" fill="#e5e7eb"/>
+          </svg>
+          Classic
+        </button>
+        <button class="preset-btn" data-preset="centered">
+          <svg class="preset-icon" viewBox="0 0 60 34" fill="none">
+            <rect x=".5" y=".5" width="59" height="33" rx="3" fill="#f4f4f4" stroke="#d4d4d4"/>
+            <rect x="12" y="3"  width="36" height="5"   rx="1.5" fill="#9ca3af"/>
+            <rect x="16" y="10" width="28" height="2.5" rx="1" fill="#d1d5db"/>
+            <rect x="18" y="14" width="24" height="2.5" rx="1" fill="#d1d5db"/>
+            <rect x="18" y="18" width="24" height="2.5" rx="1" fill="#d1d5db"/>
+            <rect x="19" y="22" width="22" height="10"  rx="2.5" fill="#e5e7eb"/>
+          </svg>
+          Centered
+        </button>
+        <button class="preset-btn" data-preset="split">
+          <svg class="preset-icon" viewBox="0 0 60 34" fill="none">
+            <rect x=".5" y=".5" width="59" height="33" rx="3" fill="#f4f4f4" stroke="#d4d4d4"/>
+            <rect x=".5" y=".5" width="24" height="33" rx="3" fill="#d1d5db"/>
+            <rect x="4"  y="6"  width="17" height="4.5" rx="1.5" fill="#9ca3af"/>
+            <rect x="4"  y="13" width="14" height="2.5" rx="1" fill="#b0b7c3"/>
+            <rect x="4"  y="17" width="15" height="2.5" rx="1" fill="#b0b7c3"/>
+            <rect x="30" y="5"  width="12" height="12"  rx="2" fill="#e5e7eb"/>
+            <rect x="30" y="20" width="22" height="2.5" rx="1" fill="#e5e7eb"/>
+            <rect x="30" y="24" width="18" height="2.5" rx="1" fill="#e5e7eb"/>
+            <rect x="30" y="28" width="20" height="2.5" rx="1" fill="#e5e7eb"/>
+          </svg>
+          Split
+        </button>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <span class="ctrl-label">Background</span>
+      <div class="swatch-grid">
+        <div class="swatch sw-matte_black"  data-bg="matte_black"  title="Matte Black"></div>
+        <div class="swatch sw-matte_navy"   data-bg="matte_navy"   title="Matte Navy"></div>
+        <div class="swatch sw-matte_forest" data-bg="matte_forest" title="Forest"></div>
+        <div class="swatch sw-matte_maroon" data-bg="matte_maroon" title="Maroon"></div>
+        <div class="swatch sw-matte_slate"  data-bg="matte_slate"  title="Slate"></div>
+        <div class="swatch sw-matte_beige"  data-bg="matte_beige"  title="Beige"></div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <span class="ctrl-label">Accent Color</span>
+      <div class="swatch-grid">
+        <div class="swatch sw-orange" data-accent="orange" title="Orange"></div>
+        <div class="swatch sw-blue"   data-accent="blue"   title="Blue"></div>
+        <div class="swatch sw-green"  data-accent="green"  title="Green"></div>
+        <div class="swatch sw-purple" data-accent="purple" title="Purple"></div>
+        <div class="swatch sw-red"    data-accent="red"    title="Red"></div>
+        <div class="swatch sw-gold"   data-accent="gold"   title="Gold"></div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <span class="ctrl-label">Show on Card</span>
+      <div class="toggle-list">
+        <label class="toggle-item"><input type="checkbox" id="tog-phone"   /> Phone</label>
+        <label class="toggle-item"><input type="checkbox" id="tog-email"   /> Email</label>
+        <label class="toggle-item"><input type="checkbox" id="tog-website" /> Website</label>
+        <label class="toggle-item"><input type="checkbox" id="tog-address" /> Address</label>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <span class="ctrl-label">Custom Text</span>
+      <input class="ctrl-input" type="text" id="customTextInput"
+             maxlength="200" placeholder="e.g. Innovating the future" />
+      <div class="ctrl-hint">Optional tagline shown on card</div>
+    </div>
+
+  </div><!-- /panel -->
+
+  <!-- CANVAS AREA -->
+  <div class="canvas-area">
+    <div class="canvas-wrap" id="canvasWrap">
+      <div class="canvas" id="canvas">
+
+        <!-- NAME -->
+        {% if card.name %}
+        <div class="card-el el-name" data-el="name"
+             style="left:{{ positions.name.x if positions.name else 26 }}px;top:{{ positions.name.y if positions.name else 26 }}px;">
+          {{ card.name }}
+        </div>
+        {% endif %}
+
+        <!-- DESIGNATION -->
+        {% set roles = card.roles %}
+        {% set desig = roles[0].designation if roles and roles[0].designation else (card.designation or card.title or '') %}
+        {% if desig %}
+        <div class="card-el el-designation" data-el="designation"
+             style="left:{{ positions.designation.x if positions.designation else 26 }}px;top:{{ positions.designation.y if positions.designation else 66 }}px;">
+          {{ desig }}
+        </div>
+        {% endif %}
+
+        <!-- COMPANY -->
+        {% set company = card.roles[0].company if card.roles and card.roles[0].company else card.company %}
+        {% if company %}
+        <div class="card-el el-company" data-el="company"
+             style="left:{{ positions.company.x if positions.company else 26 }}px;top:{{ positions.company.y if positions.company else 88 }}px;">
+          {{ company }}
+        </div>
+        {% endif %}
+
+        <!-- PHONE -->
+        {% if card.phone %}
+        <div class="card-el el-contact" data-el="phone"
+             style="left:{{ positions.phone.x if positions.phone else 26 }}px;top:{{ positions.phone.y if positions.phone else 126 }}px;display:{{ 'flex' if show_phone else 'none' }};">
+          <svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.4 21 3 13.6 3 4.5c0-.6.4-1 1-1H8c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
+          {{ card.phone }}
+        </div>
+        {% endif %}
+
+        <!-- EMAIL -->
+        {% if card.email %}
+        <div class="card-el el-contact" data-el="email"
+             style="left:{{ positions.email.x if positions.email else 26 }}px;top:{{ positions.email.y if positions.email else 148 }}px;display:{{ 'flex' if show_email else 'none' }};">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+          {{ card.email }}
+        </div>
+        {% endif %}
+
+        <!-- WEBSITE -->
+        {% if card.website %}
+        <div class="card-el el-contact" data-el="website"
+             style="left:{{ positions.website.x if positions.website else 26 }}px;top:{{ positions.website.y if positions.website else 170 }}px;display:{{ 'flex' if show_website else 'none' }};">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+          {{ card.website | replace('https://', '') | replace('http://', '') }}
+        </div>
+        {% endif %}
+
+        <!-- ADDRESS -->
+        {% if card.address %}
+        <div class="card-el el-contact" data-el="address"
+             style="left:{{ positions.address.x if positions.address else 26 }}px;top:{{ positions.address.y if positions.address else 192 }}px;display:{{ 'flex' if show_address else 'none' }};">
+          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          {{ card.address }}
+        </div>
+        {% endif %}
+
+        <!-- QR CODE -->
+        <div class="card-el el-qr" data-el="qr"
+             style="left:{{ positions.qr.x if positions.qr else 494 }}px;top:{{ positions.qr.y if positions.qr else 125 }}px;">
+          <img src="data:image/png;base64,{{ qr_base64 }}" alt="QR" class="el-qr-img" />
+          <div class="el-qr-label">SCAN ME</div>
+        </div>
+
+        <!-- CUSTOM TEXT -->
+        <div class="card-el el-custom" data-el="custom_text"
+             style="left:{{ positions.custom_text.x if positions.custom_text else 26 }}px;top:{{ positions.custom_text.y if positions.custom_text else 320 }}px;display:{{ 'block' if custom_text else 'none' }};">
+          {{ custom_text or '' }}
+        </div>
+
+        <!-- CardCraft brand (non-draggable, no data-el) -->
+        <div class="card-brand">CardCraft</div>
+
+      </div><!-- /canvas -->
+    </div><!-- /canvas-wrap -->
+    <p class="canvas-hint">Drag any element to reposition &middot; Click a preset to snap layout</p>
+  </div><!-- /canvas-area -->
+
+</div><!-- /page -->
+
+<!-- BOTTOM BAR -->
+<div class="bar">
+  <button class="bar-btn bar-btn-primary" id="saveBtn">
+    <svg viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+    Save Design
+  </button>
+  <a href="{{ url_for('print_card', card_id=card.id) }}" class="bar-btn bar-btn-secondary" target="_blank">
+    <svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+    Preview Print
+  </a>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+/* ── CONSTANTS ── */
+var CANVAS_W = 630;
+var CANVAS_H = 360;
+
+var BG_DARK = ['matte_black', 'matte_navy', 'matte_forest', 'matte_maroon', 'matte_slate'];
+var ALL_BG_CLASSES     = ['bg-matte_black','bg-matte_navy','bg-matte_forest','bg-matte_maroon','bg-matte_slate','bg-matte_beige'];
+var ALL_ACCENT_CLASSES = ['accent-orange','accent-blue','accent-green','accent-purple','accent-red','accent-gold'];
+var ACCENT_HEX = {
+  orange: '#fc7800', blue: '#2563eb', green: '#10b981',
+  purple: '#8b5cf6', red:  '#ef4444', gold:  '#f59e0b'
+};
+
+/*
+  PRESET POSITIONS — px on 630 × 360 canvas.
+
+  Element heights (approx, with 2px padding each side):
+    name        26px × 1.1lh = ~29px total
+    designation 10px          = ~15px total
+    company     13px          = ~18px total
+    contact     11px          = ~18px each
+    QR          110×110px fixed
+
+  Card: 630×360. Margins: left=26, top=26, right=26.
+  QR right margin: 630 - 110 - 26 = 494. QR vertical centre: (360-110)/2 = 125.
+
+  CLASSIC — text left, QR right-centred:
+    name        y=26
+    desig       y=26+29+8=63  (gap after name: 8px breathing room)
+    company     y=63+15+6=84  (gap: 6px)
+    [gap of ~26px before contacts — visual section break]
+    phone       y=84+18+24=126
+    email       y=126+22=148
+    website     y=148+22=170
+    address     y=170+22=192
+    custom      y=320   (near bottom, generous gap from contacts)
+    QR          x=494, y=125
+
+  CENTERED — everything horizontally centred on x=315:
+    Estimated text widths at these sizes:
+      name (~200px): x=315-100=215
+      desig (~160px): x=315-80=235
+      company (~130px): x=315-65=250
+      contacts (~200px): x=315-100=215
+      QR (110px): x=315-55=260, y=220 (below contacts)
+      custom: x=215, y=318
+
+  SPLIT — identity left column (x=26), contacts right-centre (x=220), QR far right:
+    Left col (identity, x=26):
+      name y=46
+      desig y=46+29+8=83
+      company y=83+15+6=104
+      custom_text y=310
+    Right contacts (x=220):
+      phone y=42
+      email y=42+22=64
+      website y=64+22=86
+      address y=86+22=108
+    QR far right: x=490, y=120
+*/
+var PRESETS = {
+  classic: {
+    name:        { x: 26,  y: 26  },
+    designation: { x: 26,  y: 63  },
+    company:     { x: 26,  y: 84  },
+    phone:       { x: 26,  y: 126 },
+    email:       { x: 26,  y: 148 },
+    website:     { x: 26,  y: 170 },
+    address:     { x: 26,  y: 192 },
+    qr:          { x: 494, y: 125 },
+    custom_text: { x: 26,  y: 320 }
+  },
+  centered: {
+    name:        { x: 215, y: 22  },
+    designation: { x: 235, y: 57  },
+    company:     { x: 250, y: 76  },
+    phone:       { x: 215, y: 114 },
+    email:       { x: 215, y: 136 },
+    website:     { x: 215, y: 158 },
+    address:     { x: 215, y: 180 },
+    qr:          { x: 260, y: 222 },
+    custom_text: { x: 215, y: 318 }
+  },
+  split: {
+    name:        { x: 26,  y: 46  },
+    designation: { x: 26,  y: 83  },
+    company:     { x: 26,  y: 104 },
+    custom_text: { x: 26,  y: 310 },
+    phone:       { x: 220, y: 42  },
+    email:       { x: 220, y: 64  },
+    website:     { x: 220, y: 86  },
+    address:     { x: 220, y: 108 },
+    qr:          { x: 490, y: 120 }
+  }
+};
+
+/* ── DOM REFS ── */
+var canvas     = document.getElementById('canvas');
+var canvasWrap = document.getElementById('canvasWrap');
+var saveBtn    = document.getElementById('saveBtn');
+var toast      = document.getElementById('toast');
+var elements   = Array.from(canvas.querySelectorAll('[data-el]'));
+
+/* ── STATE ── */
+var curBg     = '{{ saved_bg | default("matte_black") }}';
+var curAccent = '{{ saved_accent | default("orange") }}';
+var curScale  = 1;
+
+/* ── CANVAS SCALING ── */
+function scaleCanvas() {
+  var availW = canvasWrap.offsetWidth;
+  curScale = Math.min(availW / CANVAS_W, 1);
+  canvas.style.transform = 'scale(' + curScale + ')';
+  canvasWrap.style.height = (CANVAS_H * curScale) + 'px';
+}
+
+/* ── BACKGROUND ── */
+function applyBackground(bg) {
+  if (!bg || ALL_BG_CLASSES.indexOf('bg-' + bg) === -1) bg = 'matte_black';
+  ALL_BG_CLASSES.forEach(function (c) { canvas.classList.remove(c); });
+  canvas.classList.add('bg-' + bg);
+  var dark = BG_DARK.indexOf(bg) !== -1;
+  canvas.classList.toggle('text-light', dark);
+  canvas.classList.toggle('text-dark',  !dark);
+  curBg = bg;
+}
+
+/* ── ACCENT ── */
+function applyAccent(accent) {
+  if (!accent || !ACCENT_HEX[accent]) accent = 'orange';
+  ALL_ACCENT_CLASSES.forEach(function (c) { canvas.classList.remove(c); });
+  canvas.classList.add('accent-' + accent);
+  var hex = ACCENT_HEX[accent];
+  var qrEl = canvas.querySelector('[data-el="qr"]');
+  if (qrEl) qrEl.style.borderColor = hex;
+  curAccent = accent;
+}
+
+/* ── HELPERS ── */
+function getEl(name) { return canvas.querySelector('[data-el="' + name + '"]'); }
+
+function setElVisible(name, visible) {
+  var el = getEl(name);
+  if (!el) return;
+  el.style.display = visible ? (el.classList.contains('el-contact') ? 'flex' : 'block') : 'none';
+}
+
+function markActive(selector, matchFn) {
+  document.querySelectorAll(selector).forEach(function (b) {
+    b.classList.toggle('active', matchFn(b));
+  });
+}
+
+/* ── PRESET ── */
+function applyPreset(preset) {
+  var pos = PRESETS[preset];
+  if (!pos) return;
+  elements.forEach(function (el) {
+    var name = el.getAttribute('data-el');
+    if (pos[name] !== undefined) {
+      el.style.left = pos[name].x + 'px';
+      el.style.top  = pos[name].y + 'px';
+      el.setAttribute('data-x', pos[name].x);
+      el.setAttribute('data-y', pos[name].y);
+    }
+  });
+}
+
+/* ── DRAG & DROP — scale-aware ── */
+function makeDraggable() {
+  interact('[data-el]').draggable({
+    listeners: {
+      start: function (e) { e.target.classList.add('dragging'); },
+      move: function (e) {
+        var t  = e.target;
+        var dx = e.dx / curScale;
+        var dy = e.dy / curScale;
+        var x  = (parseFloat(t.getAttribute('data-x')) || 0) + dx;
+        var y  = (parseFloat(t.getAttribute('data-y')) || 0) + dy;
+        x = Math.max(0, Math.min(x, CANVAS_W - 4));
+        y = Math.max(0, Math.min(y, CANVAS_H - 4));
+        t.style.left = x + 'px';
+        t.style.top  = y + 'px';
+        t.setAttribute('data-x', x);
+        t.setAttribute('data-y', y);
+      },
+      end: function (e) { e.target.classList.remove('dragging'); }
+    }
+  });
+}
+
+/* ── INIT ── */
+function init() {
+  scaleCanvas();
+  applyBackground(curBg);
+  applyAccent(curAccent);
+  markActive('[data-bg]',     function (b) { return b.dataset.bg     === curBg;     });
+  markActive('[data-accent]', function (b) { return b.dataset.accent === curAccent; });
+
+  var ph = {{ 'true' if show_phone   else 'false' }};
+  var em = {{ 'true' if show_email   else 'false' }};
+  var ws = {{ 'true' if show_website else 'false' }};
+  var ad = {{ 'true' if show_address else 'false' }};
+
+  var togPhone   = document.getElementById('tog-phone');
+  var togEmail   = document.getElementById('tog-email');
+  var togWebsite = document.getElementById('tog-website');
+  var togAddress = document.getElementById('tog-address');
+  if (togPhone)   { togPhone.checked   = ph; setElVisible('phone',   ph); }
+  if (togEmail)   { togEmail.checked   = em; setElVisible('email',   em); }
+  if (togWebsite) { togWebsite.checked = ws; setElVisible('website', ws); }
+  if (togAddress) { togAddress.checked = ad; setElVisible('address', ad); }
+
+  var ct = {{ custom_text | tojson }};
+  var ctInput = document.getElementById('customTextInput');
+  if (ctInput) ctInput.value = ct || '';
+  var ctEl = getEl('custom_text');
+  if (ctEl) { ctEl.textContent = ct || ''; ctEl.style.display = (ct && ct.trim()) ? 'block' : 'none'; }
+
+  elements.forEach(function (el) {
+    el.setAttribute('data-x', parseFloat(el.style.left) || 0);
+    el.setAttribute('data-y', parseFloat(el.style.top)  || 0);
+  });
+
+  makeDraggable();
+}
+
+/* ── EVENT BINDINGS ── */
+document.querySelectorAll('[data-bg]').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    markActive('[data-bg]', function (b) { return b.dataset.bg === btn.dataset.bg; });
+    applyBackground(btn.dataset.bg);
+  });
+});
+
+document.querySelectorAll('[data-accent]').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    markActive('[data-accent]', function (b) { return b.dataset.accent === btn.dataset.accent; });
+    applyAccent(btn.dataset.accent);
+  });
+});
+
+document.querySelectorAll('[data-preset]').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    markActive('[data-preset]', function (b) { return b.dataset.preset === btn.dataset.preset; });
+    applyPreset(btn.dataset.preset);
+    showToast('Preset applied — drag to fine-tune');
+  });
+});
+
+['phone', 'email', 'website', 'address'].forEach(function (field) {
+  var chk = document.getElementById('tog-' + field);
+  if (chk) chk.addEventListener('change', function (e) { setElVisible(field, e.target.checked); });
+});
+
+var ctInputEl = document.getElementById('customTextInput');
+if (ctInputEl) {
+  ctInputEl.addEventListener('input', function (e) {
+    var val  = e.target.value;
+    var ctEl = getEl('custom_text');
+    if (ctEl) { ctEl.textContent = val; ctEl.style.display = val.trim() ? 'block' : 'none'; }
+  });
+}
+
+window.addEventListener('resize', scaleCanvas);
+
+/* ── SAVE ── */
+if (saveBtn) {
+  saveBtn.addEventListener('click', async function () {
+    saveBtn.disabled = true;
+    var positions = {};
+    elements.forEach(function (el) {
+      var name = el.getAttribute('data-el');
+      positions[name] = {
+        x: Math.round(parseFloat(el.getAttribute('data-x')) || 0),
+        y: Math.round(parseFloat(el.getAttribute('data-y')) || 0)
+      };
+    });
+    var payload = {
+      positions:    positions,
+      background:   curBg,
+      accent:       curAccent,
+      show_phone:   document.getElementById('tog-phone')   ? !!document.getElementById('tog-phone').checked   : true,
+      show_email:   document.getElementById('tog-email')   ? !!document.getElementById('tog-email').checked   : true,
+      show_website: document.getElementById('tog-website') ? !!document.getElementById('tog-website').checked : true,
+      show_address: document.getElementById('tog-address') ? !!document.getElementById('tog-address').checked : false,
+      custom_text:  document.getElementById('customTextInput') ? document.getElementById('customTextInput').value.trim() : ''
+    };
+    try {
+      var res  = await fetch('/card/{{ card.id }}/save_layout', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      var data = await res.json();
+      showToast(data.success ? '✓ Design saved' : '✗ Save failed');
+    } catch (err) { showToast('✗ Network error'); }
+    finally { saveBtn.disabled = false; }
+  });
+}
+
+/* ── TOAST ── */
+function showToast(msg) {
+  if (!toast) return;
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(function () { toast.classList.remove('show'); }, 2600);
+}
+
+init();
+
+}); /* end DOMContentLoaded */
+</script>
+</body>
+</html>
