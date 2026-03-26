@@ -44,7 +44,7 @@
     @media (max-width: 1080px) { .page { grid-template-columns: 1fr; } .panel { position: static; } }
 
     /* ── LEFT PANEL ── */
-    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); position: sticky; top: 64px; overflow: hidden; }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); position: sticky; top: 64px; overflow: hidden; max-height: calc(100vh - 80px); overflow-y: auto; }
     .panel-section { padding: 14px 16px; border-bottom: 1px solid var(--border); }
     .panel-section:last-child { border-bottom: none; }
     .ctrl-label { font-size: .68rem; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 10px; display: block; }
@@ -62,16 +62,12 @@
     .swatch:hover { transform: scale(1.12); }
     .swatch.active { border-color: var(--accent) !important; transform: scale(1.08); box-shadow: 0 0 0 3px rgba(252,120,0,.25); }
     .swatch.active::after { content: '✓'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.7); }
-
-    /* BG swatches */
     .sw-matte_black  { background: #1a1a1a; }
     .sw-matte_navy   { background: #0f1f3d; }
     .sw-matte_forest { background: #1a2f1a; }
     .sw-matte_maroon { background: #3d1a1a; }
     .sw-matte_slate  { background: #2d3748; }
     .sw-matte_beige  { background: #e8dcc8; border-color: #c8bfa8 !important; }
-
-    /* Accent swatches */
     .sw-orange { background: #fc7800; }
     .sw-blue   { background: #2563eb; }
     .sw-green  { background: #10b981; }
@@ -92,9 +88,16 @@
     /* ── CANVAS AREA ── */
     .canvas-area { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 28px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
     .canvas-hint { font-size: .72rem; color: var(--text-3); text-align: center; }
+
+    /* Reset buttons row — shown below canvas */
+    .reset-row { display: flex; gap: 8px; justify-content: center; }
+    .reset-btn { display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px; border-radius: var(--radius-sm); font-family: 'Outfit', sans-serif; font-size: .75rem; font-weight: 600; border: 1.5px solid var(--border); background: var(--surface); color: var(--text-2); cursor: pointer; transition: all .14s; }
+    .reset-btn:hover { border-color: var(--accent); color: var(--accent); background: #fff5ea; }
+    .reset-btn svg { width: 12px; height: 12px; fill: currentColor; flex-shrink: 0; }
+
     .canvas-wrap { position: relative; width: 100%; }
 
-    /* ── THE CARD CANVAS — 630×360px = 3.5in×2in at 180dpi ── */
+    /* ── CARD CANVAS — 630×360px = 3.5in×2in ── */
     .canvas {
       position: absolute; top: 0; left: 0;
       width: 630px; height: 360px;
@@ -104,7 +107,7 @@
       box-shadow: 0 12px 48px rgba(0,0,0,.28), 0 2px 8px rgba(0,0,0,.12);
     }
 
-    /* Background — via CLASS (identical chain to print_card.html) */
+    /* Background */
     .canvas.bg-matte_black  { background: #1a1a1a; }
     .canvas.bg-matte_navy   { background: #0f1f3d; }
     .canvas.bg-matte_forest { background: #1a2f1a; }
@@ -112,7 +115,7 @@
     .canvas.bg-matte_slate  { background: #2d3748; }
     .canvas.bg-matte_beige  { background: #e8dcc8; }
 
-    /* Accent — via CLASS */
+    /* Accent */
     .canvas.accent-orange { --cur-accent: #fc7800; }
     .canvas.accent-blue   { --cur-accent: #2563eb; }
     .canvas.accent-green  { --cur-accent: #10b981; }
@@ -128,7 +131,6 @@
     .canvas.text-light .el-contact svg { fill: rgba(255,255,255,.5); }
     .canvas.text-light .el-custom      { color: rgba(255,255,255,.55); }
     .canvas.text-light .card-brand     { color: rgba(255,255,255,.18); }
-
     .canvas.text-dark  .el-name        { color: #111111; }
     .canvas.text-dark  .el-designation { color: var(--cur-accent); }
     .canvas.text-dark  .el-company     { color: #374151; }
@@ -137,7 +139,7 @@
     .canvas.text-dark  .el-custom      { color: #6b7280; }
     .canvas.text-dark  .card-brand     { color: rgba(0,0,0,.18); }
 
-    /* Draggable wrapper */
+    /* ── DRAGGABLE + RESIZABLE ELEMENTS ── */
     .card-el {
       position: absolute;
       font-family: 'Outfit', sans-serif;
@@ -147,40 +149,49 @@
       padding: 2px 4px;
       border-radius: 3px;
       white-space: nowrap;
+      min-width: 20px;
+      min-height: 12px;
     }
+    /* address gets white-space:normal when in split preset via JS class */
+    .card-el.wrap-text { white-space: normal; max-width: 180px; align-items: flex-start; }
     .card-el:hover   { outline: 1.5px dashed rgba(252,120,0,.8); outline-offset: 2px; }
-    .card-el.dragging { outline: 2px solid #fc7800; outline-offset: 2px; z-index: 20; }
+    .card-el.active  { outline: 2px solid #fc7800; outline-offset: 2px; z-index: 20; }
 
-    /* ── TYPOGRAPHY — MUST BE IDENTICAL TO print_card.html ── */
-    .el-name        { font-size: 26px; font-weight: 800; letter-spacing: -.5px; line-height: 1.1; white-space: nowrap; }
-    .el-designation { font-size: 10px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; white-space: nowrap; }
-    .el-company     { font-size: 13px; font-weight: 500; letter-spacing: .1px; white-space: nowrap; }
-    .el-contact     { font-size: 11px; display: flex; align-items: center; gap: 6px; white-space: nowrap; font-weight: 400; }
-    .el-contact svg { width: 11px; height: 11px; flex-shrink: 0; fill: currentColor; }
+    /* Resize handle */
+    .resize-handle {
+      position: absolute; bottom: -4px; right: -4px;
+      width: 9px; height: 9px;
+      background: #fc7800; border: 1.5px solid #fff;
+      border-radius: 50%; opacity: 0; transition: opacity .12s;
+      pointer-events: none; display: block;
+    }
+    .card-el:hover .resize-handle,
+    .card-el.active .resize-handle { opacity: 1; }
+
+    /* ── TYPOGRAPHY — IDENTICAL TO print_card.html ── */
+    .el-name        { font-size: 28px; font-weight: 800; letter-spacing: -.5px; line-height: 1.1; }
+    .el-designation { font-size: 10px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; }
+    .el-company     { font-size: 13px; font-weight: 500; letter-spacing: .1px; }
+    .el-contact     { font-size: 11px; display: flex; align-items: center; gap: 6px; font-weight: 400; }
+    .el-contact svg { width: 1em; height: 1em; flex-shrink: 0; fill: currentColor; }
     .el-custom      { font-size: 10px; font-style: italic; max-width: 260px; line-height: 1.5; white-space: normal; opacity: .8; }
 
-    /* QR — MUST BE IDENTICAL TO print_card.html */
+    /* QR — IDENTICAL TO print_card.html */
     .el-qr {
-      width: 110px; height: 110px;
-      padding: 7px;
-      background: #ffffff;
-      border: 3px solid var(--cur-accent, #fc7800);
-      border-radius: 10px;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 4px;
+      width: 110px; height: 110px; padding: 6px;
+      background: #ffffff; border: 3px solid var(--cur-accent, #fc7800);
+      border-radius: 10px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 3px; overflow: hidden;
     }
-    .el-qr-img   { width: 82px; height: 82px; object-fit: contain; display: block; }
-    .el-qr-label { font-size: 6.5px; color: #9ca3af; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; }
+    .el-qr-img   { width: 100%; flex: 1; object-fit: contain; display: block; min-height: 0; }
+    .el-qr-label { font-size: 6.5px; color: #9ca3af; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; flex-shrink: 0; }
 
-    /* CardCraft brand watermark */
+    /* CardCraft brand */
     .card-brand {
       position: absolute; bottom: 9px; right: 14px;
       font-size: 7px; font-weight: 500;
-      font-family: 'Outfit', sans-serif;
-      letter-spacing: .4px;
-      pointer-events: none; user-select: none;
-      opacity: .7;
+      font-family: 'Outfit', sans-serif; letter-spacing: .4px;
+      pointer-events: none; user-select: none; opacity: .7;
     }
 
     /* ── BOTTOM BAR ── */
@@ -227,7 +238,6 @@
   </div>
 </nav>
 
-<!-- PAGE -->
 <div class="page">
 
   <!-- LEFT PANEL -->
@@ -239,37 +249,41 @@
         <button class="preset-btn" data-preset="classic">
           <svg class="preset-icon" viewBox="0 0 60 34" fill="none">
             <rect x=".5" y=".5" width="59" height="33" rx="3" fill="#f4f4f4" stroke="#d4d4d4"/>
-            <rect x="5"  y="5"  width="28" height="5"   rx="1.5" fill="#9ca3af"/>
-            <rect x="5"  y="13" width="19" height="2.5" rx="1" fill="#d1d5db"/>
-            <rect x="5"  y="17" width="22" height="2.5" rx="1" fill="#d1d5db"/>
-            <rect x="5"  y="21" width="17" height="2.5" rx="1" fill="#d1d5db"/>
-            <rect x="5"  y="25" width="20" height="2.5" rx="1" fill="#d1d5db"/>
-            <rect x="37" y="6"  width="19" height="19"  rx="2.5" fill="#e5e7eb"/>
+            <rect x="4" y="5" width="24" height="4.5" rx="1.5" fill="#9ca3af"/>
+            <rect x="4" y="12" width="16" height="2.5" rx="1" fill="#d1d5db"/>
+            <rect x="4" y="16" width="18" height="2.5" rx="1" fill="#d1d5db"/>
+            <rect x="4" y="22" width="14" height="2.5" rx="1" fill="#e2e5ea"/>
+            <rect x="4" y="26" width="16" height="2.5" rx="1" fill="#e2e5ea"/>
+            <rect x="32" y="4" width="15" height="15" rx="2" fill="#e5e7eb"/>
+            <rect x="32" y="21" width="12" height="2.5" rx="1" fill="#e2e5ea"/>
+            <rect x="32" y="25" width="14" height="2.5" rx="1" fill="#e2e5ea"/>
           </svg>
           Classic
         </button>
         <button class="preset-btn" data-preset="centered">
           <svg class="preset-icon" viewBox="0 0 60 34" fill="none">
             <rect x=".5" y=".5" width="59" height="33" rx="3" fill="#f4f4f4" stroke="#d4d4d4"/>
-            <rect x="12" y="3"  width="36" height="5"   rx="1.5" fill="#9ca3af"/>
+            <rect x="12" y="3" width="36" height="5" rx="1.5" fill="#9ca3af"/>
             <rect x="16" y="10" width="28" height="2.5" rx="1" fill="#d1d5db"/>
             <rect x="18" y="14" width="24" height="2.5" rx="1" fill="#d1d5db"/>
-            <rect x="18" y="18" width="24" height="2.5" rx="1" fill="#d1d5db"/>
-            <rect x="19" y="22" width="22" height="10"  rx="2.5" fill="#e5e7eb"/>
+            <rect x="14" y="18" width="14" height="2.5" rx="1" fill="#e2e5ea"/>
+            <rect x="31" y="18" width="14" height="2.5" rx="1" fill="#e2e5ea"/>
+            <rect x="19" y="23" width="22" height="9" rx="2.5" fill="#e5e7eb"/>
           </svg>
           Centered
         </button>
         <button class="preset-btn" data-preset="split">
           <svg class="preset-icon" viewBox="0 0 60 34" fill="none">
             <rect x=".5" y=".5" width="59" height="33" rx="3" fill="#f4f4f4" stroke="#d4d4d4"/>
-            <rect x=".5" y=".5" width="24" height="33" rx="3" fill="#d1d5db"/>
-            <rect x="4"  y="6"  width="17" height="4.5" rx="1.5" fill="#9ca3af"/>
-            <rect x="4"  y="13" width="14" height="2.5" rx="1" fill="#b0b7c3"/>
-            <rect x="4"  y="17" width="15" height="2.5" rx="1" fill="#b0b7c3"/>
-            <rect x="30" y="5"  width="12" height="12"  rx="2" fill="#e5e7eb"/>
-            <rect x="30" y="20" width="22" height="2.5" rx="1" fill="#e5e7eb"/>
-            <rect x="30" y="24" width="18" height="2.5" rx="1" fill="#e5e7eb"/>
-            <rect x="30" y="28" width="20" height="2.5" rx="1" fill="#e5e7eb"/>
+            <rect x="4" y="4" width="22" height="5" rx="1.5" fill="#9ca3af"/>
+            <rect x="4" y="12" width="16" height="2.5" rx="1" fill="#b0b7c3"/>
+            <rect x="4" y="16" width="18" height="2.5" rx="1" fill="#b0b7c3"/>
+            <rect x="4" y="22" width="14" height="2.5" rx="1" fill="#d1d5db"/>
+            <rect x="4" y="26" width="16" height="2.5" rx="1" fill="#d1d5db"/>
+            <rect x="34" y="3" width="22" height="2.5" rx="1" fill="#d1d5db"/>
+            <rect x="34" y="7" width="18" height="2.5" rx="1" fill="#d1d5db"/>
+            <rect x="34" y="11" width="20" height="2.5" rx="1" fill="#d1d5db"/>
+            <rect x="40" y="17" width="16" height="14" rx="2" fill="#e5e7eb"/>
           </svg>
           Split
         </button>
@@ -317,6 +331,14 @@
       <div class="ctrl-hint">Optional tagline shown on card</div>
     </div>
 
+    <div class="panel-section">
+      <span class="ctrl-label">How to use</span>
+      <p style="font-size:.72rem;color:var(--text-3);line-height:1.6;">
+        <strong style="color:var(--text-2)">Drag</strong> any element to reposition.<br>
+        <strong style="color:var(--accent)">Orange dot</strong> (bottom-right) to resize.
+      </p>
+    </div>
+
   </div><!-- /panel -->
 
   <!-- CANVAS AREA -->
@@ -324,93 +346,96 @@
     <div class="canvas-wrap" id="canvasWrap">
       <div class="canvas" id="canvas">
 
-        <!-- NAME -->
         {% if card.name %}
         <div class="card-el el-name" data-el="name"
-             style="left:{{ positions.name.x if positions.name else 26 }}px;top:{{ positions.name.y if positions.name else 26 }}px;">
-          {{ card.name }}
+             style="left:{{ positions.name.x if positions.name else 36 }}px;top:{{ positions.name.y if positions.name else 56 }}px;{% if sizes and sizes.name %}font-size:{{ sizes.name }}px;{% endif %}">
+          {{ card.name }}<span class="resize-handle"></span>
         </div>
         {% endif %}
 
-        <!-- DESIGNATION -->
         {% set roles = card.roles %}
         {% set desig = roles[0].designation if roles and roles[0].designation else (card.designation or card.title or '') %}
         {% if desig %}
         <div class="card-el el-designation" data-el="designation"
-             style="left:{{ positions.designation.x if positions.designation else 26 }}px;top:{{ positions.designation.y if positions.designation else 66 }}px;">
-          {{ desig }}
+             style="left:{{ positions.designation.x if positions.designation else 36 }}px;top:{{ positions.designation.y if positions.designation else 98 }}px;{% if sizes and sizes.designation %}font-size:{{ sizes.designation }}px;{% endif %}">
+          {{ desig }}<span class="resize-handle"></span>
         </div>
         {% endif %}
 
-        <!-- COMPANY -->
         {% set company = card.roles[0].company if card.roles and card.roles[0].company else card.company %}
         {% if company %}
         <div class="card-el el-company" data-el="company"
-             style="left:{{ positions.company.x if positions.company else 26 }}px;top:{{ positions.company.y if positions.company else 88 }}px;">
-          {{ company }}
+             style="left:{{ positions.company.x if positions.company else 36 }}px;top:{{ positions.company.y if positions.company else 118 }}px;{% if sizes and sizes.company %}font-size:{{ sizes.company }}px;{% endif %}">
+          {{ company }}<span class="resize-handle"></span>
         </div>
         {% endif %}
 
-        <!-- PHONE -->
         {% if card.phone %}
         <div class="card-el el-contact" data-el="phone"
-             style="left:{{ positions.phone.x if positions.phone else 26 }}px;top:{{ positions.phone.y if positions.phone else 126 }}px;display:{{ 'flex' if show_phone else 'none' }};">
+             style="left:{{ positions.phone.x if positions.phone else 36 }}px;top:{{ positions.phone.y if positions.phone else 165 }}px;display:{{ 'flex' if show_phone else 'none' }};{% if sizes and sizes.phone %}font-size:{{ sizes.phone }}px;{% endif %}">
           <svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.4 21 3 13.6 3 4.5c0-.6.4-1 1-1H8c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
-          {{ card.phone }}
+          {{ card.phone }}<span class="resize-handle"></span>
         </div>
         {% endif %}
 
-        <!-- EMAIL -->
         {% if card.email %}
         <div class="card-el el-contact" data-el="email"
-             style="left:{{ positions.email.x if positions.email else 26 }}px;top:{{ positions.email.y if positions.email else 148 }}px;display:{{ 'flex' if show_email else 'none' }};">
+             style="left:{{ positions.email.x if positions.email else 36 }}px;top:{{ positions.email.y if positions.email else 188 }}px;display:{{ 'flex' if show_email else 'none' }};{% if sizes and sizes.email %}font-size:{{ sizes.email }}px;{% endif %}">
           <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-          {{ card.email }}
+          {{ card.email }}<span class="resize-handle"></span>
         </div>
         {% endif %}
 
-        <!-- WEBSITE -->
         {% if card.website %}
         <div class="card-el el-contact" data-el="website"
-             style="left:{{ positions.website.x if positions.website else 26 }}px;top:{{ positions.website.y if positions.website else 170 }}px;display:{{ 'flex' if show_website else 'none' }};">
+             style="left:{{ positions.website.x if positions.website else 36 }}px;top:{{ positions.website.y if positions.website else 211 }}px;display:{{ 'flex' if show_website else 'none' }};{% if sizes and sizes.website %}font-size:{{ sizes.website }}px;{% endif %}">
           <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-          {{ card.website | replace('https://', '') | replace('http://', '') }}
+          {{ card.website | replace('https://', '') | replace('http://', '') }}<span class="resize-handle"></span>
         </div>
         {% endif %}
 
-        <!-- ADDRESS -->
         {% if card.address %}
         <div class="card-el el-contact" data-el="address"
-             style="left:{{ positions.address.x if positions.address else 26 }}px;top:{{ positions.address.y if positions.address else 192 }}px;display:{{ 'flex' if show_address else 'none' }};">
-          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-          {{ card.address }}
+             style="left:{{ positions.address.x if positions.address else 36 }}px;top:{{ positions.address.y if positions.address else 234 }}px;display:{{ 'flex' if show_address else 'none' }};{% if sizes and sizes.address %}font-size:{{ sizes.address }}px;{% endif %}">
+          <svg viewBox="0 0 24 24" style="flex-shrink:0;align-self:flex-start;margin-top:1px;"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          <span class="addr-text">{{ card.address }}</span><span class="resize-handle"></span>
         </div>
         {% endif %}
 
-        <!-- QR CODE -->
         <div class="card-el el-qr" data-el="qr"
-             style="left:{{ positions.qr.x if positions.qr else 494 }}px;top:{{ positions.qr.y if positions.qr else 125 }}px;">
+             style="left:{{ positions.qr.x if positions.qr else 490 }}px;top:{{ positions.qr.y if positions.qr else 50 }}px;{% if sizes and sizes.qr %}width:{{ sizes.qr }}px;height:{{ sizes.qr }}px;{% endif %}">
           <img src="data:image/png;base64,{{ qr_base64 }}" alt="QR" class="el-qr-img" />
           <div class="el-qr-label">SCAN ME</div>
+          <span class="resize-handle"></span>
         </div>
 
-        <!-- CUSTOM TEXT -->
         <div class="card-el el-custom" data-el="custom_text"
-             style="left:{{ positions.custom_text.x if positions.custom_text else 26 }}px;top:{{ positions.custom_text.y if positions.custom_text else 320 }}px;display:{{ 'block' if custom_text else 'none' }};">
-          {{ custom_text or '' }}
+             style="left:{{ positions.custom_text.x if positions.custom_text else 36 }}px;top:{{ positions.custom_text.y if positions.custom_text else 318 }}px;display:{{ 'block' if custom_text else 'none' }};{% if sizes and sizes.custom_text %}font-size:{{ sizes.custom_text }}px;{% endif %}">
+          {{ custom_text or '' }}<span class="resize-handle"></span>
         </div>
 
-        <!-- CardCraft brand (non-draggable, no data-el) -->
         <div class="card-brand">CardCraft</div>
 
       </div><!-- /canvas -->
     </div><!-- /canvas-wrap -->
-    <p class="canvas-hint">Drag any element to reposition &middot; Click a preset to snap layout</p>
+
+    <!-- Reset buttons -->
+    <div class="reset-row">
+      <button class="reset-btn" id="resetPositionBtn" title="Reset all element positions to current preset">
+        <svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+        Reset Position
+      </button>
+      <button class="reset-btn" id="resetSizeBtn" title="Reset all element sizes to current preset defaults">
+        <svg viewBox="0 0 24 24"><path d="M15 3l2.3 2.3-2.89 2.87 1.42 1.42L18.7 6.7 21 9V3h-6zM3 9l2.3-2.3 2.87 2.89 1.42-1.42L6.7 5.3 9 3H3v6zm6 12l-2.3-2.3 2.89-2.87-1.42-1.42L5.3 17.3 3 15v6h6zm12-6l-2.3 2.3-2.87-2.89-1.42 1.42 2.89 2.87L15 21h6v-6z"/></svg>
+        Reset Size
+      </button>
+    </div>
+
+    <p class="canvas-hint">Drag to reposition &middot; <span style="color:#fc7800;font-weight:600;">●</span> drag dot (bottom-right) to resize &middot; click preset to snap layout &amp; size</p>
   </div><!-- /canvas-area -->
 
 </div><!-- /page -->
 
-<!-- BOTTOM BAR -->
 <div class="bar">
   <button class="bar-btn bar-btn-primary" id="saveBtn">
     <svg viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
@@ -427,114 +452,126 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-/* ── CONSTANTS ── */
+/* ═══════════════════════════════════════════════════════════
+   CONSTANTS
+═══════════════════════════════════════════════════════════ */
 var CANVAS_W = 630;
 var CANVAS_H = 360;
 
-var BG_DARK = ['matte_black', 'matte_navy', 'matte_forest', 'matte_maroon', 'matte_slate'];
+var BG_DARK = ['matte_black','matte_navy','matte_forest','matte_maroon','matte_slate'];
 var ALL_BG_CLASSES     = ['bg-matte_black','bg-matte_navy','bg-matte_forest','bg-matte_maroon','bg-matte_slate','bg-matte_beige'];
 var ALL_ACCENT_CLASSES = ['accent-orange','accent-blue','accent-green','accent-purple','accent-red','accent-gold'];
-var ACCENT_HEX = {
-  orange: '#fc7800', blue: '#2563eb', green: '#10b981',
-  purple: '#8b5cf6', red:  '#ef4444', gold:  '#f59e0b'
-};
+var ACCENT_HEX = { orange:'#fc7800', blue:'#2563eb', green:'#10b981', purple:'#8b5cf6', red:'#ef4444', gold:'#f59e0b' };
 
 /*
-  PRESET POSITIONS — px on 630 × 360 canvas.
+  PRESET DEFINITIONS — each preset has its own positions AND sizes.
+  Positions are in px on the 630×360 canvas.
+  Sizes: font-size px for text elements, box-size px for QR.
 
-  Element heights (approx, with 2px padding each side):
-    name        26px × 1.1lh = ~29px total
-    designation 10px          = ~15px total
-    company     13px          = ~18px total
-    contact     11px          = ~18px each
-    QR          110×110px fixed
+  CLASSIC (Image 2 reference):
+    Left column: Name / Designation / Company (identity block)
+    Then contacts stacked below with a clear gap
+    QR: right side, vertically centred
 
-  Card: 630×360. Margins: left=26, top=26, right=26.
-  QR right margin: 630 - 110 - 26 = 494. QR vertical centre: (360-110)/2 = 125.
+  SPLIT (Image 1 reference):
+    Left: Name / Designation / Company (identity block, vertically centred)
+    Right column (x=330): contacts stacked from top
+    QR: far right (x=490), top area
+    Address: allow wrapping (max-width applied via JS class)
 
-  CLASSIC — text left, QR right-centred:
-    name        y=26
-    desig       y=26+29+8=63  (gap after name: 8px breathing room)
-    company     y=63+15+6=84  (gap: 6px)
-    [gap of ~26px before contacts — visual section break]
-    phone       y=84+18+24=126
-    email       y=126+22=148
-    website     y=148+22=170
-    address     y=170+22=192
-    custom      y=320   (near bottom, generous gap from contacts)
-    QR          x=494, y=125
-
-  CENTERED — everything horizontally centred on x=315:
-    Estimated text widths at these sizes:
-      name (~200px): x=315-100=215
-      desig (~160px): x=315-80=235
-      company (~130px): x=315-65=250
-      contacts (~200px): x=315-100=215
-      QR (110px): x=315-55=260, y=220 (below contacts)
-      custom: x=215, y=318
-
-  SPLIT — identity left column (x=26), contacts right-centre (x=220), QR far right:
-    Left col (identity, x=26):
-      name y=46
-      desig y=46+29+8=83
-      company y=83+15+6=104
-      custom_text y=310
-    Right contacts (x=220):
-      phone y=42
-      email y=42+22=64
-      website y=64+22=86
-      address y=86+22=108
-    QR far right: x=490, y=120
+  CENTERED (Image 3 reference):
+    Name centred at top
+    Designation + Company centred below
+    Contacts centred in two columns side by side
+    QR centred at bottom
 */
 var PRESETS = {
   classic: {
-    name:        { x: 26,  y: 26  },
-    designation: { x: 26,  y: 63  },
-    company:     { x: 26,  y: 84  },
-    phone:       { x: 26,  y: 126 },
-    email:       { x: 26,  y: 148 },
-    website:     { x: 26,  y: 170 },
-    address:     { x: 26,  y: 192 },
-    qr:          { x: 494, y: 125 },
-    custom_text: { x: 26,  y: 320 }
+    positions: {
+      name:        { x: 36,  y: 54  },
+      designation: { x: 36,  y: 98  },
+      company:     { x: 36,  y: 118 },
+      phone:       { x: 36,  y: 163 },
+      email:       { x: 36,  y: 187 },
+      website:     { x: 36,  y: 211 },
+      address:     { x: 36,  y: 235 },
+      qr:          { x: 490, y: 120 },
+      custom_text: { x: 36,  y: 316 }
+    },
+    sizes: {
+      name: 28, designation: 10, company: 13,
+      phone: 11, email: 11, website: 11, address: 11,
+      qr: 110, custom_text: 10
+    },
+    /* In classic, address is NOT wrapped */
+    addressWrap: false
   },
   centered: {
-    name:        { x: 215, y: 22  },
-    designation: { x: 235, y: 57  },
-    company:     { x: 250, y: 76  },
-    phone:       { x: 215, y: 114 },
-    email:       { x: 215, y: 136 },
-    website:     { x: 215, y: 158 },
-    address:     { x: 215, y: 180 },
-    qr:          { x: 260, y: 222 },
-    custom_text: { x: 215, y: 318 }
+    positions: {
+      name:        { x: 185, y: 28  },
+      designation: { x: 223, y: 68  },
+      company:     { x: 235, y: 86  },
+      phone:       { x: 100, y: 126 },
+      email:       { x: 100, y: 150 },
+      website:     { x: 344, y: 126 },
+      address:     { x: 344, y: 150 },
+      qr:          { x: 258, y: 200 },
+      custom_text: { x: 200, y: 320 }
+    },
+    sizes: {
+      name: 28, designation: 10, company: 13,
+      phone: 11, email: 11, website: 11, address: 11,
+      qr: 110, custom_text: 10
+    },
+    addressWrap: false
   },
   split: {
-    name:        { x: 26,  y: 46  },
-    designation: { x: 26,  y: 83  },
-    company:     { x: 26,  y: 104 },
-    custom_text: { x: 26,  y: 310 },
-    phone:       { x: 220, y: 42  },
-    email:       { x: 220, y: 64  },
-    website:     { x: 220, y: 86  },
-    address:     { x: 220, y: 108 },
-    qr:          { x: 490, y: 120 }
+    positions: {
+      name:        { x: 36,  y: 54  },
+      designation: { x: 36,  y: 98  },
+      company:     { x: 36,  y: 118 },
+      phone:       { x: 330, y: 54  },
+      email:       { x: 330, y: 78  },
+      website:     { x: 330, y: 102 },
+      address:     { x: 330, y: 126 },
+      qr:          { x: 490, y: 174 },
+      custom_text: { x: 36,  y: 308 }
+    },
+    sizes: {
+      name: 26, designation: 9, company: 12,
+      phone: 10, email: 10, website: 10, address: 10,
+      qr: 110, custom_text: 10
+    },
+    /* In split, address wraps to avoid colliding with QR */
+    addressWrap: true
   }
 };
 
-/* ── DOM REFS ── */
-var canvas     = document.getElementById('canvas');
-var canvasWrap = document.getElementById('canvasWrap');
-var saveBtn    = document.getElementById('saveBtn');
-var toast      = document.getElementById('toast');
-var elements   = Array.from(canvas.querySelectorAll('[data-el]'));
+/* Track which preset is currently active */
+var curPreset = '';
 
-/* ── STATE ── */
+/* ═══════════════════════════════════════════════════════════
+   DOM REFS
+═══════════════════════════════════════════════════════════ */
+var canvas           = document.getElementById('canvas');
+var canvasWrap       = document.getElementById('canvasWrap');
+var saveBtn          = document.getElementById('saveBtn');
+var toast            = document.getElementById('toast');
+var resetPositionBtn = document.getElementById('resetPositionBtn');
+var resetSizeBtn     = document.getElementById('resetSizeBtn');
+var elements         = Array.from(canvas.querySelectorAll('[data-el]'));
+
+/* ═══════════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════════ */
 var curBg     = '{{ saved_bg | default("matte_black") }}';
 var curAccent = '{{ saved_accent | default("orange") }}';
 var curScale  = 1;
+var curSizes  = {};
 
-/* ── CANVAS SCALING ── */
+/* ═══════════════════════════════════════════════════════════
+   CANVAS SCALING
+═══════════════════════════════════════════════════════════ */
 function scaleCanvas() {
   var availW = canvasWrap.offsetWidth;
   curScale = Math.min(availW / CANVAS_W, 1);
@@ -542,10 +579,12 @@ function scaleCanvas() {
   canvasWrap.style.height = (CANVAS_H * curScale) + 'px';
 }
 
-/* ── BACKGROUND ── */
+/* ═══════════════════════════════════════════════════════════
+   BACKGROUND & ACCENT
+═══════════════════════════════════════════════════════════ */
 function applyBackground(bg) {
   if (!bg || ALL_BG_CLASSES.indexOf('bg-' + bg) === -1) bg = 'matte_black';
-  ALL_BG_CLASSES.forEach(function (c) { canvas.classList.remove(c); });
+  ALL_BG_CLASSES.forEach(function(c){ canvas.classList.remove(c); });
   canvas.classList.add('bg-' + bg);
   var dark = BG_DARK.indexOf(bg) !== -1;
   canvas.classList.toggle('text-light', dark);
@@ -553,10 +592,9 @@ function applyBackground(bg) {
   curBg = bg;
 }
 
-/* ── ACCENT ── */
 function applyAccent(accent) {
   if (!accent || !ACCENT_HEX[accent]) accent = 'orange';
-  ALL_ACCENT_CLASSES.forEach(function (c) { canvas.classList.remove(c); });
+  ALL_ACCENT_CLASSES.forEach(function(c){ canvas.classList.remove(c); });
   canvas.classList.add('accent-' + accent);
   var hex = ACCENT_HEX[accent];
   var qrEl = canvas.querySelector('[data-el="qr"]');
@@ -564,7 +602,9 @@ function applyAccent(accent) {
   curAccent = accent;
 }
 
-/* ── HELPERS ── */
+/* ═══════════════════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════════════════ */
 function getEl(name) { return canvas.querySelector('[data-el="' + name + '"]'); }
 
 function setElVisible(name, visible) {
@@ -573,169 +613,290 @@ function setElVisible(name, visible) {
   el.style.display = visible ? (el.classList.contains('el-contact') ? 'flex' : 'block') : 'none';
 }
 
-function markActive(selector, matchFn) {
-  document.querySelectorAll(selector).forEach(function (b) {
-    b.classList.toggle('active', matchFn(b));
-  });
+function markActive(sel, fn) {
+  document.querySelectorAll(sel).forEach(function(b){ b.classList.toggle('active', fn(b)); });
 }
 
-/* ── PRESET ── */
+/* Apply/remove address wrap class based on preset */
+function setAddressWrap(wrap) {
+  var adEl = getEl('address');
+  if (!adEl) return;
+  if (wrap) {
+    adEl.classList.add('wrap-text');
+    adEl.style.whiteSpace = 'normal';
+    adEl.style.maxWidth   = '170px';
+    adEl.style.alignItems = 'flex-start';
+  } else {
+    adEl.classList.remove('wrap-text');
+    adEl.style.whiteSpace = 'nowrap';
+    adEl.style.maxWidth   = '';
+    adEl.style.alignItems = '';
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SIZE MANAGEMENT
+═══════════════════════════════════════════════════════════ */
+function getElSize(el) {
+  var name = el.getAttribute('data-el');
+  if (name === 'qr') return parseFloat(el.style.width) || 110;
+  return parseFloat(el.style.fontSize) || getDefaultSize(name);
+}
+
+function getDefaultSize(name) {
+  var preset = PRESETS[curPreset];
+  if (preset && preset.sizes && preset.sizes[name] != null) return preset.sizes[name];
+  var fallback = { name:28, designation:10, company:13, phone:11, email:11, website:11, address:11, qr:110, custom_text:10 };
+  return fallback[name] || 11;
+}
+
+function setElSize(el, size) {
+  var name = el.getAttribute('data-el');
+  var minS = 6, maxS = 72;
+  if (name === 'qr') { minS = 40; maxS = 220; }
+  size = Math.max(minS, Math.min(size, maxS));
+  if (name === 'qr') {
+    el.style.width  = size + 'px';
+    el.style.height = size + 'px';
+  } else {
+    el.style.fontSize = size + 'px';
+  }
+  curSizes[name] = size;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PRESET — resets BOTH positions AND sizes
+═══════════════════════════════════════════════════════════ */
 function applyPreset(preset) {
-  var pos = PRESETS[preset];
-  if (!pos) return;
-  elements.forEach(function (el) {
+  var p = PRESETS[preset];
+  if (!p) return;
+  curPreset = preset;
+
+  /* 1. Reset positions */
+  elements.forEach(function(el) {
     var name = el.getAttribute('data-el');
-    if (pos[name] !== undefined) {
-      el.style.left = pos[name].x + 'px';
-      el.style.top  = pos[name].y + 'px';
-      el.setAttribute('data-x', pos[name].x);
-      el.setAttribute('data-y', pos[name].y);
+    if (p.positions[name] !== undefined) {
+      el.style.left = p.positions[name].x + 'px';
+      el.style.top  = p.positions[name].y + 'px';
+      el.setAttribute('data-x', p.positions[name].x);
+      el.setAttribute('data-y', p.positions[name].y);
     }
   });
+
+  /* 2. Reset sizes to this preset's defaults */
+  elements.forEach(function(el) {
+    var name = el.getAttribute('data-el');
+    if (p.sizes[name] != null) {
+      setElSize(el, p.sizes[name]);
+    }
+  });
+
+  /* 3. Address wrapping */
+  setAddressWrap(p.addressWrap);
 }
 
-/* ── DRAG & DROP — scale-aware ── */
-function makeDraggable() {
-  interact('[data-el]').draggable({
-    listeners: {
-      start: function (e) { e.target.classList.add('dragging'); },
-      move: function (e) {
-        var t  = e.target;
-        var dx = e.dx / curScale;
-        var dy = e.dy / curScale;
-        var x  = (parseFloat(t.getAttribute('data-x')) || 0) + dx;
-        var y  = (parseFloat(t.getAttribute('data-y')) || 0) + dy;
-        x = Math.max(0, Math.min(x, CANVAS_W - 4));
-        y = Math.max(0, Math.min(y, CANVAS_H - 4));
-        t.style.left = x + 'px';
-        t.style.top  = y + 'px';
-        t.setAttribute('data-x', x);
-        t.setAttribute('data-y', y);
+/* ═══════════════════════════════════════════════════════════
+   RESET POSITION — snap to current preset positions only
+═══════════════════════════════════════════════════════════ */
+function resetPositions() {
+  if (!curPreset) return;
+  var p = PRESETS[curPreset];
+  if (!p) return;
+  elements.forEach(function(el) {
+    var name = el.getAttribute('data-el');
+    if (p.positions[name] !== undefined) {
+      el.style.left = p.positions[name].x + 'px';
+      el.style.top  = p.positions[name].y + 'px';
+      el.setAttribute('data-x', p.positions[name].x);
+      el.setAttribute('data-y', p.positions[name].y);
+    }
+  });
+  showToast('Positions reset to ' + curPreset + ' preset');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESET SIZE — snap to current preset sizes only
+═══════════════════════════════════════════════════════════ */
+function resetSizes() {
+  if (!curPreset) return;
+  var p = PRESETS[curPreset];
+  if (!p) return;
+  elements.forEach(function(el) {
+    var name = el.getAttribute('data-el');
+    if (p.sizes[name] != null) {
+      setElSize(el, p.sizes[name]);
+    }
+  });
+  showToast('Sizes reset to ' + curPreset + ' preset');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DRAG + RESIZE via interact.js
+═══════════════════════════════════════════════════════════ */
+function makeDraggableResizable() {
+  interact('[data-el]')
+    .draggable({
+      listeners: {
+        start: function(e){ e.target.classList.add('active'); },
+        move: function(e) {
+          var t = e.target;
+          var x = (parseFloat(t.getAttribute('data-x')) || 0) + e.dx / curScale;
+          var y = (parseFloat(t.getAttribute('data-y')) || 0) + e.dy / curScale;
+          x = Math.max(0, Math.min(x, CANVAS_W - 4));
+          y = Math.max(0, Math.min(y, CANVAS_H - 4));
+          t.style.left = x + 'px';
+          t.style.top  = y + 'px';
+          t.setAttribute('data-x', x);
+          t.setAttribute('data-y', y);
+        },
+        end: function(e){ e.target.classList.remove('active'); }
+      }
+    })
+    .resizable({
+      edges: { bottom: true, right: true, left: false, top: false },
+      listeners: {
+        start: function(e){ e.target.classList.add('active'); },
+        move: function(e) {
+          var t    = e.target;
+          var name = t.getAttribute('data-el');
+          var dw   = e.deltaRect.width  / curScale;
+          var dh   = e.deltaRect.height / curScale;
+          var delta = Math.abs(dw) >= Math.abs(dh) ? dw : dh;
+          var cur   = getElSize(t);
+          setElSize(t, name === 'qr' ? cur + delta : cur + delta * 0.1);
+        },
+        end: function(e){ e.target.classList.remove('active'); }
       },
-      end: function (e) { e.target.classList.remove('dragging'); }
-    }
-  });
+      modifiers: [interact.modifiers.restrictSize({ minWidth: 20, minHeight: 12 })]
+    });
 }
 
-/* ── INIT ── */
+/* ═══════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════ */
 function init() {
   scaleCanvas();
   applyBackground(curBg);
   applyAccent(curAccent);
-  markActive('[data-bg]',     function (b) { return b.dataset.bg     === curBg;     });
-  markActive('[data-accent]', function (b) { return b.dataset.accent === curAccent; });
+  markActive('[data-bg]',     function(b){ return b.dataset.bg     === curBg; });
+  markActive('[data-accent]', function(b){ return b.dataset.accent === curAccent; });
 
   var ph = {{ 'true' if show_phone   else 'false' }};
   var em = {{ 'true' if show_email   else 'false' }};
   var ws = {{ 'true' if show_website else 'false' }};
   var ad = {{ 'true' if show_address else 'false' }};
-
-  var togPhone   = document.getElementById('tog-phone');
-  var togEmail   = document.getElementById('tog-email');
-  var togWebsite = document.getElementById('tog-website');
-  var togAddress = document.getElementById('tog-address');
-  if (togPhone)   { togPhone.checked   = ph; setElVisible('phone',   ph); }
-  if (togEmail)   { togEmail.checked   = em; setElVisible('email',   em); }
-  if (togWebsite) { togWebsite.checked = ws; setElVisible('website', ws); }
-  if (togAddress) { togAddress.checked = ad; setElVisible('address', ad); }
+  if (document.getElementById('tog-phone'))   { document.getElementById('tog-phone').checked   = ph; setElVisible('phone',   ph); }
+  if (document.getElementById('tog-email'))   { document.getElementById('tog-email').checked   = em; setElVisible('email',   em); }
+  if (document.getElementById('tog-website')) { document.getElementById('tog-website').checked = ws; setElVisible('website', ws); }
+  if (document.getElementById('tog-address')) { document.getElementById('tog-address').checked = ad; setElVisible('address', ad); }
 
   var ct = {{ custom_text | tojson }};
-  var ctInput = document.getElementById('customTextInput');
-  if (ctInput) ctInput.value = ct || '';
+  if (document.getElementById('customTextInput')) document.getElementById('customTextInput').value = ct || '';
   var ctEl = getEl('custom_text');
-  if (ctEl) { ctEl.textContent = ct || ''; ctEl.style.display = (ct && ct.trim()) ? 'block' : 'none'; }
+  if (ctEl) { ctEl.firstChild.textContent = ct || ''; ctEl.style.display = (ct && ct.trim()) ? 'block' : 'none'; }
 
-  elements.forEach(function (el) {
+  /* Restore saved sizes; seed data-x/y */
+  var savedSizes = {{ sizes | tojson if sizes else '{}' }};
+  elements.forEach(function(el) {
     el.setAttribute('data-x', parseFloat(el.style.left) || 0);
     el.setAttribute('data-y', parseFloat(el.style.top)  || 0);
+    var name = el.getAttribute('data-el');
+    if (savedSizes && savedSizes[name] != null) {
+      setElSize(el, savedSizes[name]);
+    } else {
+      curSizes[name] = getElSize(el);
+    }
   });
 
-  makeDraggable();
+  makeDraggableResizable();
 }
 
-/* ── EVENT BINDINGS ── */
-document.querySelectorAll('[data-bg]').forEach(function (btn) {
-  btn.addEventListener('click', function () {
-    markActive('[data-bg]', function (b) { return b.dataset.bg === btn.dataset.bg; });
+/* ═══════════════════════════════════════════════════════════
+   EVENT BINDINGS
+═══════════════════════════════════════════════════════════ */
+document.querySelectorAll('[data-bg]').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    markActive('[data-bg]', function(b){ return b.dataset.bg === btn.dataset.bg; });
     applyBackground(btn.dataset.bg);
   });
 });
 
-document.querySelectorAll('[data-accent]').forEach(function (btn) {
-  btn.addEventListener('click', function () {
-    markActive('[data-accent]', function (b) { return b.dataset.accent === btn.dataset.accent; });
+document.querySelectorAll('[data-accent]').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    markActive('[data-accent]', function(b){ return b.dataset.accent === btn.dataset.accent; });
     applyAccent(btn.dataset.accent);
   });
 });
 
-document.querySelectorAll('[data-preset]').forEach(function (btn) {
-  btn.addEventListener('click', function () {
-    markActive('[data-preset]', function (b) { return b.dataset.preset === btn.dataset.preset; });
+document.querySelectorAll('[data-preset]').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    markActive('[data-preset]', function(b){ return b.dataset.preset === btn.dataset.preset; });
     applyPreset(btn.dataset.preset);
     showToast('Preset applied — drag to fine-tune');
   });
 });
 
-['phone', 'email', 'website', 'address'].forEach(function (field) {
-  var chk = document.getElementById('tog-' + field);
-  if (chk) chk.addEventListener('change', function (e) { setElVisible(field, e.target.checked); });
+['phone','email','website','address'].forEach(function(f){
+  var c = document.getElementById('tog-' + f);
+  if (c) c.addEventListener('change', function(e){ setElVisible(f, e.target.checked); });
 });
 
-var ctInputEl = document.getElementById('customTextInput');
-if (ctInputEl) {
-  ctInputEl.addEventListener('input', function (e) {
-    var val  = e.target.value;
-    var ctEl = getEl('custom_text');
-    if (ctEl) { ctEl.textContent = val; ctEl.style.display = val.trim() ? 'block' : 'none'; }
+var ctI = document.getElementById('customTextInput');
+if (ctI) {
+  ctI.addEventListener('input', function(e){
+    var v = e.target.value;
+    var el = getEl('custom_text');
+    if (el) { el.firstChild.textContent = v; el.style.display = v.trim() ? 'block' : 'none'; }
   });
 }
 
+if (resetPositionBtn) resetPositionBtn.addEventListener('click', resetPositions);
+if (resetSizeBtn)     resetSizeBtn.addEventListener('click', resetSizes);
+
 window.addEventListener('resize', scaleCanvas);
 
-/* ── SAVE ── */
+/* ═══════════════════════════════════════════════════════════
+   SAVE — positions + sizes
+═══════════════════════════════════════════════════════════ */
 if (saveBtn) {
-  saveBtn.addEventListener('click', async function () {
+  saveBtn.addEventListener('click', async function(){
     saveBtn.disabled = true;
-    var positions = {};
-    elements.forEach(function (el) {
+    var positions = {}, sizes = {};
+    elements.forEach(function(el){
       var name = el.getAttribute('data-el');
       positions[name] = {
         x: Math.round(parseFloat(el.getAttribute('data-x')) || 0),
         y: Math.round(parseFloat(el.getAttribute('data-y')) || 0)
       };
+      sizes[name] = Math.round(getElSize(el) * 10) / 10;
     });
     var payload = {
-      positions:    positions,
+      positions, sizes,
       background:   curBg,
       accent:       curAccent,
-      show_phone:   document.getElementById('tog-phone')   ? !!document.getElementById('tog-phone').checked   : true,
-      show_email:   document.getElementById('tog-email')   ? !!document.getElementById('tog-email').checked   : true,
-      show_website: document.getElementById('tog-website') ? !!document.getElementById('tog-website').checked : true,
-      show_address: document.getElementById('tog-address') ? !!document.getElementById('tog-address').checked : false,
+      show_phone:   !!( document.getElementById('tog-phone')   && document.getElementById('tog-phone').checked ),
+      show_email:   !!( document.getElementById('tog-email')   && document.getElementById('tog-email').checked ),
+      show_website: !!( document.getElementById('tog-website') && document.getElementById('tog-website').checked ),
+      show_address: !!( document.getElementById('tog-address') && document.getElementById('tog-address').checked ),
       custom_text:  document.getElementById('customTextInput') ? document.getElementById('customTextInput').value.trim() : ''
     };
     try {
-      var res  = await fetch('/card/{{ card.id }}/save_layout', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      var res  = await fetch('/card/{{ card.id }}/save_layout', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
       var data = await res.json();
       showToast(data.success ? '✓ Design saved' : '✗ Save failed');
-    } catch (err) { showToast('✗ Network error'); }
+    } catch(e){ showToast('✗ Network error'); }
     finally { saveBtn.disabled = false; }
   });
 }
 
-/* ── TOAST ── */
-function showToast(msg) {
+function showToast(msg){
   if (!toast) return;
   toast.textContent = msg;
   toast.classList.add('show');
-  setTimeout(function () { toast.classList.remove('show'); }, 2600);
+  setTimeout(function(){ toast.classList.remove('show'); }, 2600);
 }
 
 init();
-
 }); /* end DOMContentLoaded */
 </script>
 </body>

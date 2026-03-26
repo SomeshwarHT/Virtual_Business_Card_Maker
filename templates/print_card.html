@@ -8,14 +8,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
-    *, *::before, *::after { 
-      box-sizing: border-box; 
-      margin: 0; 
-      padding: 0; 
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0; padding: 0;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
 
+    /* ── SCREEN ── */
     body {
       font-family: 'Outfit', sans-serif;
       background: #eeebe7;
@@ -30,58 +30,16 @@
       print-color-adjust: exact;
     }
 
-    .controls { 
-      position: fixed; 
-      top: 16px; 
-      right: 16px; 
-      display: flex; 
-      gap: 8px; 
-      z-index: 100; 
-    }
+    /* ── CONTROLS (screen only) ── */
+    .controls { position: fixed; top: 16px; right: 16px; display: flex; gap: 8px; z-index: 100; }
+    .ctrl-btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; font-family: 'Outfit', sans-serif; font-size: .82rem; font-weight: 600; border-radius: 8px; text-decoration: none; border: none; cursor: pointer; transition: all .14s; }
+    .ctrl-btn-primary { background: #fc7800; color: #fff; box-shadow: 0 4px 14px rgba(252,120,0,.32); }
+    .ctrl-btn-primary:hover { background: #e56b00; transform: translateY(-1px); }
+    .ctrl-btn-secondary { background: #0f0f0f; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,.22); }
+    .ctrl-btn-secondary:hover { background: #1e1e1e; transform: translateY(-1px); }
+    .ctrl-btn svg { width: 14px; height: 14px; fill: currentColor; }
 
-    .ctrl-btn { 
-      display: inline-flex; 
-      align-items: center; 
-      gap: 6px; 
-      padding: 9px 16px; 
-      font-family: 'Outfit', sans-serif; 
-      font-size: .82rem; 
-      font-weight: 600; 
-      border-radius: 8px; 
-      text-decoration: none; 
-      border: none; 
-      cursor: pointer; 
-      transition: all .14s; 
-    }
-
-    .ctrl-btn-primary { 
-      background: #fc7800; 
-      color: #fff; 
-      box-shadow: 0 4px 14px rgba(252,120,0,.32); 
-    }
-
-    .ctrl-btn-primary:hover { 
-      background: #e56b00; 
-      transform: translateY(-1px); 
-    }
-
-    .ctrl-btn-secondary { 
-      background: #0f0f0f; 
-      color: #fff; 
-      box-shadow: 0 4px 12px rgba(0,0,0,.22); 
-    }
-
-    .ctrl-btn-secondary:hover { 
-      background: #1e1e1e; 
-      transform: translateY(-1px); 
-    }
-
-    .ctrl-btn svg { 
-      width: 14px; 
-      height: 14px; 
-      fill: currentColor; 
-    }
-
+    /* ── CARD WRAPPER — screen: 630×360px ── */
     .card-wrap {
       width: 630px;
       height: 360px;
@@ -93,6 +51,7 @@
       print-color-adjust: exact;
     }
 
+    /* ── BACKGROUND ── */
     .bg-matte_black  { background: #1a1a1a !important; }
     .bg-matte_navy   { background: #0f1f3d !important; }
     .bg-matte_forest { background: #1a2f1a !important; }
@@ -100,6 +59,7 @@
     .bg-matte_slate  { background: #2d3748 !important; }
     .bg-matte_beige  { background: #e8dcc8 !important; }
 
+    /* ── ACCENT ── */
     .accent-orange { --cur-accent: #fc7800; }
     .accent-blue   { --cur-accent: #2563eb; }
     .accent-green  { --cur-accent: #10b981; }
@@ -107,6 +67,7 @@
     .accent-red    { --cur-accent: #ef4444; }
     .accent-gold   { --cur-accent: #f59e0b; }
 
+    /* ── TEXT CONTRAST ── */
     .text-light .el-name        { color: #ffffff; }
     .text-light .el-designation { color: var(--cur-accent); }
     .text-light .el-company     { color: rgba(255,255,255,.65); }
@@ -114,7 +75,6 @@
     .text-light .el-contact svg { fill: rgba(255,255,255,.5); }
     .text-light .el-custom      { color: rgba(255,255,255,.55); }
     .text-light .card-brand     { color: rgba(255,255,255,.18); }
-
     .text-dark  .el-name        { color: #111111; }
     .text-dark  .el-designation { color: var(--cur-accent); }
     .text-dark  .el-company     { color: #374151; }
@@ -123,75 +83,81 @@
     .text-dark  .el-custom      { color: #6b7280; }
     .text-dark  .card-brand     { color: rgba(0,0,0,.18); }
 
-    .card-el { 
-      position: absolute; 
-      font-family: 'Outfit', sans-serif; 
+    /* ── CARD ELEMENTS ── */
+    .card-el {
+      position: absolute;
+      font-family: 'Outfit', sans-serif;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
 
-    .el-name        { font-size: 26px; font-weight: 800; letter-spacing: -.5px; line-height: 1.1; white-space: nowrap; }
+    /* ── TYPOGRAPHY ── */
+    .el-name        { font-size: 28px; font-weight: 800; letter-spacing: -.5px; line-height: 1.1; white-space: nowrap; }
     .el-designation { font-size: 10px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; white-space: nowrap; }
     .el-company     { font-size: 13px; font-weight: 500; letter-spacing: .1px; white-space: nowrap; }
     .el-contact     { font-size: 11px; display: flex; align-items: center; gap: 6px; white-space: nowrap; font-weight: 400; }
-    .el-contact svg { width: 11px; height: 11px; flex-shrink: 0; fill: currentColor; }
+    .el-contact svg { width: 1em; height: 1em; flex-shrink: 0; fill: currentColor; }
     .el-custom      { font-size: 10px; font-style: italic; max-width: 260px; line-height: 1.5; white-space: normal; opacity: .8; }
 
+    /* Address wrapping when in split preset */
+    .el-contact.addr-wrap {
+      white-space: normal;
+      max-width: 170px;
+      align-items: flex-start;
+    }
+    .el-contact.addr-wrap svg { margin-top: 1px; flex-shrink: 0; align-self: flex-start; }
+
+    /* ── QR ── */
     .el-qr {
-      width: 110px; 
-      height: 110px;
-      padding: 7px;
+      width: 110px; height: 110px;
+      padding: 6px;
       background: #ffffff !important;
       border: 3px solid var(--cur-accent, #fc7800);
       border-radius: 10px;
-      display: flex !important; 
-      flex-direction: column;
-      align-items: center; 
-      justify-content: center;
-      gap: 4px;
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-    }
-
-    .el-qr-img   { 
-      width: 82px; 
-      height: 82px; 
-      object-fit: contain; 
-      display: block !important; 
-      visibility: visible !important;
-      opacity: 1 !important;
+      display: flex !important; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 3px; overflow: hidden;
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
     }
-
-    .el-qr-label { 
-      font-size: 6.5px; 
-      color: #9ca3af; 
-      font-weight: 700; 
-      letter-spacing: .8px; 
-      text-transform: uppercase; 
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
+    .el-qr-img {
+      width: 100%; flex: 1; object-fit: contain;
+      display: block !important; min-height: 0;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
     }
+    .el-qr-label { font-size: 6.5px; color: #9ca3af; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; flex-shrink: 0; }
 
+    /* CardCraft brand */
     .card-brand {
-      position: absolute; 
-      bottom: 9px; 
-      right: 14px;
-      font-size: 7px; 
-      font-weight: 500;
-      font-family: 'Outfit', sans-serif;
-      letter-spacing: .4px;
-      pointer-events: none;
-      opacity: .7;
+      position: absolute; bottom: 9px; right: 14px;
+      font-size: 7px; font-weight: 500;
+      font-family: 'Outfit', sans-serif; letter-spacing: .4px;
+      pointer-events: none; opacity: .7;
     }
 
+    /* ═══════════════════════════════════════════════════════
+       PRINT STYLES
+
+       Strategy:
+       - @page uses auto margins so the browser centres content
+         on whatever paper size the user's printer uses.
+       - html/body become a flex container that centres the card.
+       - .card-wrap stays at its native 630×360px coordinate space.
+       - zoom: 0.5333 collapses the element tree (including all
+         absolutely-positioned children) to 3.5in × 2in while
+         keeping all px coordinates valid and proportional.
+         (zoom = 336/630 = 192/360 at 96 dpi)
+       - No position:fixed / transform — the card sits in normal
+         flow inside a centred flex body, so it is centred on the
+         printed page regardless of paper size (A4, Letter, etc.).
+       - Page-break properties prevent the card splitting.
+    ═══════════════════════════════════════════════════════ */
     @media print {
       @page {
-        size: 3.5in 2in;
-        margin: 0;
+        /* Let the browser use the printer's default paper size.
+           Auto margins allow the card to be centred on the page. */
+        margin: 0.5in;
       }
 
       * {
@@ -202,80 +168,56 @@
       html {
         margin: 0 !important;
         padding: 0 !important;
-        width: 3.5in !important;
-        height: 2in !important;
-        overflow: hidden !important;
         background: transparent !important;
       }
 
       body {
+        /* Centre the card on the printed page */
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-height: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
-        width: 3.5in !important;
-        height: 2in !important;
-        min-height: unset !important;
-        max-height: 2in !important;
-        overflow: hidden !important;
         background: transparent !important;
-        display: block !important;
-        position: relative !important;
+        overflow: hidden !important;
       }
 
-      .controls {
-        display: none !important;
-        visibility: hidden !important;
-      }
+      .controls { display: none !important; }
 
       .card-wrap {
-        position: absolute !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 3.5in !important;
-        height: 2in !important;
-        margin: 0 !important;
-        padding: 0 !important;
+        /* Keep native 630×360 coordinate space intact so all
+           absolutely-positioned children render at their correct
+           px positions. zoom scales the whole element tree to the
+           physical card size (3.5in × 2in) without displacing any
+           children — unlike transform:scale which only scales
+           visually and does not shrink layout footprint. */
+        position: relative !important;
+        width: 630px !important;
+        height: 360px !important;
+        zoom: 0.5333 !important;
         border-radius: 0 !important;
         box-shadow: none !important;
         overflow: hidden !important;
         transform: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
         page-break-before: avoid !important;
         page-break-inside: avoid !important;
-        page-break-after: avoid !important;
+        page-break-after:  avoid !important;
         break-before: avoid !important;
         break-inside: avoid !important;
-        break-after: avoid !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
+        break-after:  avoid !important;
       }
 
-      .card-el {
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
-
-      .el-qr {
-        display: flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        background: #ffffff !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
-
-      .el-qr-img {
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
-
-      .el-contact {
-        display: flex !important;
-      }
+      .card-el    { visibility: visible !important; opacity: 1 !important; }
+      .el-qr      { display: flex !important; visibility: visible !important; opacity: 1 !important; background: #ffffff !important; }
+      .el-qr-img  { display: block !important; visibility: visible !important; opacity: 1 !important; }
+      .el-contact { display: flex !important; }
+      .card-brand { visibility: visible !important; }
     }
   </style>
 </head>
@@ -298,7 +240,8 @@
 <div class="card-wrap bg-{{ bg }} accent-{{ accent }} {{ text_cls }}">
 
   {% if card.name %}
-  <div class="card-el el-name" style="left:{{ positions.name.x if positions.name else 26 }}px;top:{{ positions.name.y if positions.name else 26 }}px;">
+  <div class="card-el el-name"
+       style="left:{{ positions.name.x if positions.name else 36 }}px;top:{{ positions.name.y if positions.name else 56 }}px;{% if sizes and sizes.name %}font-size:{{ sizes.name }}px;{% endif %}">
     {{ card.name }}
   </div>
   {% endif %}
@@ -306,60 +249,72 @@
   {% set roles = card.roles %}
   {% set desig = roles[0].designation if roles and roles[0].designation else (card.designation or card.title or '') %}
   {% if desig %}
-  <div class="card-el el-designation" style="left:{{ positions.designation.x if positions.designation else 26 }}px;top:{{ positions.designation.y if positions.designation else 66 }}px;">
+  <div class="card-el el-designation"
+       style="left:{{ positions.designation.x if positions.designation else 36 }}px;top:{{ positions.designation.y if positions.designation else 98 }}px;{% if sizes and sizes.designation %}font-size:{{ sizes.designation }}px;{% endif %}">
     {{ desig }}
   </div>
   {% endif %}
 
   {% set company = card.roles[0].company if card.roles and card.roles[0].company else card.company %}
   {% if company %}
-  <div class="card-el el-company" style="left:{{ positions.company.x if positions.company else 26 }}px;top:{{ positions.company.y if positions.company else 88 }}px;">
+  <div class="card-el el-company"
+       style="left:{{ positions.company.x if positions.company else 36 }}px;top:{{ positions.company.y if positions.company else 118 }}px;{% if sizes and sizes.company %}font-size:{{ sizes.company }}px;{% endif %}">
     {{ company }}
   </div>
   {% endif %}
 
   {% if show_phone and card.phone %}
-  <div class="card-el el-contact" style="left:{{ positions.phone.x if positions.phone else 26 }}px;top:{{ positions.phone.y if positions.phone else 126 }}px;">
+  <div class="card-el el-contact"
+       style="left:{{ positions.phone.x if positions.phone else 36 }}px;top:{{ positions.phone.y if positions.phone else 163 }}px;{% if sizes and sizes.phone %}font-size:{{ sizes.phone }}px;{% endif %}">
     <svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.4 21 3 13.6 3 4.5c0-.6.4-1 1-1H8c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
     {{ card.phone }}
   </div>
   {% endif %}
 
   {% if show_email and card.email %}
-  <div class="card-el el-contact" style="left:{{ positions.email.x if positions.email else 26 }}px;top:{{ positions.email.y if positions.email else 148 }}px;">
+  <div class="card-el el-contact"
+       style="left:{{ positions.email.x if positions.email else 36 }}px;top:{{ positions.email.y if positions.email else 187 }}px;{% if sizes and sizes.email %}font-size:{{ sizes.email }}px;{% endif %}">
     <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
     {{ card.email }}
   </div>
   {% endif %}
 
   {% if show_website and card.website %}
-  <div class="card-el el-contact" style="left:{{ positions.website.x if positions.website else 26 }}px;top:{{ positions.website.y if positions.website else 170 }}px;">
+  <div class="card-el el-contact"
+       style="left:{{ positions.website.x if positions.website else 36 }}px;top:{{ positions.website.y if positions.website else 211 }}px;{% if sizes and sizes.website %}font-size:{{ sizes.website }}px;{% endif %}">
     <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
     {{ card.website | replace('https://', '') | replace('http://', '') }}
   </div>
   {% endif %}
 
   {% if show_address and card.address %}
-  <div class="card-el el-contact" style="left:{{ positions.address.x if positions.address else 26 }}px;top:{{ positions.address.y if positions.address else 192 }}px;">
-    <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+  {# addr_wrap is set by JS when saved; for print we check if the saved position
+     places address at x >= 300 (i.e. in the split right column) and wrap it #}
+  {% set addr_x = positions.address.x if positions.address else 36 %}
+  {% set do_wrap = addr_x >= 300 %}
+  <div class="card-el el-contact{% if do_wrap %} addr-wrap{% endif %}"
+       style="left:{{ addr_x }}px;top:{{ positions.address.y if positions.address else 235 }}px;{% if sizes and sizes.address %}font-size:{{ sizes.address }}px;{% endif %}{% if do_wrap %}white-space:normal;max-width:170px;align-items:flex-start;{% endif %}">
+    <svg viewBox="0 0 24 24" {% if do_wrap %}style="flex-shrink:0;align-self:flex-start;margin-top:1px;"{% endif %}><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
     {{ card.address }}
   </div>
   {% endif %}
 
-  <div class="card-el el-qr" style="left:{{ positions.qr.x if positions.qr else 494 }}px;top:{{ positions.qr.y if positions.qr else 125 }}px;">
-    <img src="data:image/png;base64,{{ qr_base64 }}" alt="QR Code" class="el-qr-img" />
+  <div class="card-el el-qr"
+       style="left:{{ positions.qr.x if positions.qr else 490 }}px;top:{{ positions.qr.y if positions.qr else 50 }}px;{% if sizes and sizes.qr %}width:{{ sizes.qr }}px;height:{{ sizes.qr }}px;{% endif %}">
+    <img src="data:image/png;base64,{{ qr_base64 }}" alt="QR Code" class="el-qr-img" width="82" height="82" />
     <div class="el-qr-label">SCAN ME</div>
   </div>
 
   {% if custom_text %}
-  <div class="card-el el-custom" style="left:{{ positions.custom_text.x if positions.custom_text else 26 }}px;top:{{ positions.custom_text.y if positions.custom_text else 320 }}px;">
+  <div class="card-el el-custom"
+       style="left:{{ positions.custom_text.x if positions.custom_text else 36 }}px;top:{{ positions.custom_text.y if positions.custom_text else 318 }}px;{% if sizes and sizes.custom_text %}font-size:{{ sizes.custom_text }}px;{% endif %}">
     {{ custom_text }}
   </div>
   {% endif %}
 
   <div class="card-brand">CardCraft</div>
 
-</div>
+</div><!-- /card-wrap -->
 
 </body>
 </html>

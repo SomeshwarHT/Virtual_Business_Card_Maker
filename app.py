@@ -298,6 +298,7 @@ def card_designer(card_id):
             layout = {}
 
     positions    = layout.get('positions', {})
+    sizes        = layout.get('sizes', {})
     saved_bg     = layout.get('background', 'matte_black')
     saved_accent = layout.get('accent', 'orange')
     custom_text  = layout.get('custom_text', '')
@@ -314,6 +315,7 @@ def card_designer(card_id):
         card=card,
         qr_base64=qr_base64,
         positions=positions,
+        sizes=sizes,
         saved_bg=saved_bg,
         saved_accent=saved_accent,
         custom_text=custom_text,
@@ -356,6 +358,7 @@ def print_card(card_id):
             layout = {}
 
     positions    = layout.get('positions', {})
+    sizes        = layout.get('sizes', {})
     bg           = layout.get('background', 'matte_black')
     accent       = layout.get('accent', 'orange')
     custom_text  = layout.get('custom_text', '')
@@ -372,6 +375,7 @@ def print_card(card_id):
         card=card,
         qr_base64=qr_base64,
         positions=positions,
+        sizes=sizes,
         bg=bg,
         accent=accent,
         custom_text=custom_text,
