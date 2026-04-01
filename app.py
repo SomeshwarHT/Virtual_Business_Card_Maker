@@ -70,6 +70,70 @@ google = oauth.register(
 with app.app_context():
     db.create_all()
 
+# ───────── TEMPLATE PRESETS ─────────
+TEMPLATE_PRESETS = {
+    'modern': {
+        'positions': {
+            'name': {'x': 26, 'y': 26, 'scale': 1},
+            'designation': {'x': 26, 'y': 55, 'scale': 1},
+            'company': {'x': 26, 'y': 73, 'scale': 1},
+            'phone': {'x': 26, 'y': 105, 'scale': 1},
+            'email': {'x': 26, 'y': 125, 'scale': 1},
+            'website': {'x': 26, 'y': 145, 'scale': 1},
+            'qr': {'x': 494, 'y': 125, 'scale': 1}
+        },
+        'background': 'matte_navy',
+        'accent': 'orange',
+        'preset': 'modern',
+        'bg_template_filename': 'template_modern.png'
+    },
+    'minimal': {
+        'positions': {
+            'name': {'x': 265, 'y': 70, 'scale': 1},
+            'designation': {'x': 265, 'y': 98, 'scale': 1},
+            'company': {'x': 265, 'y': 118, 'scale': 1},
+            'phone': {'x': 265, 'y': 155, 'scale': 1},
+            'email': {'x': 265, 'y': 175, 'scale': 1},
+            'website': {'x': 265, 'y': 195, 'scale': 1},
+            'qr': {'x': 273, 'y': 235, 'scale': 0.9}
+        },
+        'background': 'matte_beige',
+        'accent': 'blue',
+        'preset': 'minimal',
+        'bg_template_filename': 'template_minimal.png'
+    },
+    'bold': {
+        'positions': {
+            'name': {'x': 26, 'y': 35, 'scale': 1.3},
+            'designation': {'x': 26, 'y': 75, 'scale': 1.1},
+            'company': {'x': 26, 'y': 98, 'scale': 1},
+            'phone': {'x': 26, 'y': 135, 'scale': 1},
+            'email': {'x': 26, 'y': 155, 'scale': 1},
+            'website': {'x': 26, 'y': 175, 'scale': 1},
+            'qr': {'x': 485, 'y': 215, 'scale': 1.1}
+        },
+        'background': 'matte_black',
+        'accent': 'orange',
+        'preset': 'bold',
+        'bg_template_filename': 'template_bold.png'
+    },
+    'elegant': {
+        'positions': {
+            'name': {'x': 260, 'y': 55, 'scale': 1.1},
+            'designation': {'x': 260, 'y': 88, 'scale': 1},
+            'company': {'x': 260, 'y': 108, 'scale': 1},
+            'phone': {'x': 260, 'y': 145, 'scale': 1},
+            'email': {'x': 260, 'y': 165, 'scale': 1},
+            'website': {'x': 260, 'y': 185, 'scale': 1},
+            'qr': {'x': 268, 'y': 230, 'scale': 1}
+        },
+        'background': 'matte_beige',
+        'accent': 'gold',
+        'preset': 'elegant',
+        'bg_template_filename': 'template_elegant.png'
+    }
+}
+
 # ───────── ROUTES ─────────
 
 @app.route("/")
@@ -98,9 +162,9 @@ def auth_callback():
     if not user:
         user = User(
             google_id=google_id,
-            name=user_info["name"],
-            email=user_info["email"],
-            profile_pic=user_info["picture"]
+            name=user_info.get("name"),
+            email=user_info.get("email"),
+            profile_pic=user_info.get("picture")
         )
         db.session.add(user)
         db.session.commit()
@@ -108,7 +172,12 @@ def auth_callback():
     login_user(user)
     return redirect(url_for("dashboard"))
 
-# ───────── NEW: DASHBOARD ROUTE ─────────
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("home"))
+
 @app.route("/dashboard")
 @login_required
 def dashboard():
@@ -118,152 +187,101 @@ def dashboard():
 @app.route("/form")
 @login_required
 def form():
-    user_cards = Card.query.filter_by(user_id=current_user.id).order_by(Card.created_at.desc()).all()
-    return render_template("form.html", edit_card=None, user_cards=user_cards)
+    return render_template("form.html", card=None)
 
-@app.route("/form/edit/<int:card_id>")
+@app.route('/edit_card/<int:card_id>', methods=['GET', 'POST'])
 @login_required
 def edit_card(card_id):
     card = Card.query.get_or_404(card_id)
-    if card.user_id != current_user.id:
-        return redirect(url_for("form"))
-    user_cards = Card.query.filter_by(user_id=current_user.id).order_by(Card.created_at.desc()).all()
-    return render_template("form.html", edit_card=card, user_cards=user_cards)
+
+    if request.method == 'POST':
+        card.name = request.form.get('name')
+        card.phone = request.form.get('phone')
+        card.email = request.form.get('email')
+        card.address = request.form.get('address')
+        # add other fields
+
+        db.session.commit()
+        return redirect(url_for('dashboard'))
+
+    return render_template('form.html', card=card, edit_card=True)
 
 @app.route("/save_card", methods=["POST"])
 @login_required
 def save_card():
-    data = request.form
-    card_id = data.get("card_id")
-
-    # Handle profile picture upload
-    profile_pic_filename = save_upload(
-        request.files.get('profile_pic'),
-        f"{current_user.id}_profile"
-    )
-
-    # Handle banner picture upload
-    banner_pic_filename = save_upload(
-        request.files.get('banner_pic'),
-        f"{current_user.id}_banner"
-    )
-
-    # Handle multi-role data (arrays from form)
-    designations = request.form.getlist('designation[]')
-    companies    = request.form.getlist('company[]')
-    bios         = request.form.getlist('bio[]')
-
-    roles = []
-    for i in range(max(len(designations), len(companies), len(bios))):
-        d = designations[i].strip() if i < len(designations) else ''
-        c = companies[i].strip()    if i < len(companies)    else ''
-        b = bios[i].strip()         if i < len(bios)         else ''
-        if d or c or b:
-            roles.append({'designation': d, 'company': c, 'bio': b})
-
-    roles = roles[:8]
-    first_role = roles[0] if roles else {}
-
-    # Card label — validate uniqueness among this user's cards
-    card_label = (data.get("card_label") or "").strip() or None
+    card_id = request.form.get("card_id")
 
     if card_id:
-        card = Card.query.get(int(card_id))
-        if card and card.user_id == current_user.id:
-            card.card_label    = card_label
-            card.name          = data.get("name") or ""
-            card.title         = first_role.get('designation', '')
-            card.designation   = first_role.get('designation', '')
-            card.company       = first_role.get('company', '')
-            card.bio           = first_role.get('bio', '')
-            card.roles_json    = json.dumps(roles) if roles else None
-            card.phone         = data.get("phone")
-            card.email         = data.get("email")
-            card.address       = data.get("address")
-            card.website       = data.get("website")
-            card.upi           = data.get("upi")
-            if profile_pic_filename:
-                card.profile_pic = profile_pic_filename
-            if banner_pic_filename:
-                card.banner_pic  = banner_pic_filename
-            card.pic_shape     = data.get("pic_shape", card.pic_shape or "round")
-            card.pic_position  = data.get("pic_position", card.pic_position or "center")
-            card.identity_align= data.get("identity_align", card.identity_align or "center")
-            card.theme         = data.get("theme", card.theme or "midnight")
-            card.instagram     = data.get("instagram")
-            card.linkedin      = data.get("linkedin")
-            card.twitter       = data.get("twitter")
-            card.facebook      = data.get("facebook")
-            card.youtube       = data.get("youtube")
-            card.whatsapp      = data.get("whatsapp")
-            db.session.commit()
-            return redirect(url_for("view_card", card_id=card.id))
+        card = Card.query.get_or_404(int(card_id))
+        if card.user_id != current_user.id:
+            return redirect(url_for("dashboard"))
+    else:
+        card = Card(user_id=current_user.id)
+        db.session.add(card)
 
-    new_card = Card(
-        user_id=current_user.id,
-        card_label=card_label,
-        name=data.get("name") or "",
-        title=first_role.get('designation', ''),
-        designation=first_role.get('designation', ''),
-        company=first_role.get('company', ''),
-        bio=first_role.get('bio', ''),
-        roles_json=json.dumps(roles) if roles else None,
-        phone=data.get("phone"),
-        email=data.get("email"),
-        address=data.get("address"),
-        website=data.get("website"),
-        upi=data.get("upi"),
-        profile_pic=profile_pic_filename,
-        banner_pic=banner_pic_filename,
-        pic_shape=data.get("pic_shape", "round"),
-        pic_position=data.get("pic_position", "center"),
-        identity_align=data.get("identity_align", "center"),
-        theme=data.get("theme", "midnight"),
-        instagram=data.get("instagram"),
-        linkedin=data.get("linkedin"),
-        twitter=data.get("twitter"),
-        facebook=data.get("facebook"),
-        youtube=data.get("youtube"),
-        whatsapp=data.get("whatsapp"),
-    )
+    card.card_label = request.form.get("card_label", "").strip() or None
+    card.name = request.form.get("name")
+    card.title = request.form.get("title")
+    card.designation = request.form.get("designation")
+    card.company = request.form.get("company")
+    card.bio = request.form.get("bio")
+    card.phone = request.form.get("phone")
+    card.email = request.form.get("email")
+    card.address = request.form.get("address")
+    card.website = request.form.get("website")
+    card.upi = request.form.get("upi")
 
-    db.session.add(new_card)
+    card.pic_shape = request.form.get("pic_shape", "round")
+    card.pic_position = request.form.get("pic_position", "center")
+    card.identity_align = request.form.get("identity_align", "center")
+    card.theme = request.form.get("theme", "midnight")
+
+    card.instagram = request.form.get("instagram")
+    card.linkedin = request.form.get("linkedin")
+    card.twitter = request.form.get("twitter")
+    card.facebook = request.form.get("facebook")
+    card.youtube = request.form.get("youtube")
+    card.whatsapp = request.form.get("whatsapp")
+
+    profile_file = request.files.get("profile_pic")
+    if profile_file and profile_file.filename:
+        uploaded = save_upload(profile_file, f"profile_{card.id or 'new'}")
+        if uploaded:
+            card.profile_pic = uploaded
+
+    banner_file = request.files.get("banner_pic")
+    if banner_file and banner_file.filename:
+        uploaded = save_upload(banner_file, f"banner_{card.id or 'new'}")
+        if uploaded:
+            card.banner_pic = uploaded
+
     db.session.commit()
 
-    return redirect(url_for("view_card", card_id=new_card.id))
+    return redirect(url_for("view_card", card_id=card.id))
 
 @app.route("/card/<int:card_id>")
 def view_card(card_id):
     card = Card.query.get_or_404(card_id)
 
-    # Don't count owner views
-    if current_user.is_authenticated and current_user.id == card.user_id:
-        return render_template("card.html", card=card)
+    if "anon_id" not in session:
+        session["anon_id"] = str(uuid.uuid4())
 
-    # Case 1: Logged-in user
     if current_user.is_authenticated:
-
-        existing_view = CardView.query.filter_by(
-            card_id=card.id,
-            viewer_id=current_user.id
-        ).first()
-
-        if not existing_view:
-            new_view = CardView(
+        if current_user.id != card.user_id:
+            existing_view = CardView.query.filter_by(
                 card_id=card.id,
                 viewer_id=current_user.id
-            )
-            db.session.add(new_view)
-            card.views += 1
-            db.session.commit()
+            ).first()
 
-    # Case 2: Anonymous user
+            if not existing_view:
+                new_view = CardView(
+                    card_id=card.id,
+                    viewer_id=current_user.id
+                )
+                db.session.add(new_view)
+                card.views += 1
+                db.session.commit()
     else:
-
-        # Create unique session ID if not exists
-        if "anon_id" not in session:
-            session["anon_id"] = str(uuid.uuid4())
-
         existing_view = CardView.query.filter_by(
             card_id=card.id,
             session_id=session["anon_id"]
@@ -279,6 +297,68 @@ def view_card(card_id):
             db.session.commit()
 
     return render_template("card.html", card=card)
+
+# ───────── TEMPLATE SELECTION ROUTE (NEW) ─────────
+
+@app.route("/card/<int:card_id>/templates")
+@login_required
+def card_templates(card_id):
+    card = Card.query.get_or_404(card_id)
+    if card.user_id != current_user.id:
+        return redirect(url_for("dashboard"))
+    # Pass a stripped-down metadata dict (no position data needed in the template)
+    templates_meta = {
+        key: {
+            'bg_template_filename': val.get('bg_template_filename'),
+            'background': val['background'],
+            'accent': val['accent'],
+        }
+        for key, val in TEMPLATE_PRESETS.items()
+    }
+    return render_template(
+        "templates.html",
+        card=card,
+        templates_meta=templates_meta,
+        current_template=card.print_bg_template,
+    )
+
+@app.route("/card/<int:card_id>/select_template", methods=["POST"])
+@login_required
+def select_template(card_id):
+    card = Card.query.get_or_404(card_id)
+    if card.user_id != current_user.id:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    data = request.get_json()
+    template_name = data.get('template')
+    
+    if template_name not in TEMPLATE_PRESETS:
+        return jsonify({'error': 'Invalid template'}), 400
+    
+    # Apply template preset to card
+    template_config = TEMPLATE_PRESETS[template_name]
+
+    # Persist the template background filename directly on the card model
+    # so it can be retrieved without parsing the layout JSON.
+    card.print_bg_template = template_config.get('bg_template_filename')
+
+    # Store full layout in print_layout_json (single source of truth for the designer)
+    card.print_layout_json = json.dumps({
+        'positions': template_config['positions'],
+        'background': template_config['background'],
+        'accent': template_config['accent'],
+        'preset': template_config['preset'],
+        'bg_template_filename': template_config.get('bg_template_filename'),
+        'show_phone': True,
+        'show_email': True,
+        'show_website': True,
+        'show_address': False,
+        'custom_text': ''
+    })
+    
+    db.session.commit()
+    
+    return jsonify({'success': True})
 
 # ───────── DESIGNER & PRINT ROUTES ─────────
 
@@ -306,11 +386,24 @@ def card_designer(card_id):
     show_email   = layout.get('show_email', True)
     show_website = layout.get('show_website', True)
     show_address = layout.get('show_address', False)
+    font_colors  = layout.get('font_colors', {})
+
+    # Background image priority:
+    # 1. User-uploaded binary image (card.print_bg_image) — served via /get_bg_image
+    # 2. Template default static image (card.print_bg_template filename)
+    # 3. Fallback to background colour class
+    has_user_bg = bool(card.print_bg_image)
+
+    bg_template_filename = card.print_bg_template or layout.get('bg_template_filename') or ''
+    template_bg_url = (
+        url_for('static', filename=f'templates/bg/{bg_template_filename}')
+        if bg_template_filename else ''
+    )
 
     # Generate QR code for designer preview
     card_url = url_for("view_card", card_id=card.id, _external=True)
     qr_base64 = generate_qr_base64(card_url)
-    
+
     return render_template("designer.html",
         card=card,
         qr_base64=qr_base64,
@@ -323,6 +416,9 @@ def card_designer(card_id):
         show_email=show_email,
         show_website=show_website,
         show_address=show_address,
+        has_user_bg=has_user_bg,
+        template_bg_url=template_bg_url,
+        font_colors=font_colors,
     )
 
 @app.route("/card/<int:card_id>/save_layout", methods=["POST"])
@@ -331,15 +427,20 @@ def save_layout(card_id):
     card = Card.query.get_or_404(card_id)
     if card.user_id != current_user.id:
         return jsonify({'error': 'Unauthorized'}), 403
-    
+
     layout_data = request.get_json()
     if not layout_data:
         return jsonify({'error': 'No data'}), 400
 
+    # If the designer sends a bg_template_filename, mirror it onto the model field
+    # so print_card can read it without re-parsing the JSON every time.
+    if 'bg_template_filename' in layout_data:
+        card.print_bg_template = layout_data['bg_template_filename'] or None
+
     # Store everything in print_layout_json — single source of truth
     card.print_layout_json = json.dumps(layout_data)
     db.session.commit()
-    
+
     return jsonify({'success': True})
 
 @app.route("/card/<int:card_id>/print")
@@ -348,7 +449,10 @@ def print_card(card_id):
     card = Card.query.get_or_404(card_id)
     if card.user_id != current_user.id:
         return redirect(url_for("dashboard"))
-    
+
+    # Determine whether a user-uploaded background image exists
+    has_bg_image = card.print_bg_image is not None
+
     # Parse layout JSON in Python — never in templates
     layout = {}
     if card.print_layout_json:
@@ -366,13 +470,20 @@ def print_card(card_id):
     show_email   = layout.get('show_email', True)
     show_website = layout.get('show_website', True)
     show_address = layout.get('show_address', False)
+    font_colors  = layout.get('font_colors', {})
+
+    # Resolve the template background filename:
+    # prefer the value stored on the card model; fall back to what's in layout JSON.
+    bg_template_filename = card.print_bg_template or layout.get('bg_template_filename')
 
     # Generate QR code
     card_url = url_for("view_card", card_id=card.id, _external=True)
     qr_base64 = generate_qr_base64(card_url)
-    
+
     return render_template("print_card.html",
         card=card,
+        has_bg_image=has_bg_image,
+        bg_template_filename=bg_template_filename,
         qr_base64=qr_base64,
         positions=positions,
         sizes=sizes,
@@ -383,6 +494,7 @@ def print_card(card_id):
         show_email=show_email,
         show_website=show_website,
         show_address=show_address,
+        font_colors=font_colors,
     )
 
 @app.route("/card/<int:card_id>/delete", methods=["POST"])
@@ -401,90 +513,98 @@ def update_card_label(card_id):
     card = Card.query.get_or_404(card_id)
     if card.user_id != current_user.id:
         return jsonify({'error': 'Unauthorized'}), 403
-    label = (request.form.get("card_label") or "").strip() or None
-    card.card_label = label
+    
+    data = request.get_json()
+    new_label = data.get('label', '').strip() or None
+    card.card_label = new_label
     db.session.commit()
+    
     return jsonify({'success': True})
 
-@app.route("/card/<int:card_id>/update_image", methods=["POST"])
+@app.route("/card/<int:card_id>/download")
+def download_contact(card_id):
+    card = Card.query.get_or_404(card_id)
+
+    vcard = f"""BEGIN:VCARD
+VERSION:3.0
+FN:{card.name}
+ORG:{card.company}
+TITLE:{card.designation}
+TEL:{card.phone}
+EMAIL:{card.email}
+URL:{card.website}
+END:VCARD
+"""
+
+    return Response(
+        vcard,
+        mimetype="text/vcard",
+        headers={"Content-Disposition": f"attachment;filename={card.name}.vcf"}
+    )
+
+@app.route("/card/<int:card_id>/upload_bg_image", methods=["POST"])
 @login_required
-def update_card_image(card_id):
-    """Update only profile pic or banner from the card view page."""
+def upload_bg_image(card_id):
+    """Upload background image for printable card"""
+    card = Card.query.get_or_404(card_id)
+    if card.user_id != current_user.id:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    if 'bg_image' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400
+    
+    file = request.files['bg_image']
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+    
+    # Validate file type
+    allowed_types = {'image/png', 'image/jpeg', 'image/jpg'}
+    if file.content_type not in allowed_types:
+        return jsonify({'error': 'Invalid file type. Use PNG or JPG'}), 400
+    
+    # Read and store binary data
+    image_data = file.read()
+    
+    # Store in database
+    card.print_bg_image = image_data
+    card.print_bg_image_mime = file.content_type
+    db.session.commit()
+    
+    return jsonify({'success': True})
+
+@app.route("/card/<int:card_id>/get_bg_image")
+@login_required
+def get_bg_image(card_id):
+    """Retrieve background image for printable card"""
+    card = Card.query.get_or_404(card_id)
+    if card.user_id != current_user.id:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    if not card.print_bg_image:
+        return jsonify({'error': 'No background image'}), 404
+    
+    return Response(card.print_bg_image, mimetype=card.print_bg_image_mime)
+
+@app.route("/card/<int:card_id>/delete_bg_image", methods=["POST"])
+@login_required
+def delete_bg_image(card_id):
+    """Delete user-uploaded background image. Template default BG is preserved."""
     card = Card.query.get_or_404(card_id)
     if card.user_id != current_user.id:
         return jsonify({'error': 'Unauthorized'}), 403
 
-    image_type = request.form.get("image_type")
+    card.print_bg_image = None
+    card.print_bg_image_mime = None
+    db.session.commit()
 
-    if image_type == 'profile':
-        filename = save_upload(request.files.get('image'), f"{current_user.id}_profile")
-        if filename:
-            card.profile_pic = filename
-            db.session.commit()
-            return jsonify({'success': True, 'url': url_for('static', filename=f'uploads/{filename}')})
-    elif image_type == 'banner':
-        filename = save_upload(request.files.get('image'), f"{current_user.id}_banner")
-        if filename:
-            card.banner_pic = filename
-            db.session.commit()
-            return jsonify({'success': True, 'url': url_for('static', filename=f'uploads/{filename}')})
-
-    return jsonify({'error': 'No valid file uploaded'}), 400
-
-@app.route("/download_contact/<int:card_id>")
-def download_contact(card_id):
-    card = Card.query.get_or_404(card_id)
-
-    lines = [
-        "BEGIN:VCARD",
-        "VERSION:3.0",
-        f"FN:{card.name or ''}",
-        f"ORG:{card.company or ''}",
-    ]
-
-    roles = card.roles
-    first_desig = ''
-    if roles:
-        first_desig = roles[0].get('designation', '') or ''
-    if not first_desig:
-        first_desig = (card.designation or card.title or '').strip().splitlines()[0] if (card.designation or card.title) else ''
-
-    if first_desig:
-        lines.append(f"TITLE:{first_desig}")
-
-    if card.phone:
-        lines.append(f"TEL;TYPE=CELL,VOICE:{card.phone.replace(' ', '')}")
-    if card.email:
-        lines.append(f"EMAIL;TYPE=WORK:{card.email}")
-    if card.address:
-        lines.append(f"ADR;TYPE=WORK:;;{card.address};;;;")
-    if card.website:
-        lines.append(f"URL:{card.website}")
-    if card.instagram:
-        lines.append(f"X-SOCIALPROFILE;type=instagram:{card.instagram}")
-    if card.linkedin:
-        lines.append(f"X-SOCIALPROFILE;type=linkedin:{card.linkedin}")
-    if card.twitter:
-        lines.append(f"X-SOCIALPROFILE;type=twitter:{card.twitter}")
-
-    lines.append("END:VCARD")
-
-    vcf_content = "\r\n".join(lines)
-    safe_name = (card.name or "contact").replace(" ", "_")
-
-    return Response(
-        vcf_content,
-        mimetype="text/vcard",
-        headers={
-            "Content-Disposition": f'attachment; filename="{safe_name}.vcf"'
-        }
+    # Tell the designer what (if any) template BG should now show instead
+    bg_template_filename = card.print_bg_template or ''
+    template_bg_url = (
+        url_for('static', filename=f'templates/bg/{bg_template_filename}',
+                _external=False)
+        if bg_template_filename else ''
     )
-
-@app.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for("home"))
+    return jsonify({'success': True, 'template_bg_url': template_bg_url})
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(debug=True)

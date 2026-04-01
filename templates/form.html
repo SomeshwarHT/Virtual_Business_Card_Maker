@@ -613,16 +613,16 @@
       <p class="form-subtitle">Fill in your details — the preview updates live on the right.</p>
     </div>
 
-    <form id="card-form" method="POST" action="{{ url_for('save_card') }}" enctype="multipart/form-data">
+    <form id="card-form" method="POST" action="{% if edit_card %}{{ url_for('edit_card', card_id=card.id) }}{% else %}{{ url_for('save_card') }}{% endif %}" enctype="multipart/form-data">
 
       <!-- Hidden fields for shape/position/align and card id when editing -->
-      <input type="hidden" id="pic_shape" name="pic_shape" value="{{ edit_card.pic_shape if edit_card else 'round' }}" />
-      <input type="hidden" id="pic_position" name="pic_position" value="{{ edit_card.pic_position if edit_card else 'center' }}" />
-      <input type="hidden" id="identity_align" name="identity_align" value="{{ edit_card.identity_align if edit_card else 'center' }}" />
-      <input type="hidden" id="theme" name="theme" value="{{ edit_card.theme if edit_card else 'midnight' }}" />
-      <input type="hidden" id="card_label" name="card_label" value="{{ edit_card.card_label if edit_card and edit_card.card_label else '' }}" />
+      <input type="hidden" id="pic_shape" name="pic_shape" value="{{ card.pic_shape if edit_card else 'round' }}" />
+      <input type="hidden" id="pic_position" name="pic_position" value="{{ card.pic_position if edit_card else 'center' }}" />
+      <input type="hidden" id="identity_align" name="identity_align" value="{{ card.identity_align if edit_card else 'center' }}" />
+      <input type="hidden" id="theme" name="theme" value="{{ card.theme if edit_card else 'midnight' }}" />
+      <input type="hidden" id="card_label" name="card_label" value="{{ card.card_label if edit_card and card.card_label else '' }}" />
       {% if edit_card %}
-      <input type="hidden" name="card_id" value="{{ edit_card.id }}" />
+      <input type="hidden" name="card_id" value="{{ card.id }}" />
       {% endif %}
 
       <!-- §1 Basic Info -->
@@ -638,7 +638,7 @@
             <label class="field-label" for="name">Full Name</label>
             <input class="field-input" type="text" id="name" name="name"
               placeholder="e.g. Alex Morgan" autocomplete="name"
-              value="{{ edit_card.name if edit_card else '' }}" />
+              value="{{ card.name if edit_card else '' }}" />
           </div>
         </div>
 
@@ -654,13 +654,13 @@
                   <input type="file" id="profile_pic" name="profile_pic" accept="image/*" />
                   <div class="img-upload-inner" id="profileUploadInner">
                     <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                    <span id="profileFileLabel">{% if edit_card and edit_card.profile_pic %}Change photo…{% else %}Choose photo…{% endif %}</span>
+                    <span id="profileFileLabel">{% if edit_card and card.profile_pic %}Change photo…{% else %}Choose photo…{% endif %}</span>
                   </div>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
-                  <div class="profile-preview-wrap" id="profilePreviewWrap" style="{% if edit_card and edit_card.profile_pic %}display:flex;{% endif %}">
+                  <div class="profile-preview-wrap" id="profilePreviewWrap" style="{% if edit_card and card.profile_pic %}display:flex;{% endif %}">
                     <img class="profile-preview-img" id="profilePreviewImg" alt="Profile preview"
-                      src="{% if edit_card and edit_card.profile_pic %}{{ url_for('static', filename='uploads/' + edit_card.profile_pic) }}{% endif %}" />
+                      src="{% if edit_card and card.profile_pic %}{{ url_for('static', filename='uploads/' + card.profile_pic) }}{% endif %}" />
                   </div>
                   <span id="profilePreviewName" style="font-size:.72rem;color:var(--text-3);"></span>
                 </div>
@@ -673,13 +673,13 @@
                   <input type="file" id="banner_pic" name="banner_pic" accept="image/*" />
                   <div class="img-upload-inner" id="bannerUploadInner">
                     <svg viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zm-5-7l-3 3.72L10 13l-4 5h12l-3-2z"/></svg>
-                    <span id="bannerFileLabel">{% if edit_card and edit_card.banner_pic %}Change banner…{% else %}Choose banner…{% endif %}</span>
+                    <span id="bannerFileLabel">{% if edit_card and card.banner_pic %}Change banner…{% else %}Choose banner…{% endif %}</span>
                   </div>
                 </div>
-                <div id="bannerPreviewContainer" style="{% if edit_card and edit_card.banner_pic %}display:block;{% else %}display:none;{% endif %}margin-top:4px;">
+                <div id="bannerPreviewContainer" style="{% if edit_card and card.banner_pic %}display:block;{% else %}display:none;{% endif %}margin-top:4px;">
                   <div class="banner-preview-wrap" style="display:block;">
                     <img class="banner-preview-img" id="bannerPreviewImg" alt="Banner preview"
-                      src="{% if edit_card and edit_card.banner_pic %}{{ url_for('static', filename='uploads/' + edit_card.banner_pic) }}{% endif %}" />
+                      src="{% if edit_card and card.banner_pic %}{{ url_for('static', filename='uploads/' + card.banner_pic) }}{% endif %}" />
                   </div>
                 </div>
               </div>
@@ -717,70 +717,70 @@
           <label class="field-label" style="margin-bottom:10px;display:block;">Card Theme</label>
           <div class="theme-grid">
 
-            <div class="theme-swatch {% if not edit_card or (edit_card.theme or 'midnight') == 'midnight' %}active{% endif %}" id="theme-midnight" onclick="setTheme('midnight')">
+            <div class="theme-swatch {% if not edit_card or (card.theme or 'midnight') == 'midnight' %}active{% endif %}" id="theme-midnight" onclick="setTheme('midnight')">
               <div class="theme-swatch-circle" style="--ts-a:#0f0f0f;--ts-b:#1e1000;--ts-c:#fc7800;">
                 <div class="theme-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
               </div>
               <span class="theme-swatch-label">Midnight</span>
             </div>
 
-            <div class="theme-swatch {% if edit_card and edit_card.theme == 'ocean' %}active{% endif %}" id="theme-ocean" onclick="setTheme('ocean')">
+            <div class="theme-swatch {% if edit_card and card.theme == 'ocean' %}active{% endif %}" id="theme-ocean" onclick="setTheme('ocean')">
               <div class="theme-swatch-circle" style="--ts-a:#0a1628;--ts-b:#0d3060;--ts-c:#0ea5e9;">
                 <div class="theme-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
               </div>
               <span class="theme-swatch-label">Ocean</span>
             </div>
 
-            <div class="theme-swatch {% if edit_card and edit_card.theme == 'forest' %}active{% endif %}" id="theme-forest" onclick="setTheme('forest')">
+            <div class="theme-swatch {% if edit_card and card.theme == 'forest' %}active{% endif %}" id="theme-forest" onclick="setTheme('forest')">
               <div class="theme-swatch-circle" style="--ts-a:#0a1a0f;--ts-b:#14391e;--ts-c:#22c55e;">
                 <div class="theme-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
               </div>
               <span class="theme-swatch-label">Forest</span>
             </div>
 
-            <div class="theme-swatch {% if edit_card and edit_card.theme == 'rose' %}active{% endif %}" id="theme-rose" onclick="setTheme('rose')">
+            <div class="theme-swatch {% if edit_card and card.theme == 'rose' %}active{% endif %}" id="theme-rose" onclick="setTheme('rose')">
               <div class="theme-swatch-circle" style="--ts-a:#1a0a10;--ts-b:#3d1020;--ts-c:#f43f5e;">
                 <div class="theme-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
               </div>
               <span class="theme-swatch-label">Rose</span>
             </div>
 
-            <div class="theme-swatch {% if edit_card and edit_card.theme == 'violet' %}active{% endif %}" id="theme-violet" onclick="setTheme('violet')">
+            <div class="theme-swatch {% if edit_card and card.theme == 'violet' %}active{% endif %}" id="theme-violet" onclick="setTheme('violet')">
               <div class="theme-swatch-circle" style="--ts-a:#0f0a1e;--ts-b:#1e0f45;--ts-c:#7c3aed;">
                 <div class="theme-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
               </div>
               <span class="theme-swatch-label">Violet</span>
             </div>
 
-            <div class="theme-swatch {% if edit_card and edit_card.theme == 'amber' %}active{% endif %}" id="theme-amber" onclick="setTheme('amber')">
+            <div class="theme-swatch {% if edit_card and card.theme == 'amber' %}active{% endif %}" id="theme-amber" onclick="setTheme('amber')">
               <div class="theme-swatch-circle" style="--ts-a:#1a1000;--ts-b:#3d2500;--ts-c:#f59e0b;">
                 <div class="theme-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
               </div>
               <span class="theme-swatch-label">Amber</span>
             </div>
 
-            <div class="theme-swatch {% if edit_card and edit_card.theme == 'slate' %}active{% endif %}" id="theme-slate" onclick="setTheme('slate')">
+            <div class="theme-swatch {% if edit_card and card.theme == 'slate' %}active{% endif %}" id="theme-slate" onclick="setTheme('slate')">
               <div class="theme-swatch-circle" style="--ts-a:#0f172a;--ts-b:#1e293b;--ts-c:#64748b;">
                 <div class="theme-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
               </div>
               <span class="theme-swatch-label">Slate</span>
             </div>
 
-            <div class="theme-swatch {% if edit_card and edit_card.theme == 'crimson' %}active{% endif %}" id="theme-crimson" onclick="setTheme('crimson')">
+            <div class="theme-swatch {% if edit_card and card.theme == 'crimson' %}active{% endif %}" id="theme-crimson" onclick="setTheme('crimson')">
               <div class="theme-swatch-circle" style="--ts-a:#1a0505;--ts-b:#3d0a0a;--ts-c:#dc2626;">
                 <div class="theme-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
               </div>
               <span class="theme-swatch-label">Crimson</span>
             </div>
 
-            <div class="theme-swatch {% if edit_card and edit_card.theme == 'teal' %}active{% endif %}" id="theme-teal" onclick="setTheme('teal')">
+            <div class="theme-swatch {% if edit_card and card.theme == 'teal' %}active{% endif %}" id="theme-teal" onclick="setTheme('teal')">
               <div class="theme-swatch-circle" style="--ts-a:#031a18;--ts-b:#063a36;--ts-c:#14b8a6;">
                 <div class="theme-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
               </div>
               <span class="theme-swatch-label">Teal</span>
             </div>
 
-            <div class="theme-swatch {% if edit_card and edit_card.theme == 'gold' %}active{% endif %}" id="theme-gold" onclick="setTheme('gold')">
+            <div class="theme-swatch {% if edit_card and card.theme == 'gold' %}active{% endif %}" id="theme-gold" onclick="setTheme('gold')">
               <div class="theme-swatch-circle" style="--ts-a:#12100a;--ts-b:#2e2508;--ts-c:#eab308;">
                 <div class="theme-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
               </div>
@@ -797,15 +797,15 @@
             <div class="option-group">
               <span class="option-group-label">Profile Shape</span>
               <div class="option-btns">
-                <button type="button" class="shape-btn {% if not edit_card or edit_card.pic_shape == 'round' %}active{% endif %}" id="shapeRoundBtn" onclick="setShape('round')">
+                <button type="button" class="shape-btn {% if not edit_card or card.pic_shape == 'round' %}active{% endif %}" id="shapeRoundBtn" onclick="setShape('round')">
                   <div class="shape-icon-round">
-                    <svg class="shape-tick {% if edit_card and edit_card.pic_shape == 'square' %}shape-tick-hidden{% endif %}" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    <svg class="shape-tick {% if edit_card and card.pic_shape == 'square' %}shape-tick-hidden{% endif %}" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
                   </div>
                   Round
                 </button>
-                <button type="button" class="shape-btn {% if edit_card and edit_card.pic_shape == 'square' %}active{% endif %}" id="shapeSquareBtn" onclick="setShape('square')">
+                <button type="button" class="shape-btn {% if edit_card and card.pic_shape == 'square' %}active{% endif %}" id="shapeSquareBtn" onclick="setShape('square')">
                   <div class="shape-icon-square">
-                    <svg class="shape-tick {% if not edit_card or edit_card.pic_shape != 'square' %}shape-tick-hidden{% endif %}" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    <svg class="shape-tick {% if not edit_card or card.pic_shape != 'square' %}shape-tick-hidden{% endif %}" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
                   </div>
                   Square
                 </button>
@@ -816,14 +816,14 @@
             <div class="option-group">
               <span class="option-group-label">Profile Position</span>
               <div class="option-btns">
-                <button type="button" class="pos-btn {% if edit_card and edit_card.pic_position == 'left' %}active{% endif %}" id="posLeftBtn" onclick="setPosition('left')">
+                <button type="button" class="pos-btn {% if edit_card and card.pic_position == 'left' %}active{% endif %}" id="posLeftBtn" onclick="setPosition('left')">
                   <div class="pos-icon" style="justify-content:flex-start;">
                     <div class="pos-dot"></div>
                     <div class="pos-line"></div>
                   </div>
                   Left
                 </button>
-                <button type="button" class="pos-btn {% if not edit_card or edit_card.pic_position == 'center' %}active{% endif %}" id="posCenterBtn" onclick="setPosition('center')">
+                <button type="button" class="pos-btn {% if not edit_card or card.pic_position == 'center' %}active{% endif %}" id="posCenterBtn" onclick="setPosition('center')">
                   <div class="pos-icon" style="justify-content:center;">
                     <div class="pos-line"></div>
                     <div class="pos-dot"></div>
@@ -831,7 +831,7 @@
                   </div>
                   Center
                 </button>
-                <button type="button" class="pos-btn {% if edit_card and edit_card.pic_position == 'right' %}active{% endif %}" id="posRightBtn" onclick="setPosition('right')">
+                <button type="button" class="pos-btn {% if edit_card and card.pic_position == 'right' %}active{% endif %}" id="posRightBtn" onclick="setPosition('right')">
                   <div class="pos-icon" style="justify-content:flex-end;">
                     <div class="pos-line"></div>
                     <div class="pos-dot"></div>
@@ -847,15 +847,15 @@
         <div>
           <label class="field-label" style="margin-bottom:7px;">Name &amp; Info Alignment</label>
           <div class="align-row">
-            <button type="button" class="align-btn {% if edit_card and edit_card.identity_align == 'left' %}active{% endif %}" id="alignLeftBtn" onclick="setAlign('left')">
+            <button type="button" class="align-btn {% if edit_card and card.identity_align == 'left' %}active{% endif %}" id="alignLeftBtn" onclick="setAlign('left')">
               <svg viewBox="0 0 24 24"><path d="M15 15H3v2h12v-2zm0-8H3v2h12V7zM3 13h18v-2H3v2zm0 8h18v-2H3v2zM3 3v2h18V3H3z"/></svg>
               Left
             </button>
-            <button type="button" class="align-btn {% if not edit_card or edit_card.identity_align == 'center' %}active{% endif %}" id="alignCenterBtn" onclick="setAlign('center')">
+            <button type="button" class="align-btn {% if not edit_card or card.identity_align == 'center' %}active{% endif %}" id="alignCenterBtn" onclick="setAlign('center')">
               <svg viewBox="0 0 24 24"><path d="M7 15v2h10v-2H7zm-4 6h18v-2H3v2zm0-8h18v-2H3v2zm4-6v2h10V7H7zM3 3v2h18V3H3z"/></svg>
               Center
             </button>
-            <button type="button" class="align-btn {% if edit_card and edit_card.identity_align == 'right' %}active{% endif %}" id="alignRightBtn" onclick="setAlign('right')">
+            <button type="button" class="align-btn {% if edit_card and card.identity_align == 'right' %}active{% endif %}" id="alignRightBtn" onclick="setAlign('right')">
               <svg viewBox="0 0 24 24"><path d="M3 21h18v-2H3v2zm6-4h12v-2H9v2zm-6-4h18v-2H3v2zm6-4h12V7H9v2zM3 3v2h18V3H3z"/></svg>
               Right
             </button>
@@ -876,7 +876,7 @@
             <label class="field-label" for="phone">Phone Number</label>
             <div class="iw">
               <svg class="ii" viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.4 21 3 13.6 3 4.5c0-.6.4-1 1-1H8c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
-              <input class="field-input ic" type="tel" id="phone" name="phone" placeholder="+91 98765 43210" autocomplete="tel" value="{{ edit_card.phone if edit_card and edit_card.phone else '' }}" />
+              <input class="field-input ic" type="tel" id="phone" name="phone" placeholder="+91 98765 43210" autocomplete="tel" value="{{ card.phone if edit_card and card.phone else '' }}" />
             </div>
           </div>
 
@@ -884,7 +884,7 @@
             <label class="field-label" for="email">Email Address</label>
             <div class="iw">
               <svg class="ii" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-              <input class="field-input ic" type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" value="{{ edit_card.email if edit_card and edit_card.email else '' }}" />
+              <input class="field-input ic" type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" value="{{ card.email if edit_card and card.email else '' }}" />
             </div>
           </div>
 
@@ -892,7 +892,7 @@
             <label class="field-label" for="address">Address</label>
             <div class="iw">
               <svg class="ii" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-              <input class="field-input ic" type="text" id="address" name="address" placeholder="e.g. Chennai, Tamil Nadu, India" autocomplete="street-address" value="{{ edit_card.address if edit_card and edit_card.address else '' }}" />
+              <input class="field-input ic" type="text" id="address" name="address" placeholder="e.g. Chennai, Tamil Nadu, India" autocomplete="street-address" value="{{ card.address if edit_card and card.address else '' }}" />
             </div>
           </div>
 
@@ -911,7 +911,7 @@
             <label class="field-label" for="website">Website URL</label>
             <div class="iw">
               <svg class="ii" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-              <input class="field-input ic" type="url" id="website" name="website" placeholder="https://yourwebsite.com" value="{{ edit_card.website if edit_card and edit_card.website else '' }}" />
+              <input class="field-input ic" type="url" id="website" name="website" placeholder="https://yourwebsite.com" value="{{ card.website if edit_card and card.website else '' }}" />
             </div>
           </div>
 
@@ -948,7 +948,7 @@
               <span class="sli wa-bg"><svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></span>
               WhatsApp
             </label>
-            <input class="field-input" type="tel" id="whatsapp" name="whatsapp" placeholder="+91 98765 43210" autocomplete="tel" value="{{ edit_card.whatsapp if edit_card and edit_card.whatsapp else '' }}" />
+            <input class="field-input" type="tel" id="whatsapp" name="whatsapp" placeholder="+91 98765 43210" autocomplete="tel" value="{{ card.whatsapp if edit_card and card.whatsapp else '' }}" />
           </div>
 
           <div class="field-wrap">
@@ -956,7 +956,7 @@
               <span class="sli ig-bg"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></span>
               Instagram
             </label>
-            <input class="field-input" type="url" id="instagram" name="instagram" placeholder="https://instagram.com/handle" value="{{ edit_card.instagram if edit_card and edit_card.instagram else '' }}" />
+            <input class="field-input" type="url" id="instagram" name="instagram" placeholder="https://instagram.com/handle" value="{{ card.instagram if edit_card and card.instagram else '' }}" />
           </div>
 
           <div class="field-wrap">
@@ -964,7 +964,7 @@
               <span class="sli li-bg"><svg viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg></span>
               LinkedIn
             </label>
-            <input class="field-input" type="url" id="linkedin" name="linkedin" placeholder="https://linkedin.com/in/profile" value="{{ edit_card.linkedin if edit_card and edit_card.linkedin else '' }}" />
+            <input class="field-input" type="url" id="linkedin" name="linkedin" placeholder="https://linkedin.com/in/profile" value="{{ card.linkedin if edit_card and card.linkedin else '' }}" />
           </div>
 
           <div class="field-wrap">
@@ -972,7 +972,7 @@
               <span class="sli tw-bg"><svg viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg></span>
               Twitter / X
             </label>
-            <input class="field-input" type="url" id="twitter" name="twitter" placeholder="https://twitter.com/handle" value="{{ edit_card.twitter if edit_card and edit_card.twitter else '' }}" />
+            <input class="field-input" type="url" id="twitter" name="twitter" placeholder="https://twitter.com/handle" value="{{ card.twitter if edit_card and card.twitter else '' }}" />
           </div>
 
           <div class="field-wrap">
@@ -980,7 +980,7 @@
               <span class="sli fb-bg"><svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></span>
               Facebook
             </label>
-            <input class="field-input" type="url" id="facebook" name="facebook" placeholder="https://facebook.com/page" value="{{ edit_card.facebook if edit_card and edit_card.facebook else '' }}" />
+            <input class="field-input" type="url" id="facebook" name="facebook" placeholder="https://facebook.com/page" value="{{ card.facebook if edit_card and card.facebook else '' }}" />
           </div>
 
           <div class="field-wrap">
@@ -988,7 +988,7 @@
               <span class="sli yt-bg"><svg viewBox="0 0 24 24"><path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg></span>
               YouTube
             </label>
-            <input class="field-input" type="url" id="youtube" name="youtube" placeholder="https://youtube.com/@channel" value="{{ edit_card.youtube if edit_card and edit_card.youtube else '' }}" />
+            <input class="field-input" type="url" id="youtube" name="youtube" placeholder="https://youtube.com/@channel" value="{{ card.youtube if edit_card and card.youtube else '' }}" />
           </div>
 
         </div>
@@ -1005,7 +1005,7 @@
             <label class="field-label" for="upi">UPI ID</label>
             <div class="iw">
               <svg class="ii" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-              <input class="field-input ic" type="text" id="upi" name="upi" placeholder="yourname@upi" autocomplete="off" spellcheck="false" value="{{ edit_card.upi if edit_card and edit_card.upi else '' }}" />
+              <input class="field-input ic" type="text" id="upi" name="upi" placeholder="yourname@upi" autocomplete="off" spellcheck="false" value="{{ card.upi if edit_card and card.upi else '' }}" />
             </div>
             <p class="hint">e.g. <code>alexmorgan@okicici</code> or <code>9876543210@paytm</code></p>
           </div>
@@ -1036,25 +1036,25 @@
 
         <!-- Hero / Banner -->
         <div class="cpw-hero" id="pHero">
-          <img id="pBannerImg" class="cpw-hero-img" alt="" {% if edit_card and edit_card.banner_pic %}src="{{ url_for('static', filename='uploads/' + edit_card.banner_pic) }}" style="display:block;"{% endif %} />
+          <img id="pBannerImg" class="cpw-hero-img" alt="" {% if edit_card and card.banner_pic %}src="{{ url_for('static', filename='uploads/' + card.banner_pic) }}" style="display:block;"{% endif %} />
         </div>
 
         <!-- Avatar -->
-        <div class="cpw-av-wrap pos-{{ edit_card.pic_position if edit_card else 'center' }}" id="pAvWrap">
-          <div class="cpw-av {% if edit_card and edit_card.pic_shape == 'square' %}sq{% endif %}" id="pAvatar">
-            {% if edit_card and edit_card.profile_pic %}
-            <img id="pAvatarImg" alt="" src="{{ url_for('static', filename='uploads/' + edit_card.profile_pic) }}" style="display:block;" />
-            <span id="pInitials" style="display:none;">{{ (edit_card.name or '?')[:2]|upper if edit_card else '?' }}</span>
+        <div class="cpw-av-wrap pos-{{ card.pic_position if edit_card else 'center' }}" id="pAvWrap">
+          <div class="cpw-av {% if edit_card and card.pic_shape == 'square' %}sq{% endif %}" id="pAvatar">
+            {% if edit_card and card.profile_pic %}
+            <img id="pAvatarImg" alt="" src="{{ url_for('static', filename='uploads/' + card.profile_pic) }}" style="display:block;" />
+            <span id="pInitials" style="display:none;">{{ (card.name or '?')[:2]|upper if edit_card else '?' }}</span>
             {% else %}
             <img id="pAvatarImg" alt="" />
-            <span id="pInitials">{{ (edit_card.name or '?')[0]|upper if edit_card else '?' }}</span>
+            <span id="pInitials">{{ (card.name or '?')[0]|upper if edit_card else '?' }}</span>
             {% endif %}
           </div>
         </div>
 
         <!-- Identity -->
-        <div class="cpw-identity align-{{ edit_card.identity_align if edit_card else 'center' }}" id="pIdentity">
-          <div class="cpw-name {% if not edit_card or not edit_card.name %}empty{% endif %}" id="pName">{{ edit_card.name if edit_card and edit_card.name else 'Your name will appear here' }}</div>
+        <div class="cpw-identity align-{{ card.identity_align if edit_card else 'center' }}" id="pIdentity">
+          <div class="cpw-name {% if not edit_card or not card.name %}empty{% endif %}" id="pName">{{ card.name if edit_card and card.name else 'Your name will appear here' }}</div>
           <div class="cpw-designations" id="pDesig"></div>
           <div id="pUpiRow" style="display:none;"></div>
         </div>
@@ -1108,17 +1108,17 @@
   <div class="submit-bar-inner">
     <div class="sub-info">
       <div class="sub-avatar" id="barAvatar">
-        {% if edit_card and edit_card.profile_pic %}
-        <img id="barAvatarImg" alt="" src="{{ url_for('static', filename='uploads/' + edit_card.profile_pic) }}" style="display:block;" />
-        <span id="barInitials" style="display:none;">{{ (edit_card.name or '?')[0]|upper }}</span>
+        {% if edit_card and card.profile_pic %}
+        <img id="barAvatarImg" alt="" src="{{ url_for('static', filename='uploads/' + card.profile_pic) }}" style="display:block;" />
+        <span id="barInitials" style="display:none;">{{ (card.name or '?')[0]|upper }}</span>
         {% else %}
         <img id="barAvatarImg" alt="" />
-        <span id="barInitials">{{ (edit_card.name or current_user.name or '?')[0]|upper }}</span>
+        <span id="barInitials">{{ ((card.name if card else None) or current_user.name or '?')[0]|upper }}</span>
         {% endif %}
       </div>
       <div class="sub-meta">
-        <div class="sub-name" id="barName">{{ edit_card.name if edit_card and edit_card.name else current_user.name or 'Your name' }}</div>
-        <div class="sub-sub" id="barSub">{% if edit_card and edit_card.roles %}{{ edit_card.roles[0].designation or edit_card.roles[0].company or 'Fill in your details above' }}{% else %}Fill in your details above{% endif %}</div>
+        <div class="sub-name" id="barName">{{ card.name if edit_card and card.name else current_user.name or 'Your name' }}</div>
+        <div class="sub-sub" id="barSub">{% if edit_card and card.roles %}{{ card.roles[0].designation or card.roles[0].company or 'Fill in your details above' }}{% else %}Fill in your details above{% endif %}</div>
       </div>
     </div>
     <button type="submit" form="card-form" class="submit-btn">
@@ -1540,8 +1540,8 @@ document.querySelectorAll('.field-input').forEach(el=>{
 });
 
 /* ── INIT ROLES ── */
-{% if edit_card and edit_card.roles %}
-  {% for role in edit_card.roles %}
+{% if edit_card and card.roles %}
+  {% for role in card.roles %}
   addRole({{ role.designation | tojson }}, {{ role.company | tojson }}, {{ role.bio | tojson }});
   {% endfor %}
 {% else %}

@@ -85,6 +85,22 @@
     .ctrl-input:focus { border-color: var(--accent); }
     .ctrl-hint { font-size: .67rem; color: var(--text-3); margin-top: 5px; }
 
+    /* ── FONT COLOR ROWS ── */
+    .color-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; }
+    .color-row + .color-row { border-top: 1px solid var(--border); }
+    .color-row-label { font-size: .75rem; color: var(--text-2); }
+    .color-picker-wrap { display: flex; align-items: center; gap: 6px; }
+    .color-picker-wrap input[type="color"] {
+      width: 28px; height: 28px; padding: 2px; border: 1.5px solid var(--border);
+      border-radius: 6px; cursor: pointer; background: none; outline: none;
+    }
+    .color-picker-wrap input[type="color"]:hover { border-color: var(--accent); }
+    .color-reset-btn {
+      font-size: .65rem; color: var(--text-3); background: none; border: none;
+      cursor: pointer; padding: 2px 4px; border-radius: 4px; line-height: 1;
+    }
+    .color-reset-btn:hover { color: var(--accent); }
+
     /* ── CANVAS AREA ── */
     .canvas-area { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 28px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
     .canvas-hint { font-size: .72rem; color: var(--text-3); text-align: center; }
@@ -101,7 +117,7 @@
     .canvas {
       position: absolute; top: 0; left: 0;
       width: 630px; height: 360px;
-      transform-origin: top left;
+      transform-origin: top center;
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 12px 48px rgba(0,0,0,.28), 0 2px 8px rgba(0,0,0,.12);
@@ -207,6 +223,100 @@
     /* ── TOAST ── */
     .toast { position: fixed; bottom: 76px; left: 50%; transform: translateX(-50%) translateY(16px); background: var(--brand); color: #fff; padding: 11px 18px; border-radius: var(--radius-sm); font-size: .82rem; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,.25); opacity: 0; pointer-events: none; transition: all .22s; z-index: 300; white-space: nowrap; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .bg-image-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .bg-image-preview {
+      width: 100%;
+      aspect-ratio: 3.5 / 2;
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .bg-image-preview.has-image {
+      border-style: solid;
+    }
+    
+    .bg-image-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      color: var(--text-3);
+      background: var(--surface2);
+    }
+    
+    .bg-image-placeholder svg {
+      width: 28px;
+      height: 28px;
+      fill: var(--text-3);
+    }
+    
+    .bg-image-placeholder span {
+      font-size: .75rem;
+      font-weight: 500;
+    }
+    
+    .bg-image-actions {
+      display: flex;
+      gap: 6px;
+    }
+    
+    .bg-img-btn {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 8px 12px;
+      border-radius: 7px;
+      font-family: 'Outfit', sans-serif;
+      font-size: .75rem;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-2);
+      cursor: pointer;
+      transition: all .15s;
+    }
+    
+    .bg-img-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+    
+    .bg-img-btn svg {
+      width: 13px;
+      height: 13px;
+      fill: currentColor;
+    }
+    
+    .bg-img-remove {
+      flex: 0 0 auto;
+    }
+    
+    .bg-img-remove:hover {
+      border-color: #dc2626;
+      color: #dc2626;
+      background: #fef2f2;
+    }
+    
+    /* Background image in canvas */
+    .card-canvas.has-bg-image {
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
   </style>
 </head>
 <body>
@@ -332,11 +442,99 @@
     </div>
 
     <div class="panel-section">
+      <span class="ctrl-label">Font Colors</span>
+      <div id="fontColorList">
+        <div class="color-row">
+          <span class="color-row-label">Name</span>
+          <div class="color-picker-wrap">
+            <input type="color" id="fc-name" data-fc="name" title="Name color">
+            <button class="color-reset-btn" data-fc-reset="name" title="Reset to default">↺</button>
+          </div>
+        </div>
+        <div class="color-row">
+          <span class="color-row-label">Designation</span>
+          <div class="color-picker-wrap">
+            <input type="color" id="fc-designation" data-fc="designation" title="Designation color">
+            <button class="color-reset-btn" data-fc-reset="designation" title="Reset to default">↺</button>
+          </div>
+        </div>
+        <div class="color-row">
+          <span class="color-row-label">Company</span>
+          <div class="color-picker-wrap">
+            <input type="color" id="fc-company" data-fc="company" title="Company color">
+            <button class="color-reset-btn" data-fc-reset="company" title="Reset to default">↺</button>
+          </div>
+        </div>
+        <div class="color-row">
+          <span class="color-row-label">Phone</span>
+          <div class="color-picker-wrap">
+            <input type="color" id="fc-phone" data-fc="phone" title="Phone color">
+            <button class="color-reset-btn" data-fc-reset="phone" title="Reset to default">↺</button>
+          </div>
+        </div>
+        <div class="color-row">
+          <span class="color-row-label">Email</span>
+          <div class="color-picker-wrap">
+            <input type="color" id="fc-email" data-fc="email" title="Email color">
+            <button class="color-reset-btn" data-fc-reset="email" title="Reset to default">↺</button>
+          </div>
+        </div>
+        <div class="color-row">
+          <span class="color-row-label">Website</span>
+          <div class="color-picker-wrap">
+            <input type="color" id="fc-website" data-fc="website" title="Website color">
+            <button class="color-reset-btn" data-fc-reset="website" title="Reset to default">↺</button>
+          </div>
+        </div>
+        <div class="color-row">
+          <span class="color-row-label">Address</span>
+          <div class="color-picker-wrap">
+            <input type="color" id="fc-address" data-fc="address" title="Address color">
+            <button class="color-reset-btn" data-fc-reset="address" title="Reset to default">↺</button>
+          </div>
+        </div>
+        <div class="color-row">
+          <span class="color-row-label">Custom Text</span>
+          <div class="color-picker-wrap">
+            <input type="color" id="fc-custom_text" data-fc="custom_text" title="Custom text color">
+            <button class="color-reset-btn" data-fc-reset="custom_text" title="Reset to default">↺</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-section">
       <span class="ctrl-label">How to use</span>
       <p style="font-size:.72rem;color:var(--text-3);line-height:1.6;">
         <strong style="color:var(--text-2)">Drag</strong> any element to reposition.<br>
         <strong style="color:var(--accent)">Orange dot</strong> (bottom-right) to resize.
       </p>
+    </div>
+
+    <!-- Background Image Control (Add to panel-section) -->
+    <div class="panel-section">
+      <span class="ctrl-label">Background Image</span>
+      <div class="bg-image-controls">
+        <div class="bg-image-preview" id="bgImagePreview">
+          <div class="bg-image-placeholder">
+            <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+            <span>No image</span>
+          </div>
+          <img id="bgImageImg" style="display:none; width:100%; height:100%; object-fit:cover; border-radius:6px;">
+        </div>
+        <div class="bg-image-actions">
+          <input type="file" id="bgImageInput" accept="image/png,image/jpeg" style="display:none;">
+          <button class="bg-img-btn bg-img-upload" id="uploadBgBtn">
+            <svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
+            Upload
+          </button>
+          <button class="bg-img-btn bg-img-remove" id="removeBgBtn" style="display:none;">
+            <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            Remove
+          </button>
+        </div>
+        <div class="ctrl-hint">Recommended: 630 × 360 px (3.5 : 2 ratio) · PNG or JPG · max 5 MB</div>
+      </div>
     </div>
 
   </div><!-- /panel -->
@@ -564,10 +762,11 @@ var elements         = Array.from(canvas.querySelectorAll('[data-el]'));
 /* ═══════════════════════════════════════════════════════════
    STATE
 ═══════════════════════════════════════════════════════════ */
-var curBg     = '{{ saved_bg | default("matte_black") }}';
-var curAccent = '{{ saved_accent | default("orange") }}';
-var curScale  = 1;
-var curSizes  = {};
+var curBg         = '{{ saved_bg | default("matte_black") }}';
+var curAccent     = '{{ saved_accent | default("orange") }}';
+var curScale      = 1;
+var curSizes      = {};
+var curFontColors = {{ font_colors | tojson if font_colors else '{}' }};
 
 /* ═══════════════════════════════════════════════════════════
    CANVAS SCALING
@@ -576,6 +775,7 @@ function scaleCanvas() {
   var availW = canvasWrap.offsetWidth;
   curScale = Math.min(availW / CANVAS_W, 1);
   canvas.style.transform = 'scale(' + curScale + ')';
+  canvas.style.left = Math.max(0, (availW - CANVAS_W * curScale) / 2) + 'px';
   canvasWrap.style.height = (CANVAS_H * curScale) + 'px';
 }
 
@@ -644,7 +844,7 @@ function getElSize(el) {
 }
 
 function getDefaultSize(name) {
-  var preset = PRESETS[curPreset];
+  var preset = PRESETS[curPreset] || PRESETS['classic'];
   if (preset && preset.sizes && preset.sizes[name] != null) return preset.sizes[name];
   var fallback = { name:28, designation:10, company:13, phone:11, email:11, website:11, address:11, qr:110, custom_text:10 };
   return fallback[name] || 11;
@@ -699,8 +899,8 @@ function applyPreset(preset) {
    RESET POSITION — snap to current preset positions only
 ═══════════════════════════════════════════════════════════ */
 function resetPositions() {
-  if (!curPreset) return;
-  var p = PRESETS[curPreset];
+  var preset = curPreset || 'classic';
+  var p = PRESETS[preset];
   if (!p) return;
   elements.forEach(function(el) {
     var name = el.getAttribute('data-el');
@@ -711,15 +911,15 @@ function resetPositions() {
       el.setAttribute('data-y', p.positions[name].y);
     }
   });
-  showToast('Positions reset to ' + curPreset + ' preset');
+  showToast('Positions reset to ' + preset + ' preset');
 }
 
 /* ═══════════════════════════════════════════════════════════
    RESET SIZE — snap to current preset sizes only
 ═══════════════════════════════════════════════════════════ */
 function resetSizes() {
-  if (!curPreset) return;
-  var p = PRESETS[curPreset];
+  var preset = curPreset || 'classic';
+  var p = PRESETS[preset];
   if (!p) return;
   elements.forEach(function(el) {
     var name = el.getAttribute('data-el');
@@ -727,7 +927,7 @@ function resetSizes() {
       setElSize(el, p.sizes[name]);
     }
   });
-  showToast('Sizes reset to ' + curPreset + ' preset');
+  showToast('Sizes reset to ' + preset + ' preset');
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -806,6 +1006,10 @@ function init() {
     } else {
       curSizes[name] = getElSize(el);
     }
+    /* Apply saved font color if present */
+    if (curFontColors && curFontColors[name]) {
+      el.style.color = curFontColors[name];
+    }
   });
 
   makeDraggableResizable();
@@ -874,6 +1078,7 @@ if (saveBtn) {
       positions, sizes,
       background:   curBg,
       accent:       curAccent,
+      font_colors:  curFontColors,
       show_phone:   !!( document.getElementById('tog-phone')   && document.getElementById('tog-phone').checked ),
       show_email:   !!( document.getElementById('tog-email')   && document.getElementById('tog-email').checked ),
       show_website: !!( document.getElementById('tog-website') && document.getElementById('tog-website').checked ),
@@ -896,7 +1101,226 @@ function showToast(msg){
   setTimeout(function(){ toast.classList.remove('show'); }, 2600);
 }
 
+/* ═══════════════════════════════════════════════════════════
+   FONT COLOR PICKERS
+═══════════════════════════════════════════════════════════ */
+function applyFontColor(name, hex) {
+  var el = getEl(name);
+  if (!el) return;
+  if (hex) {
+    el.style.color = hex;
+    curFontColors[name] = hex;
+  } else {
+    el.style.color = '';
+    delete curFontColors[name];
+  }
+}
+
+/* Sync picker values from curFontColors and wire events */
+function initFontColorPickers() {
+  document.querySelectorAll('[data-fc]').forEach(function(input) {
+    var name = input.getAttribute('data-fc');
+    /* Seed picker with saved color, or a neutral fallback so the swatch isn't black */
+    input.value = (curFontColors && curFontColors[name]) ? curFontColors[name] : '#ffffff';
+    input.addEventListener('input', function() {
+      applyFontColor(name, input.value);
+    });
+  });
+
+  document.querySelectorAll('[data-fc-reset]').forEach(function(btn) {
+    var name = btn.getAttribute('data-fc-reset');
+    btn.addEventListener('click', function() {
+      applyFontColor(name, null);
+      /* Reset picker swatch to neutral */
+      var inp = document.getElementById('fc-' + name);
+      if (inp) inp.value = '#ffffff';
+    });
+  });
+}
+
 init();
+initFontColorPickers();
+
+/* ═══════════════════════════════════════════════════════════
+   BACKGROUND IMAGE MANAGEMENT
+   Priority: user-uploaded → template default → colour class
+═══════════════════════════════════════════════════════════ */
+
+var cardId        = {{ card.id }};
+var hasUserBg     = {{ 'true' if has_user_bg else 'false' }};
+var templateBgUrl = {{ template_bg_url | tojson }};
+
+var bgImageInput  = document.getElementById('bgImageInput');
+var uploadBgBtn   = document.getElementById('uploadBgBtn');
+var removeBgBtn   = document.getElementById('removeBgBtn');
+var bgImagePreview= document.getElementById('bgImagePreview');
+var bgImageImg    = document.getElementById('bgImageImg');
+/* cardCanvas = canvas (already declared above) */
+
+/* Apply a URL as the canvas background image */
+function applyCanvasBgImage(url) {
+  canvas.style.backgroundImage = 'url(' + url + ')';
+  canvas.style.backgroundSize     = 'cover';
+  canvas.style.backgroundPosition = 'center';
+  canvas.style.backgroundRepeat   = 'no-repeat';
+  canvas.classList.add('has-bg-image');
+}
+
+/* Remove all background image styling from canvas */
+function clearCanvasBgImage() {
+  canvas.style.backgroundImage    = '';
+  canvas.style.backgroundSize     = '';
+  canvas.style.backgroundPosition = '';
+  canvas.style.backgroundRepeat   = '';
+  canvas.classList.remove('has-bg-image');
+}
+
+/* Update the panel thumbnail */
+function showBgPreview(url) {
+  bgImageImg.src = url;
+  bgImageImg.style.display = 'block';
+  bgImagePreview.querySelector('.bg-image-placeholder').style.display = 'none';
+  bgImagePreview.classList.add('has-image');
+}
+
+function clearBgPreview() {
+  bgImageImg.style.display = 'none';
+  bgImageImg.src = '';
+  bgImagePreview.querySelector('.bg-image-placeholder').style.display = 'flex';
+  bgImagePreview.classList.remove('has-image');
+}
+
+/* Show a user-uploaded image (highest priority) */
+function setUserBackgroundImage(url) {
+  applyCanvasBgImage(url);
+  showBgPreview(url);
+  removeBgBtn.style.display = 'inline-flex';
+  uploadBgBtn.textContent = 'Change';
+}
+
+/*
+  Remove user image and fall back:
+  - if a template background exists → apply it (template BG is read-only, no Remove btn)
+  - else → clear to colour class
+*/
+function clearUserBackgroundImage(fallbackUrl) {
+  hasUserBg = false;
+  var fb = fallbackUrl || templateBgUrl || '';
+  if (fb) {
+    applyCanvasBgImage(fb);
+    showBgPreview(fb);
+    removeBgBtn.style.display = 'none';    /* template BG has no remove button */
+    uploadBgBtn.textContent = 'Upload';
+  } else {
+    clearCanvasBgImage();
+    clearBgPreview();
+    removeBgBtn.style.display = 'none';
+    uploadBgBtn.textContent = 'Upload';
+  }
+}
+
+/* ── Load initial background on page open ── */
+(function initBgImage() {
+  if (hasUserBg) {
+    /* Fetch the user-uploaded binary image from the server */
+    fetch('/card/' + cardId + '/get_bg_image')
+      .then(function(res) {
+        if (!res.ok) throw new Error('no user bg');
+        return res.blob();
+      })
+      .then(function(blob) {
+        var url = URL.createObjectURL(blob);
+        setUserBackgroundImage(url);
+      })
+      .catch(function() {
+        /* Fetch failed — fall back to template BG if any */
+        if (templateBgUrl) {
+          applyCanvasBgImage(templateBgUrl);
+          showBgPreview(templateBgUrl);
+          removeBgBtn.style.display = 'none';
+          uploadBgBtn.textContent = 'Upload';
+        }
+      });
+  } else if (templateBgUrl) {
+    /* No user image — apply template default immediately (static URL, no fetch) */
+    applyCanvasBgImage(templateBgUrl);
+    showBgPreview(templateBgUrl);
+    removeBgBtn.style.display = 'none';
+    uploadBgBtn.textContent = 'Upload';
+  }
+  /* else: no image at all — colour class already applied by applyBackground() */
+})();
+
+/* ── Upload button ── */
+uploadBgBtn.addEventListener('click', function() {
+  bgImageInput.click();
+});
+
+/* ── File chosen ── */
+bgImageInput.addEventListener('change', function(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+
+  if (!file.type.match(/^image\/(png|jpeg|jpg)$/)) {
+    showToast('Please upload a PNG or JPG image');
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('Image must be less than 5MB');
+    return;
+  }
+
+  /* Preview immediately from local file */
+  var reader = new FileReader();
+  reader.onload = function(ev) { setUserBackgroundImage(ev.target.result); };
+  reader.readAsDataURL(file);
+
+  /* Upload to server */
+  var formData = new FormData();
+  formData.append('bg_image', file);
+
+  fetch('/card/' + cardId + '/upload_bg_image', { method: 'POST', body: formData })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.success) {
+        hasUserBg = true;
+        showToast('✓ Background image uploaded');
+      } else {
+        showToast('✗ Failed to upload image');
+        clearUserBackgroundImage();
+      }
+    })
+    .catch(function() {
+      showToast('✗ Error uploading image');
+      clearUserBackgroundImage();
+    });
+
+  bgImageInput.value = '';
+});
+
+/* ── Remove button ── */
+removeBgBtn.addEventListener('click', function() {
+  if (!confirm('Remove background image?')) return;
+
+  fetch('/card/' + cardId + '/delete_bg_image', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.success) {
+        /* Server returns template_bg_url so we know what to fall back to */
+        clearUserBackgroundImage(data.template_bg_url || '');
+        showToast('✓ Background image removed');
+      } else {
+        showToast('✗ Failed to remove image');
+      }
+    })
+    .catch(function() {
+      showToast('✗ Error removing image');
+    });
+});
+
 }); /* end DOMContentLoaded */
 </script>
 </body>

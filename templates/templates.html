@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Choose Template — CardCraft</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent:        #fc7800;
+      --accent-hover:  #e56b00;
+      --accent-soft:   #fff3e6;
+      --brand:         #0f0f0f;
+      --surface:       #ffffff;
+      --bg:            #f0ede9;
+      --text-1:        #0f0f0f;
+      --text-2:        #4b5563;
+      --text-3:        #9ca3af;
+      --border:        #e5e1da;
+      --radius:        14px;
+      --shadow-sm:     0 2px 12px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.04);
+      --shadow-md:     0 8px 32px rgba(0,0,0,.10), 0 2px 8px rgba(0,0,0,.06);
+      --shadow-lg:     0 16px 48px rgba(0,0,0,.14), 0 4px 16px rgba(0,0,0,.08);
+    }
+
+    html, body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text-1);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ── */
+    .navbar {
+      background: var(--brand);
+      border-bottom: 1px solid #1e1e1e;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+    }
+
+    .navbar-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      text-decoration: none;
+    }
+
+    .nav-logo-icon { width: 26px; height: 26px; flex-shrink: 0; }
+
+    .nav-logo-text {
+      font-size: .95rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -.2px;
+    }
+
+    .nav-actions { display: flex; gap: 8px; align-items: center; }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      background: transparent;
+      color: rgba(255,255,255,.7);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 8px;
+      font-family: 'Outfit', sans-serif;
+      font-size: .82rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .nav-btn:hover { color: #fff; border-color: rgba(255,255,255,.3); }
+    .nav-btn svg { width: 14px; height: 14px; fill: currentColor; }
+
+    /* ── PAGE ── */
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 52px 24px 120px;
+    }
+
+    /* ── HEADER ── */
+    .page-header {
+      text-align: center;
+      margin-bottom: 52px;
+    }
+
+    .page-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 5px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+
+    .page-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2.6rem;
+      font-weight: 400;
+      color: var(--text-1);
+      letter-spacing: -.5px;
+      line-height: 1.15;
+      margin-bottom: 14px;
+    }
+
+    .page-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-2);
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.65;
+    }
+
+    /* ── CARD COUNT BADGE ── */
+    .card-context {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 20px;
+      padding: 8px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: .85rem;
+      color: var(--text-2);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .card-context strong { color: var(--text-1); font-weight: 600; }
+
+    /* ── GRID ── */
+    .templates-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 28px;
+    }
+
+    /* ── TEMPLATE CARD ── */
+    .template-card {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+      transition: border-color .2s, box-shadow .2s, transform .2s;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .template-card:hover {
+      border-color: var(--accent);
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-3px);
+    }
+
+    .template-card.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(252,120,0,.18), var(--shadow-md);
+    }
+
+    /* ── ACTIVE BADGE ── */
+    .active-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 20;
+      display: none;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 11px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 20px;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .3px;
+      text-transform: uppercase;
+      box-shadow: 0 2px 8px rgba(252,120,0,.4);
+    }
+
+    .template-card.active .active-badge { display: flex; }
+    .active-badge svg { width: 12px; height: 12px; fill: currentColor; }
+
+    /* ── PREVIEW AREA ── */
+    /*
+      Aspect ratio 3.5:2 matches a real business card.
+      The preview image fills the container; CSS colour is shown
+      as the background so the card still looks correct even if
+      the image file hasn't been placed yet.
+    */
+    .template-preview {
+      width: 100%;
+      aspect-ratio: 3.5 / 2;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Colour fallback layer — visible when image hasn't loaded */
+    .preview-bg {
+      position: absolute;
+      inset: 0;
+    }
+
+    /* Background colours matching each template */
+    .bg-matte_navy   { background: #0f1f3d; }
+    .bg-matte_beige  { background: #e8dcc8; }
+    .bg-matte_black  { background: #1a1a1a; }
+    .bg-matte_forest { background: #1a2f1a; }
+    .bg-matte_maroon { background: #3d1a1a; }
+    .bg-matte_slate  { background: #2d3748; }
+
+    /* The actual template background image */
+    .preview-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      /* Hide broken-image icon — colour fallback stays visible */
+      color: transparent;
+    }
+
+    /* Subtle gradient overlay to make text readable over both image and colour */
+    .preview-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        135deg,
+        rgba(0,0,0,.08) 0%,
+        transparent 60%
+      );
+      pointer-events: none;
+    }
+
+    /* ── PREVIEW CONTENT — card fields shown inside preview ── */
+    .preview-content {
+      position: absolute;
+      inset: 0;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .prev-name {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: -.2px;
+      line-height: 1.2;
+      margin-bottom: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .prev-role {
+      font-size: 6.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .9px;
+      margin-bottom: 3px;
+      opacity: .9;
+    }
+
+    .prev-company {
+      font-size: 7px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      opacity: .75;
+    }
+
+    .prev-contacts {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .prev-contact {
+      font-size: 6px;
+      opacity: .7;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* QR placeholder inside preview */
+    .prev-qr {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 44px;
+      height: 44px;
+      background: #ffffff;
+      border-radius: 5px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 3px;
+    }
+
+    .prev-qr-grid {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1px;
+    }
+
+    .prev-qr-grid span {
+      display: block;
+      border-radius: 0.5px;
+    }
+
+    .prev-qr-label {
+      font-size: 4.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      color: #9ca3af;
+    }
+
+    /* Text colours per template background */
+    .text-light .prev-name    { color: #ffffff; }
+    .text-light .prev-role    { color: var(--t-accent, #fc7800); }
+    .text-light .prev-company { color: rgba(255,255,255,.8); }
+    .text-light .prev-contact { color: rgba(255,255,255,.7); }
+
+    .text-dark  .prev-name    { color: #0f0f0f; }
+    .text-dark  .prev-role    { color: var(--t-accent, #fc7800); }
+    .text-dark  .prev-company { color: #4b5563; }
+    .text-dark  .prev-contact { color: #6b7280; }
+
+    /* Accent colour per template */
+    .accent-orange { --t-accent: #fc7800; }
+    .accent-blue   { --t-accent: #2563eb; }
+    .accent-gold   { --t-accent: #d97706; }
+    .accent-green  { --t-accent: #10b981; }
+
+    /* QR dot colour per background */
+    .text-light .prev-qr-grid span { background: #1a1a1a; }
+    .text-dark  .prev-qr-grid span { background: #0f0f0f; }
+
+    /* ── CARD INFO ── */
+    .template-info {
+      padding: 18px 20px 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .info-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .template-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-1);
+      line-height: 1.2;
+    }
+
+    .template-tag {
+      flex-shrink: 0;
+      font-size: .68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--text-3);
+      border: 1px solid var(--border);
+    }
+
+    .template-desc {
+      font-size: .84rem;
+      color: var(--text-2);
+      line-height: 1.55;
+      margin-bottom: 16px;
+    }
+
+    /* ── SELECT BUTTON ── */
+    .template-btn {
+      width: 100%;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Outfit', sans-serif;
+      font-size: .88rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: all .15s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .template-btn.btn-select {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(252,120,0,.28);
+    }
+
+    .template-btn.btn-select:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 5px 16px rgba(252,120,0,.36);
+    }
+
+    .template-btn.btn-active {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1.5px solid var(--accent);
+      box-shadow: none;
+      cursor: default;
+    }
+
+    .template-btn svg {
+      width: 15px;
+      height: 15px;
+      fill: currentColor;
+      flex-shrink: 0;
+    }
+
+    /* ── LOADING SPINNER inside button ── */
+    .btn-spinner {
+      display: none;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .template-btn.loading .btn-icon { display: none; }
+    .template-btn.loading .btn-text { opacity: .6; }
+    .template-btn.loading .btn-spinner { display: block; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: var(--brand);
+      color: #fff;
+      padding: 11px 20px;
+      border-radius: 10px;
+      font-size: .85rem;
+      font-weight: 500;
+      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .22s, transform .22s;
+      white-space: nowrap;
+      z-index: 500;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .templates-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    }
+
+    @media (max-width: 560px) {
+      .container { padding: 32px 16px 80px; }
+      .page-title { font-size: 2rem; }
+      .templates-grid { grid-template-columns: 1fr; gap: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="{{ url_for('dashboard') }}" class="nav-logo">
+      <svg class="nav-logo-icon" viewBox="0 0 32 32">
+        <rect width="32" height="32" rx="6" fill="#fc7800"/>
+        <rect x="4" y="6" width="24" height="20" rx="3" fill="#0f0f0f" opacity=".85"/>
+        <circle cx="11" cy="14" r="4" fill="#fc7800" opacity=".95"/>
+        <rect x="17" y="11" width="9" height="2" rx="1" fill="#fff" opacity=".8"/>
+        <rect x="17" y="15" width="6" height="2" rx="1" fill="#fff" opacity=".55"/>
+        <rect x="5" y="21" width="22" height="2" rx="1" fill="#fc7800" opacity=".4"/>
+      </svg>
+      <span class="nav-logo-text">Template Gallery</span>
+    </a>
+    <div class="nav-actions">
+      <a href="{{ url_for('card_designer', card_id=card.id) }}" class="nav-btn">
+        <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+        Open Designer
+      </a>
+      <a href="{{ url_for('dashboard') }}" class="nav-btn">
+        <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        Dashboard
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="container">
+
+  <div class="page-header">
+    <div class="page-eyebrow">
+      <svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      Design Templates
+    </div>
+    <h1 class="page-title">Choose Your Template</h1>
+    <p class="page-subtitle">Each template sets the background, colour scheme, and content layout for your printable card. You can fine-tune positions in the designer after selecting.</p>
+    <div class="card-context">
+      <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:var(--accent)"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+      Designing card for <strong>{{ card.name or "Untitled Card" }}</strong>
+    </div>
+  </div>
+
+  <div class="templates-grid">
+
+    {#
+      For each template we render a card with:
+        - CSS colour fallback visible immediately
+        - <img> over the top that shows the actual bg image file
+        - Live card fields overlaid
+        - Active state if this template is already chosen
+      The `templates_meta` dict is passed from app.py:
+        { 'modern': { bg_template_filename, background, accent }, … }
+    #}
+
+    <!-- ── MODERN ── -->
+    {% set t = templates_meta.modern %}
+    {% set is_active = current_template == t.bg_template_filename %}
+    <div class="template-card{% if is_active %} active{% endif %}" data-template="modern" id="card-modern">
+
+      <div class="active-badge">
+        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        Active
+      </div>
+
+      <div class="template-preview">
+        <!-- colour fallback -->
+        <div class="preview-bg bg-{{ t.background }}"></div>
+        <!-- actual image -->
+        {% if t.bg_template_filename %}
+        <img class="preview-img"
+             src="{{ url_for('static', filename='templates/' + t.bg_template_filename) }}"
+             alt="Modern template background"
+             onerror="this.style.display='none'">
+        {% endif %}
+        <div class="preview-overlay"></div>
+        <!-- content overlay -->
+        <div class="preview-content text-light accent-{{ t.accent }}">
+          <div class="prev-name">{{ card.name or "Your Name" }}</div>
+          <div class="prev-role">{{ card.designation or card.title or "Job Title" }}</div>
+          <div class="prev-company">{{ card.company or "Company" }}</div>
+          <div class="prev-contacts">
+            {% if card.phone %}<div class="prev-contact">{{ card.phone }}</div>{% endif %}
+            {% if card.email %}<div class="prev-contact">{{ card.email }}</div>{% endif %}
+          </div>
+        </div>
+        <!-- QR placeholder -->
+        <div class="prev-qr text-light">
+          <div class="prev-qr-grid">
+            {% for i in range(25) %}
+            <span style="background:{{ '#1a1a1a' if i % 3 != 1 else 'transparent' }}"></span>
+            {% endfor %}
+          </div>
+          <div class="prev-qr-label">SCAN</div>
+        </div>
+      </div>
+
+      <div class="template-info">
+        <div class="info-row">
+          <div class="template-name">Modern Split</div>
+          <span class="template-tag">Dark</span>
+        </div>
+        <div class="template-desc">Left-aligned content on a deep navy background with a bold accent QR code. Built for tech professionals and designers.</div>
+        <button class="template-btn {% if is_active %}btn-active{% else %}btn-select{% endif %}"
+                id="btn-modern"
+                {% if is_active %}disabled{% endif %}
+                onclick="selectTemplate('modern')">
+          <svg class="btn-icon" viewBox="0 0 24 24">
+            {% if is_active %}
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            {% else %}
+            <path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+            {% endif %}
+          </svg>
+          <span class="btn-text">{% if is_active %}Currently Active{% else %}Use This Template{% endif %}</span>
+          <div class="btn-spinner"></div>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── MINIMAL ── -->
+    {% set t = templates_meta.minimal %}
+    {% set is_active = current_template == t.bg_template_filename %}
+    <div class="template-card{% if is_active %} active{% endif %}" data-template="minimal" id="card-minimal">
+
+      <div class="active-badge">
+        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        Active
+      </div>
+
+      <div class="template-preview">
+        <div class="preview-bg bg-{{ t.background }}"></div>
+        {% if t.bg_template_filename %}
+        <img class="preview-img"
+             src="{{ url_for('static', filename='templates/' + t.bg_template_filename) }}"
+             alt="Minimal template background"
+             onerror="this.style.display='none'">
+        {% endif %}
+        <div class="preview-overlay" style="background:linear-gradient(135deg,rgba(0,0,0,.04) 0%,transparent 60%)"></div>
+        <div class="preview-content text-dark accent-{{ t.accent }}" style="align-items:center;justify-content:center;text-align:center;">
+          <div class="prev-name">{{ card.name or "Your Name" }}</div>
+          <div class="prev-role">{{ card.designation or card.title or "Job Title" }}</div>
+          <div class="prev-company">{{ card.company or "Company" }}</div>
+          <div class="prev-contacts" style="align-items:center">
+            {% if card.phone %}<div class="prev-contact">{{ card.phone }}</div>{% endif %}
+            {% if card.email %}<div class="prev-contact">{{ card.email }}</div>{% endif %}
+          </div>
+        </div>
+        <div class="prev-qr" style="right:unset;left:50%;top:unset;bottom:10px;transform:translateX(-50%)">
+          <div class="prev-qr-grid">
+            {% for i in range(25) %}
+            <span style="background:{{ '#0f0f0f' if i % 3 != 1 else 'transparent' }}"></span>
+            {% endfor %}
+          </div>
+          <div class="prev-qr-label">SCAN</div>
+        </div>
+      </div>
+
+      <div class="template-info">
+        <div class="info-row">
+          <div class="template-name">Minimal Center</div>
+          <span class="template-tag">Light</span>
+        </div>
+        <div class="template-desc">Clean white or beige background with all content centred. Ideal for creatives and consultants who value simplicity.</div>
+        <button class="template-btn {% if is_active %}btn-active{% else %}btn-select{% endif %}"
+                id="btn-minimal"
+                {% if is_active %}disabled{% endif %}
+                onclick="selectTemplate('minimal')">
+          <svg class="btn-icon" viewBox="0 0 24 24">
+            {% if is_active %}
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            {% else %}
+            <path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+            {% endif %}
+          </svg>
+          <span class="btn-text">{% if is_active %}Currently Active{% else %}Use This Template{% endif %}</span>
+          <div class="btn-spinner"></div>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── BOLD ── -->
+    {% set t = templates_meta.bold %}
+    {% set is_active = current_template == t.bg_template_filename %}
+    <div class="template-card{% if is_active %} active{% endif %}" data-template="bold" id="card-bold">
+
+      <div class="active-badge">
+        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        Active
+      </div>
+
+      <div class="template-preview">
+        <div class="preview-bg bg-{{ t.background }}"></div>
+        {% if t.bg_template_filename %}
+        <img class="preview-img"
+             src="{{ url_for('static', filename='templates/' + t.bg_template_filename) }}"
+             alt="Bold template background"
+             onerror="this.style.display='none'">
+        {% endif %}
+        <div class="preview-overlay"></div>
+        <div class="preview-content text-light accent-{{ t.accent }}">
+          <div class="prev-name" style="font-size:16px">{{ card.name or "Your Name" }}</div>
+          <div class="prev-role">{{ card.designation or card.title or "Job Title" }}</div>
+          <div class="prev-company">{{ card.company or "Company" }}</div>
+          <div class="prev-contacts">
+            {% if card.phone %}<div class="prev-contact">{{ card.phone }}</div>{% endif %}
+            {% if card.email %}<div class="prev-contact">{{ card.email }}</div>{% endif %}
+          </div>
+        </div>
+        <div class="prev-qr" style="right:14px;bottom:14px;top:unset;transform:none">
+          <div class="prev-qr-grid">
+            {% for i in range(25) %}
+            <span style="background:{{ '#1a1a1a' if i % 3 != 1 else 'transparent' }}"></span>
+            {% endfor %}
+          </div>
+          <div class="prev-qr-label">SCAN</div>
+        </div>
+      </div>
+
+      <div class="template-info">
+        <div class="info-row">
+          <div class="template-name">Bold Statement</div>
+          <span class="template-tag">Dark</span>
+        </div>
+        <div class="template-desc">Large typography and high contrast on deep black. Commanding and direct — great for executives and entrepreneurs.</div>
+        <button class="template-btn {% if is_active %}btn-active{% else %}btn-select{% endif %}"
+                id="btn-bold"
+                {% if is_active %}disabled{% endif %}
+                onclick="selectTemplate('bold')">
+          <svg class="btn-icon" viewBox="0 0 24 24">
+            {% if is_active %}
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            {% else %}
+            <path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+            {% endif %}
+          </svg>
+          <span class="btn-text">{% if is_active %}Currently Active{% else %}Use This Template{% endif %}</span>
+          <div class="btn-spinner"></div>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── ELEGANT ── -->
+    {% set t = templates_meta.elegant %}
+    {% set is_active = current_template == t.bg_template_filename %}
+    <div class="template-card{% if is_active %} active{% endif %}" data-template="elegant" id="card-elegant">
+
+      <div class="active-badge">
+        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        Active
+      </div>
+
+      <div class="template-preview">
+        <div class="preview-bg bg-{{ t.background }}"></div>
+        {% if t.bg_template_filename %}
+        <img class="preview-img"
+             src="{{ url_for('static', filename='templates/' + t.bg_template_filename) }}"
+             alt="Elegant template background"
+             onerror="this.style.display='none'">
+        {% endif %}
+        <div class="preview-overlay" style="background:linear-gradient(135deg,rgba(0,0,0,.04) 0%,transparent 60%)"></div>
+        <div class="preview-content text-dark accent-{{ t.accent }}" style="align-items:center;text-align:center;padding-top:20px">
+          <div class="prev-name">{{ card.name or "Your Name" }}</div>
+          <div class="prev-role">{{ card.designation or card.title or "Job Title" }}</div>
+          <div class="prev-company">{{ card.company or "Company" }}</div>
+          <div class="prev-contacts" style="align-items:center;margin-top:4px">
+            {% if card.phone %}<div class="prev-contact">{{ card.phone }}</div>{% endif %}
+            {% if card.email %}<div class="prev-contact">{{ card.email }}</div>{% endif %}
+          </div>
+        </div>
+        <div class="prev-qr" style="right:unset;left:50%;bottom:10px;top:unset;transform:translateX(-50%)">
+          <div class="prev-qr-grid">
+            {% for i in range(25) %}
+            <span style="background:{{ '#0f0f0f' if i % 3 != 1 else 'transparent' }}"></span>
+            {% endfor %}
+          </div>
+          <div class="prev-qr-label">SCAN</div>
+        </div>
+      </div>
+
+      <div class="template-info">
+        <div class="info-row">
+          <div class="template-name">Elegant Refined</div>
+          <span class="template-tag">Warm</span>
+        </div>
+        <div class="template-desc">Sophisticated warm-toned layout with premium spacing and gold accents. Perfect for luxury brands and consultants.</div>
+        <button class="template-btn {% if is_active %}btn-active{% else %}btn-select{% endif %}"
+                id="btn-elegant"
+                {% if is_active %}disabled{% endif %}
+                onclick="selectTemplate('elegant')">
+          <svg class="btn-icon" viewBox="0 0 24 24">
+            {% if is_active %}
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            {% else %}
+            <path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+            {% endif %}
+          </svg>
+          <span class="btn-text">{% if is_active %}Currently Active{% else %}Use This Template{% endif %}</span>
+          <div class="btn-spinner"></div>
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /templates-grid -->
+</div><!-- /container -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── STATE ── */
+var CARD_ID = {{ card.id }};
+
+/* ── SELECT TEMPLATE ── */
+function selectTemplate(name) {
+  var btn = document.getElementById('btn-' + name);
+  var card = document.getElementById('card-' + name);
+
+  /* Already active — nothing to do */
+  if (btn.disabled && btn.classList.contains('btn-active')) return;
+
+  /* Loading state */
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  fetch('/card/' + CARD_ID + '/select_template', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ template: name })
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    if (data.success) {
+      /* Update UI: mark this card active, reset all others */
+      document.querySelectorAll('.template-card').forEach(function(c) {
+        c.classList.remove('active');
+      });
+      card.classList.add('active');
+
+      /* Reset all buttons, then set this one to active state */
+      document.querySelectorAll('.template-btn').forEach(function(b) {
+        b.classList.remove('btn-active', 'loading');
+        b.classList.add('btn-select');
+        b.disabled = false;
+        b.querySelector('.btn-icon').innerHTML = '<path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>';
+        b.querySelector('.btn-text').textContent = 'Use This Template';
+      });
+
+      btn.classList.remove('btn-select', 'loading');
+      btn.classList.add('btn-active');
+      btn.disabled = true;
+      btn.querySelector('.btn-icon').innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>';
+      btn.querySelector('.btn-text').textContent = 'Currently Active';
+
+      showToast('Template applied — redirecting to designer…');
+
+      /* Brief pause so user sees the confirmation, then redirect */
+      setTimeout(function() {
+        window.location.href = '/card/' + CARD_ID + '/designer';
+      }, 1200);
+    } else {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+      showToast('Failed to apply template. Please try again.');
+    }
+  })
+  .catch(function(err) {
+    console.error(err);
+    btn.classList.remove('loading');
+    btn.disabled = false;
+    showToast('Network error. Please try again.');
+  });
+}
+
+/* ── TOAST ── */
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 3000);
+}
+</script>
+
+</body>
+</html>

@@ -75,6 +75,13 @@ class Card(db.Model):
     print_color = db.Column(db.String(20), default='black')
     print_background_color = db.Column(db.String(30), default='matte_black')
     print_layout_json = db.Column(db.Text)
+    print_bg_template = db.Column(db.String(100), nullable=True)
+    # ───────── BACKGROUND IMAGE (NEW) ─────────
+    print_bg_image = db.Column(db.LargeBinary)  # Store image binary data
+    print_bg_image_mime = db.Column(db.String(50))  # Store MIME type (image/png, image/jpeg)
+    
+    # ───────── FONT COLORS (NEW) ─────────
+    print_font_colors_json = db.Column(db.Text)  # Store font colors as JSON (e.g., {"name": "#ffffff", "phone": "#000000"})
 
     @property
     def roles(self):
@@ -88,6 +95,16 @@ class Card(db.Model):
         if self.designation or self.company or self.bio:
             return [{'designation': self.designation or '', 'company': self.company or '', 'bio': self.bio or ''}]
         return []
+
+    @property
+    def font_colors(self):
+        """Return dict of font colors from print_font_colors_json, or empty dict."""
+        if self.print_font_colors_json:
+            try:
+                return json.loads(self.print_font_colors_json)
+            except Exception:
+                pass
+        return {}
 
     @property
     def social(self):
