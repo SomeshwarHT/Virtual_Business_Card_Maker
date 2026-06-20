@@ -12,6 +12,7 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(100))
     email = db.Column(db.String(150), unique=True)
     profile_pic = db.Column(db.String(300))
+    role = db.Column(db.String(20), default='viewer', nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 # ───────── CARD MODEL ─────────

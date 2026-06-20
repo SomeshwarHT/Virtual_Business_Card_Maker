@@ -2,18 +2,32 @@ import os
 import json
 import io
 import base64
-from flask import Flask, render_template, request, redirect, url_for, Response, jsonify
-from flask_login import LoginManager, login_required, login_user, logout_user, current_user
-from authlib.integrations.flask_client import OAuth
+from urllib.parse import urlencode
+from flask import Flask, render_template, request, redirect, url_for, Response, jsonify, session
 from werkzeug.utils import secure_filename
 from config import Config
 from models import db, User, Card, CardView
-from flask import session
 import uuid
 import qrcode
+from auth_ulties import app_page_login_required, get_user_id
+from He5Lib.he5IAMConnect import load_iam_data, get_session_token_from_auth_token
+from utils.db_utils import get_db
+from utils.permissions import has_permission, ROLE_VIEWER
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
+
+if not app.config.get("SECRET_KEY"):
+    raise RuntimeError("SECRET_KEY is required for Flask sessions and IAM auth.")
+
+if not app.config.get("IAM_AUTH_HEAD_KEY"):
+    raise RuntimeError("IAM_AUTH_HEAD_KEY is required for IAM token exchange.")
+
+
+@app.before_request
+def load_iam_context():
+    load_iam_data()
 
 # Upload folder config
 UPLOAD_FOLDER = os.path.join(app.root_path, 'static', 'uploads')
@@ -46,29 +60,64 @@ def generate_qr_base64(data):
 # Initialize DB
 db.init_app(app)
 
-# Login manager
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = "home"
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
-
-# OAuth
-oauth = OAuth(app)
-
-google = oauth.register(
-    name='google',
-    client_id=app.config["GOOGLE_CLIENT_ID"],
-    client_secret=app.config["GOOGLE_CLIENT_SECRET"],
-    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
-    client_kwargs={'scope': 'openid email profile'}
-)
-
 # Create DB
 with app.app_context():
     db.create_all()
+
+
+
+def get_current_app_user():
+    user_id = get_user_id()
+    if not user_id:
+        return None
+    return User.query.get(user_id)
+
+
+class TemplateUserProxy:
+    def __init__(self, is_authenticated, user_id=None, name="Guest", email="", profile_pic="", role=ROLE_VIEWER):
+        self.is_authenticated = is_authenticated
+        self.id = user_id
+        self.name = name
+        self.email = email
+        self.profile_pic = profile_pic
+        self.role = role
+
+
+def build_template_current_user():
+    user = get_current_app_user()
+    if not user:
+        return TemplateUserProxy(False)
+
+    display_name = (user.name or user.email or "User").strip() or "User"
+    return TemplateUserProxy(
+        True,
+        user_id=user.id,
+        name=display_name,
+        email=user.email or "",
+        profile_pic=user.profile_pic or "",
+        role=getattr(user, "role", ROLE_VIEWER) or ROLE_VIEWER,
+    )
+
+
+@app.context_processor
+def inject_current_user():
+    return {"current_user": build_template_current_user()}
+
+
+def current_user_role():
+    user = get_current_app_user()
+    if not user:
+        return ROLE_VIEWER
+    return getattr(user, 'role', ROLE_VIEWER) or ROLE_VIEWER
+
+
+def card_action_allowed(card, permission):
+    user = get_current_app_user()
+    if not user:
+        return False
+    if card and card.user_id == user.id:
+        return True
+    return has_permission(current_user_role(), permission)
 
 # ───────── TEMPLATE PRESETS ─────────
 TEMPLATE_PRESETS = {
@@ -138,63 +187,65 @@ TEMPLATE_PRESETS = {
 
 @app.route("/")
 def home():
-    if current_user.is_authenticated:
+    if get_user_id():
         return redirect(url_for("dashboard"))
     return render_template("home.html")
 
 
 @app.route("/login")
 def login():
-    redirect_uri = url_for("auth_callback", _external=True)
-    return google.authorize_redirect(redirect_uri)
+    from config import BASE_PATH, IAM_PATH
+
+    redirect_url = url_for("auth_callback", _external=True)
+
+    login_url = f"{IAM_PATH.rstrip('/')}/login?{urlencode({'redirect': redirect_url})}"
+    return redirect(login_url)
+
 
 @app.route("/auth/callback")
 def auth_callback():
-    token = google.authorize_access_token()
-
-    resp = google.get("https://openidconnect.googleapis.com/v1/userinfo")
-    user_info = resp.json()
-
-    google_id = user_info["sub"]
-
-    user = User.query.filter_by(google_id=google_id).first()
-
-    if not user:
-        user = User(
-            google_id=google_id,
-            name=user_info.get("name"),
-            email=user_info.get("email"),
-            profile_pic=user_info.get("picture")
-        )
-        db.session.add(user)
-        db.session.commit()
-
-    login_user(user)
+    auth_token = request.args.get("auth_token")
+    if auth_token:
+        session["auth_token"] = get_session_token_from_auth_token(auth_token)
     return redirect(url_for("dashboard"))
 
 @app.route("/logout")
-@login_required
 def logout():
-    logout_user()
-    return redirect(url_for("home"))
+    session.clear()
+    from config import BASE_PATH, IAM_PATH
+
+    redirect_url = BASE_PATH or request.url_root.rstrip("/")
+    if not redirect_url.startswith(("http://", "https://")):
+        redirect_url = f"https://{redirect_url}"
+
+    logout_url = f"{IAM_PATH.rstrip('/')}/app-logout?{urlencode({'redirect': redirect_url})}"
+    logout_response = redirect(logout_url)
+    logout_response.delete_cookie(
+        app.config.get("SESSION_COOKIE_NAME", "session"),
+        path=app.config.get("SESSION_COOKIE_PATH", "/"),
+        domain=app.config.get("SESSION_COOKIE_DOMAIN"),
+    )
+    return logout_response
 
 @app.route("/dashboard")
-@login_required
+@app_page_login_required
 def dashboard():
-    user_cards = Card.query.filter_by(user_id=current_user.id).order_by(Card.created_at.desc()).all()
+    user = get_current_app_user()
+    user_cards = Card.query.filter_by(user_id=user.id).order_by(Card.created_at.desc()).all() if user else []
     return render_template("dashboard.html", user_cards=user_cards)
 
 @app.route("/form")
-@login_required
+@app_page_login_required
 def form():
     return render_template("form.html", card=None)
 
 @app.route('/edit_card/<int:card_id>', methods=['GET', 'POST'])
-@login_required
+@app_page_login_required
 def edit_card(card_id):
     card = Card.query.get_or_404(card_id)
+    user = get_current_app_user()
 
-    if request.method == 'POST':
+    if request.method == 'POST' and user:
         card.name = request.form.get('name')
         card.phone = request.form.get('phone')
         card.email = request.form.get('email')
@@ -207,16 +258,21 @@ def edit_card(card_id):
     return render_template('form.html', card=card, edit_card=True)
 
 @app.route("/save_card", methods=["POST"])
-@login_required
+@app_page_login_required
 def save_card():
+    user = get_current_app_user()
     card_id = request.form.get("card_id")
 
     if card_id:
         card = Card.query.get_or_404(int(card_id))
-        if card.user_id != current_user.id:
+        if not user or (card.user_id != user.id and not card_action_allowed(card, "cards.edit")):
             return redirect(url_for("dashboard"))
     else:
-        card = Card(user_id=current_user.id)
+        if not user:
+            return redirect(url_for("dashboard"))
+        if not has_permission(current_user_role(), "cards.create"):
+            return redirect(url_for("dashboard"))
+        card = Card(user_id=user.id)
         db.session.add(card)
 
     card.card_label = request.form.get("card_label", "").strip() or None
@@ -262,21 +318,22 @@ def save_card():
 @app.route("/card/<int:card_id>")
 def view_card(card_id):
     card = Card.query.get_or_404(card_id)
+    viewer = get_current_app_user()
 
     if "anon_id" not in session:
         session["anon_id"] = str(uuid.uuid4())
 
-    if current_user.is_authenticated:
-        if current_user.id != card.user_id:
+    if viewer:
+        if viewer.id != card.user_id:
             existing_view = CardView.query.filter_by(
                 card_id=card.id,
-                viewer_id=current_user.id
+                viewer_id=viewer.id
             ).first()
 
             if not existing_view:
                 new_view = CardView(
                     card_id=card.id,
-                    viewer_id=current_user.id
+                    viewer_id=viewer.id
                 )
                 db.session.add(new_view)
                 card.views += 1
@@ -301,10 +358,10 @@ def view_card(card_id):
 # ───────── TEMPLATE SELECTION ROUTE (NEW) ─────────
 
 @app.route("/card/<int:card_id>/templates")
-@login_required
+@app_page_login_required
 def card_templates(card_id):
     card = Card.query.get_or_404(card_id)
-    if card.user_id != current_user.id:
+    if not card_action_allowed(card, "cards.design"):
         return redirect(url_for("dashboard"))
     # Pass a stripped-down metadata dict (no position data needed in the template)
     templates_meta = {
@@ -323,10 +380,10 @@ def card_templates(card_id):
     )
 
 @app.route("/card/<int:card_id>/select_template", methods=["POST"])
-@login_required
+@app_page_login_required
 def select_template(card_id):
     card = Card.query.get_or_404(card_id)
-    if card.user_id != current_user.id:
+    if not card_action_allowed(card, "cards.design"):
         return jsonify({'error': 'Unauthorized'}), 403
     
     data = request.get_json()
@@ -363,10 +420,10 @@ def select_template(card_id):
 # ───────── DESIGNER & PRINT ROUTES ─────────
 
 @app.route("/card/<int:card_id>/designer")
-@login_required
+@app_page_login_required
 def card_designer(card_id):
     card = Card.query.get_or_404(card_id)
-    if card.user_id != current_user.id:
+    if not card_action_allowed(card, "cards.design"):
         return redirect(url_for("dashboard"))
     
     # Parse layout JSON in Python — never in templates
@@ -422,10 +479,10 @@ def card_designer(card_id):
     )
 
 @app.route("/card/<int:card_id>/save_layout", methods=["POST"])
-@login_required
+@app_page_login_required
 def save_layout(card_id):
     card = Card.query.get_or_404(card_id)
-    if card.user_id != current_user.id:
+    if not card_action_allowed(card, "cards.design"):
         return jsonify({'error': 'Unauthorized'}), 403
 
     layout_data = request.get_json()
@@ -444,10 +501,10 @@ def save_layout(card_id):
     return jsonify({'success': True})
 
 @app.route("/card/<int:card_id>/print")
-@login_required
+@app_page_login_required
 def print_card(card_id):
     card = Card.query.get_or_404(card_id)
-    if card.user_id != current_user.id:
+    if not card_action_allowed(card, "cards.print"):
         return redirect(url_for("dashboard"))
 
     # Determine whether a user-uploaded background image exists
@@ -498,20 +555,20 @@ def print_card(card_id):
     )
 
 @app.route("/card/<int:card_id>/delete", methods=["POST"])
-@login_required
+@app_page_login_required
 def delete_card(card_id):
     card = Card.query.get_or_404(card_id)
-    if card.user_id != current_user.id:
+    if not card_action_allowed(card, "cards.delete"):
         return jsonify({'error': 'Unauthorized'}), 403
     db.session.delete(card)
     db.session.commit()
     return jsonify({'success': True})
 
 @app.route("/card/<int:card_id>/update_label", methods=["POST"])
-@login_required
+@app_page_login_required
 def update_card_label(card_id):
     card = Card.query.get_or_404(card_id)
-    if card.user_id != current_user.id:
+    if not card_action_allowed(card, "cards.edit"):
         return jsonify({'error': 'Unauthorized'}), 403
     
     data = request.get_json()
@@ -543,11 +600,11 @@ END:VCARD
     )
 
 @app.route("/card/<int:card_id>/upload_bg_image", methods=["POST"])
-@login_required
+@app_page_login_required
 def upload_bg_image(card_id):
     """Upload background image for printable card"""
     card = Card.query.get_or_404(card_id)
-    if card.user_id != current_user.id:
+    if not card_action_allowed(card, "cards.design"):
         return jsonify({'error': 'Unauthorized'}), 403
     
     if 'bg_image' not in request.files:
@@ -573,11 +630,11 @@ def upload_bg_image(card_id):
     return jsonify({'success': True})
 
 @app.route("/card/<int:card_id>/get_bg_image")
-@login_required
+@app_page_login_required
 def get_bg_image(card_id):
     """Retrieve background image for printable card"""
     card = Card.query.get_or_404(card_id)
-    if card.user_id != current_user.id:
+    if not card_action_allowed(card, "cards.print"):
         return jsonify({'error': 'Unauthorized'}), 403
     
     if not card.print_bg_image:
@@ -586,11 +643,11 @@ def get_bg_image(card_id):
     return Response(card.print_bg_image, mimetype=card.print_bg_image_mime)
 
 @app.route("/card/<int:card_id>/delete_bg_image", methods=["POST"])
-@login_required
+@app_page_login_required
 def delete_bg_image(card_id):
     """Delete user-uploaded background image. Template default BG is preserved."""
     card = Card.query.get_or_404(card_id)
-    if card.user_id != current_user.id:
+    if not card_action_allowed(card, "cards.design"):
         return jsonify({'error': 'Unauthorized'}), 403
 
     card.print_bg_image = None
